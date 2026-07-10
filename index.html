@@ -3,122 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Absensi SSD Kebayoran (V14)</title>
+    <title>Sistem Absensi SS GMAHK Kebayoran</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        
+        /* Animasi Spinner Loading Kustom */
+        .spinner {
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            width: 1rem;
+            height: 1rem;
+            animation: spin 0.6s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="p-3 md:p-8">
     <div class="max-w-6xl mx-auto">
-        <header class="mb-8 bg-white p-6 rounded-2xl shadow-xs border border-slate-100">
+        <header class="mb-6 bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-100">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-100 pb-4">
                 <div>
-                    <h1 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                        <span>📋</span> Sistem Absensi SSD Kebayoran
+                    <h1 class="text-xl md:text-2xl font-bold text-slate-800 flex items-center gap-2">
+                        <span>📋</span> Sistem Absensi SS GMAHK Kebayoran
                     </h1>
-                    <p class="text-slate-500 text-sm mt-1">Kelola master kelas, pencatatan absensi harian, dan analisis tren dalam satu aplikasi tunggal.</p>
+                    <p class="text-slate-500 text-xs md:text-sm mt-1">Kelola master kelas, pencatatan absensi harian, dan analisis tren dalam satu aplikasi tunggal.</p>
                 </div>
                 
                 <div class="bg-slate-100 p-1 rounded-xl flex gap-1 w-full md:w-auto">
-                    <button onclick="pindahMenu('menu-absen')" id="btnMenuAbsen" class="flex-1 md:flex-none px-4 py-2 text-sm font-medium rounded-lg cursor-pointer transition-all bg-white text-slate-800 shadow-xs">
+                    <button onclick="pindahMenu('menu-absen')" id="btnMenuAbsen" class="flex-1 md:flex-none text-center px-3 py-2 text-xs md:text-sm font-medium rounded-lg cursor-pointer transition-all bg-white text-slate-800 shadow-xs">
                         📝 Sesi Absensi
                     </button>
-                    <button onclick="pindahMenu('menu-rekap')" id="btnMenuRekap" class="flex-1 md:flex-none px-4 py-2 text-sm font-medium rounded-lg cursor-pointer transition-all text-slate-600 hover:text-slate-900">
+                    <button onclick="pindahMenu('menu-rekap')" id="btnMenuRekap" class="flex-1 md:flex-none text-center px-3 py-2 text-xs md:text-sm font-medium rounded-lg cursor-pointer transition-all text-slate-600 hover:text-slate-900">
                         📊 Tren & Rekap Total
                     </button>
                 </div>
             </div>
             
-            <div class="mt-4 bg-slate-50 border border-slate-200 p-4 rounded-xl text-sm flex flex-col md:flex-row gap-4 items-end">
+            <div class="mt-4 bg-slate-50 border border-slate-200 p-3 md:p-4 rounded-xl text-xs md:text-sm flex flex-col md:flex-row gap-3 md:gap-4 items-end">
                 <div class="flex-1 w-full">
                     <label class="block font-semibold mb-1 text-blue-800">URL Web App Google Apps Script Anda:</label>
                     <input type="text" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/XXXXX/exec" 
-                           class="w-full p-2 rounded-md border border-slate-300 bg-white text-slate-700">
+                           class="w-full p-2 rounded-md border border-slate-300 bg-white text-slate-700 text-xs md:text-sm">
                 </div>
                 <div id="filterTanggalArea" class="w-full md:w-auto">
                     <label class="block font-semibold mb-1 text-emerald-800">📆 Pilih Tanggal Absensi:</label>
-                    <input type="date" id="attendanceDateInput" onchange="muatDataDariSheets()" class="w-full p-2 rounded-md border border-slate-300 bg-white font-medium text-slate-800">
+                    <input type="date" id="attendanceDateInput" onchange="muatDataDariSheets()" class="w-full p-2 rounded-md border border-slate-300 bg-white font-medium text-slate-800 text-xs md:text-sm">
                 </div>
-                <button id="btnSinkronUtama" onclick="jalankanSinkronisasiBerdasarkanMenu()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-md text-sm cursor-pointer whitespace-nowrap h-[38px]">
-                    🔄 Tarik Data Cloud
+                <button id="btnSinkronUtama" onclick="jalankanSinkronisasiBerdasarkanMenu()" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-md text-xs md:text-sm cursor-pointer whitespace-nowrap h-[38px] flex items-center justify-center gap-2">
+                    <span>🔄</span> Tarik Data Cloud
                 </button>
             </div>
         </header>
 
-        <div id="panel-absen" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-1 space-y-6">
-                <div class="bg-white p-6 rounded-2xl shadow-xs border border-slate-100">
-                    <h2 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2"><span>🏢</span> Tambah Master Kelas</h2>
-                    <form id="classForm" class="space-y-4" onsubmit="return false;">
-                        <input type="text" id="className" required placeholder="Contoh: XII RPL 1" class="w-full p-2.5 border border-slate-200 rounded-lg text-sm">
-                        <button type="submit" id="btnSubmitKelas" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium p-2.5 rounded-lg text-sm cursor-pointer">Simpan Kelas</button>
+        <div id="panel-absen" class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+            <div class="lg:col-span-1 space-y-4 md:space-y-6">
+                <div class="bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-100">
+                    <h2 class="text-md md:text-lg font-semibold text-slate-800 mb-3 md:make-mb-4 flex items-center gap-2"><span>🏢</span> Tambah Master Kelas</h2>
+                    <form id="classForm" class="space-y-3" onsubmit="return false;">
+                        <input type="text" id="className" required placeholder="Contoh: XII RPL 1" class="w-full p-2.5 border border-slate-200 rounded-lg text-xs md:text-sm">
+                        <button type="submit" id="btnSubmitKelas" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium p-2.5 rounded-lg text-xs md:text-sm cursor-pointer flex items-center justify-center gap-2">Simpan Kelas</button>
                     </form>
                 </div>
 
-                <div class="bg-white p-6 rounded-2xl shadow-xs border border-slate-100">
-                    <h2 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2"><span>👤</span> Tambah Master Siswa</h2>
-                    <form id="memberForm" class="space-y-4" onsubmit="return false;">
-                        <select id="memberClassSelect" required class="w-full p-2.5 border border-slate-200 rounded-lg text-sm"></select>
-                        <input type="text" id="memberId" required placeholder="ID / NISN Unik" class="w-full p-2.5 border border-slate-200 rounded-lg text-sm">
-                        <input type="text" id="memberName" required placeholder="Nama Lengkap" class="w-full p-2.5 border border-slate-200 rounded-lg text-sm">
-                        <button type="submit" id="btnSubmitSiswa" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium p-2.5 rounded-lg text-sm cursor-pointer">Simpan Siswa</button>
+                <div class="bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-100">
+                    <h2 class="text-md md:text-lg font-semibold text-slate-800 mb-3 md:mb-4 flex items-center gap-2"><span>👤</span> Tambah Master Siswa</h2>
+                    <form id="memberForm" class="space-y-3" onsubmit="return false;">
+                        <select id="memberClassSelect" required class="w-full p-2.5 border border-slate-200 rounded-lg text-xs md:text-sm"></select>
+                        <input type="text" id="memberId" required placeholder="ID / NISN Unik" class="w-full p-2.5 border border-slate-200 rounded-lg text-xs md:text-sm">
+                        <input type="text" id="memberName" required placeholder="Nama Lengkap" class="w-full p-2.5 border border-slate-200 rounded-lg text-xs md:text-sm">
+                        <button type="submit" id="btnSubmitSiswa" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium p-2.5 rounded-lg text-xs md:text-sm cursor-pointer flex items-center justify-center gap-2">Simpan Siswa</button>
                     </form>
                 </div>
             </div>
 
             <div class="lg:col-span-2 space-y-6">
-                <div class="bg-white p-6 rounded-2xl shadow-xs border border-slate-100">
-                    <h2 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2"><span>🗂️</span> Panel Sesi Absensi</h2>
-                    <div id="classTabs" class="flex flex-wrap gap-2 mb-6 border-b border-slate-100 pb-4"></div>
+                <div class="bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-100">
+                    <h2 class="text-md md:text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2"><span>🗂️</span> Panel Sesi Absensi</h2>
+                    
+                    <div id="classTabs" class="flex flex-wrap gap-2 mb-4 border-b border-slate-100 pb-4"></div>
 
                     <div id="attendanceArea" class="hidden">
-                        <div class="flex justify-between items-center mb-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 bg-slate-50 p-3 md:p-4 rounded-xl border border-slate-100">
                             <div>
-                                <h3 id="selectedClassName" class="text-md font-bold text-slate-700 uppercase tracking-wide inline-block mr-2">Kelas</h3>
-                                <span id="memberCount" class="bg-slate-200 text-slate-700 text-xs font-semibold px-2.5 py-1 rounded-full">0</span>
+                                <h3 id="selectedClassName" class="text-sm md:text-md font-bold text-slate-700 uppercase tracking-wide inline-block mr-2">Kelas</h3>
+                                <span id="memberCount" class="bg-slate-200 text-slate-700 text-2xs md:text-xs font-semibold px-2 py-0.5 md:py-1 rounded-full">0</span>
                             </div>
-                            <button onclick="hapusKelasDariMasterCloud(this)" id="btnHapusKelas" class="text-xs bg-rose-50 text-rose-700 px-3 py-1.5 rounded-md border border-rose-100 cursor-pointer">🗑️ Hapus Kelas</button>
+                            <button onclick="hapusKelasDariMasterCloud(this)" id="btnHapusKelas" class="text-2xs md:text-xs bg-rose-50 text-rose-700 px-2.5 py-1.5 rounded-md border border-rose-100 cursor-pointer w-full sm:w-auto text-center">🗑️ Hapus Kelas</button>
                         </div>
 
-                        <div class="overflow-x-auto border border-slate-100 rounded-xl">
+                        <div class="hidden md:block overflow-x-auto border border-slate-100 rounded-xl">
                             <table class="w-full text-left border-collapse">
                                 <thead>
-                                    <tr class="bg-slate-50 border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wider"><th class="p-3">ID</th><th class="p-3">Nama</th><th class="p-3 text-right">Tombol Tindakan Absensi</th></tr>
+                                    <tr class="bg-slate-50 border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                        <th class="p-3">ID</th>
+                                        <th class="p-3">Nama</th>
+                                        <th class="p-3 text-right">Tombol Tindakan Absensi</th>
+                                    </tr>
                                 </thead>
                                 <tbody id="memberTableBody" class="divide-y divide-slate-100 text-sm text-slate-600"></tbody>
                             </table>
                         </div>
+
+                        <div id="memberMobileCards" class="block md:hidden space-y-3"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div id="panel-rekap" class="hidden space-y-8">
-            <div class="bg-white p-6 rounded-2xl shadow-xs border border-slate-200">
-                <h2 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2"><span>📈</span> Grafik Tren Kehadiran Per Tanggal (Kumulatif)</h2>
-                <div class="h-[260px] w-full">
+        <div id="panel-rekap" class="hidden space-y-6 md:space-y-8">
+            <div class="bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-200">
+                <h2 class="text-md md:text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2"><span>📈</span> Grafik Tren Kehadiran Per Tanggal (Kumulatif)</h2>
+                <div class="h-[220px] md:h-[260px] w-full">
                     <canvas id="trendChart"></canvas>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-xs border border-slate-200">
-                    <h2 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2"><span>🏢</span> Rasio Per Kelas</h2>
-                    <div id="classSummaryContainer" class="space-y-4"></div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+                <div class="lg:col-span-1 bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-200">
+                    <h2 class="text-md md:text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2"><span>🏢</span> Rasio Per Kelas</h2>
+                    <div id="classSummaryContainer" class="space-y-3 md:space-y-4"></div>
                 </div>
 
-                <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-xs border border-slate-200">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-2"><span>👥</span> Persentase Kehadiran Anggota</h2>
-                        <input type="text" id="searchSiswa" oninput="filterTabelSiswa()" placeholder="Cari nama siswa..." class="p-2 text-xs border border-slate-300 rounded-lg w-44">
+                <div class="lg:col-span-2 bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-200">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                        <h2 class="text-md md:text-lg font-semibold text-slate-800 flex items-center gap-2"><span>👥</span> Persentase Kehadiran Anggota</h2>
+                        <input type="text" id="searchSiswa" oninput="filterTabelSiswa()" placeholder="Cari nama siswa..." class="p-2 text-xs border border-slate-300 rounded-lg w-full sm:w-44">
                     </div>
-                    <div class="overflow-x-auto border border-slate-100 rounded-xl max-h-[400px]">
-                        <table class="w-full text-left border-collapse text-sm">
+                    <div class="overflow-x-auto border border-slate-100 rounded-xl max-h-[350px] md:max-h-[400px]">
+                        <table class="w-full text-left border-collapse text-xs md:text-sm">
                             <thead>
-                                <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                <tr class="bg-slate-50 border-b border-slate-200 text-2xs md:text-xs font-semibold text-slate-500 uppercase tracking-wider">
                                     <th class="p-3">Nama</th>
                                     <th class="p-3">Kelas</th>
                                     <th class="p-3 text-center">Hadir</th>
@@ -145,6 +164,7 @@
         const selectedClassName = document.getElementById('selectedClassName');
         const memberCount = document.getElementById('memberCount');
         const memberTableBody = document.getElementById('memberTableBody');
+        const memberMobileCards = document.getElementById('memberMobileCards');
         const scriptUrlInput = document.getElementById('scriptUrlInput');
         const attendanceDateInput = document.getElementById('attendanceDateInput');
         const memberClassSelect = document.getElementById('memberClassSelect');
@@ -154,7 +174,6 @@
         function saveUrlToLocalStorage() { localStorage.setItem('gas_url', scriptUrlInput.value.trim()); }
         scriptUrlInput.addEventListener('input', saveUrlToLocalStorage);
 
-        // FITUR SAKLAR: Pindah Halaman Tanpa File Baru
         function pindahMenu(targetMenu) {
             menuAktif = targetMenu;
             const btnA = document.getElementById('btnMenuAbsen');
@@ -164,16 +183,16 @@
             const filterTgl = document.getElementById('filterTanggalArea');
 
             if(targetMenu === 'menu-absen') {
-                btnA.className = "flex-1 md:flex-none px-4 py-2 text-sm font-medium rounded-lg cursor-pointer bg-white text-slate-800 shadow-xs";
-                btnR.className = "flex-1 md:flex-none px-4 py-2 text-sm font-medium rounded-lg cursor-pointer text-slate-600 hover:text-slate-900";
+                btnA.className = "flex-1 md:flex-none text-center px-3 py-2 text-xs md:text-sm font-medium rounded-lg cursor-pointer bg-white text-slate-800 shadow-xs";
+                btnR.className = "flex-1 md:flex-none text-center px-3 py-2 text-xs md:text-sm font-medium rounded-lg cursor-pointer text-slate-600 hover:text-slate-900";
                 panelA.classList.remove('hidden'); panelR.classList.add('hidden');
                 filterTgl.classList.remove('hidden');
                 muatDataDariSheets();
             } else {
-                btnR.className = "flex-1 md:flex-none px-4 py-2 text-sm font-medium rounded-lg cursor-pointer bg-white text-slate-800 shadow-xs";
-                btnA.className = "flex-1 md:flex-none px-4 py-2 text-sm font-medium rounded-lg cursor-pointer text-slate-600 hover:text-slate-900";
+                btnR.className = "flex-1 md:flex-none text-center px-3 py-2 text-xs md:text-sm font-medium rounded-lg cursor-pointer bg-white text-slate-800 shadow-xs";
+                btnA.className = "flex-1 md:flex-none text-center px-3 py-2 text-xs md:text-sm font-medium rounded-lg cursor-pointer text-slate-600 hover:text-slate-900";
                 panelR.classList.remove('hidden'); panelA.classList.add('hidden');
-                filterTgl.classList.add('hidden'); // Sembunyikan pemilih tanggal saat melihat grafik total keseluruhan waktu
+                filterTgl.classList.add('hidden');
                 muatDataRekapTotal();
             }
         }
@@ -183,11 +202,10 @@
             else muatDataRekapTotal();
         }
 
-        // AMBIL DATA ABSENSI HARIAN
         function muatDataDariSheets() {
             const urlApi = scriptUrlInput.value.trim(); if(!urlApi) return;
             const tglTerpilih = attendanceDateInput.value;
-            classTabs.innerHTML = '<p class="text-sm text-blue-600 italic animate-pulse">⏳ Membaca Sesi Absensi...</p>';
+            classTabs.innerHTML = '<p class="text-xs text-blue-600 italic animate-pulse">⏳ Membaca Sesi Absensi...</p>';
             
             fetch(`${urlApi}?tanggal=${tglTerpilih}`, { method: "GET" })
             .then(res => res.json())
@@ -210,13 +228,14 @@
             });
 
             if(appData.classes.length === 0) {
-                classTabs.innerHTML = '<p class="text-slate-400 text-sm italic">Belum ada kelas terdaftar.</p>';
+                classTabs.innerHTML = '<p class="text-slate-400 text-xs italic">Belum ada kelas terdaftar.</p>';
                 attendanceArea.classList.add('hidden'); return;
             }
             classTabs.innerHTML = '';
             appData.classes.forEach(c => {
                 const btn = document.createElement('button');
-                btn.className = `px-4 py-2 text-sm font-medium rounded-lg cursor-pointer ${currentClassId == c.id ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
+                // Membuat ukuran tombol tab kelas dinamis di HP (px-3 py-1.5 text-xs) dan PC (md:px-4 md:py-2 md:text-sm)
+                btn.className = `px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-medium rounded-lg cursor-pointer transition-all ${currentClassId == c.id ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
                 btn.textContent = c.name; btn.onclick = () => { currentClassId = c.id; refreshTampilanAbsen(); };
                 classTabs.appendChild(btn);
             });
@@ -230,36 +249,130 @@
             attendanceArea.classList.remove('hidden');
             selectedClassName.textContent = activeClass.name;
             memberCount.textContent = `${activeClass.members.length} Anggota`;
+            
+            // Bersihkan kontainer tabel (PC) dan kontainer kartu (HP)
             memberTableBody.innerHTML = '';
+            memberMobileCards.innerHTML = '';
 
             if(activeClass.members.length === 0) {
-                memberTableBody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-400 italic">Kelas Kosong.</td></tr>`; return;
+                const barisKosong = `<tr><td colspan="3" class="p-4 text-center text-slate-400 italic text-xs md:text-sm">Kelas Kosong.</td></tr>`;
+                memberTableBody.innerHTML = barisKosong;
+                memberMobileCards.innerHTML = `<p class="p-4 bg-slate-50 border rounded-xl text-center text-slate-400 italic text-xs">Kelas Kosong.</p>`;
+                return;
             }
 
             activeClass.members.forEach(m => {
+                let statusSudahAbsen = (m.absenHariIni && m.absenHariIni.tanggal === attendanceDateInput.value);
+                
+                // --- RENDER UNTUK TAMPILAN TABLET/PC (MD:BLOCK) ---
                 const tr = document.createElement('tr');
-                let kolomAksi = '';
-                if (m.absenHariIni && m.absenHariIni.tanggal === attendanceDateInput.value) {
-                    const bgB = m.absenHariIni.status === 'Hadir' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800';
-                    kolomAksi = `<span class="font-semibold text-xs px-3 py-1.5 rounded-md border ${bgB}">✅ ${m.absenHariIni.status}</span>
+                let htmlAksiPc = '';
+                if (statusSudahAbsen) {
+                    const bgB = m.absenHariIni.status === 'Hadir' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-rose-100 text-rose-800 border-rose-200';
+                    htmlAksiPc = `<span class="font-semibold text-xs px-3 py-1.5 rounded-md border ${bgB}">✅ ${m.absenHariIni.status}</span>
                                  <button onclick="bukaEditStatus('${m.id}')" class="text-blue-600 text-xs ml-2 hover:underline cursor-pointer">Ubah</button>`;
                 } else {
-                    kolomAksi = `<button onclick="kirimKeLogAbsen('${m.id}', '${m.name}', 'Hadir', this)" class="bg-emerald-50 text-emerald-700 text-xs px-2.5 py-1.5 rounded border border-emerald-200 mr-1 cursor-pointer">✅ Hadir</button>
-                                 <button onclick="kirimKeLogAbsen('${m.id}', '${m.name}', 'Tidak Hadir', this)" class="bg-rose-50 text-rose-700 text-xs px-2.5 py-1.5 rounded border border-rose-200 cursor-pointer">❌ Absen</button>`;
+                    htmlAksiPc = `<button onclick="kirimKeLogAbsen('${m.id}', '${m.name}', 'Hadir', this)" class="bg-emerald-50 text-emerald-700 text-xs px-2.5 py-1.5 rounded border border-emerald-200 mr-1 cursor-pointer hover:bg-emerald-100">✅ Hadir</button>
+                                 <button onclick="kirimKeLogAbsen('${m.id}', '${m.name}', 'Tidak Hadir', this)" class="bg-rose-50 text-rose-700 text-xs px-2.5 py-1.5 rounded border border-rose-200 cursor-pointer hover:bg-rose-100">❌ Absen</button>`;
                 }
                 tr.innerHTML = `<td class="p-3 font-mono text-xs text-slate-400">${m.id}</td>
                                 <td class="p-3 font-medium text-slate-700">${m.name}</td>
-                                <td class="p-3 text-right flex items-center justify-end gap-3"><div>${kolomAksi}</div>
+                                <td class="p-3 text-right flex items-center justify-end gap-3"><div>${htmlAksiPc}</div>
                                 <button onclick="hapusSiswaDariMasterCloud('${m.id}', '${m.name}', this)" class="text-slate-300 hover:text-rose-600 text-xs pl-2 border-l border-slate-200 cursor-pointer">🗑️</button></td>`;
                 memberTableBody.appendChild(tr);
+
+
+                // --- RENDER UNTUK TAMPILAN SMARTPHONE (KARTU DINAMIS) ---
+                const card = document.createElement('div');
+                card.className = "p-4 bg-white rounded-xl border border-slate-200 shadow-xs flex flex-col gap-3";
+                
+                let htmlAksiMobile = '';
+                if (statusSudahAbsen) {
+                    const bgB = m.absenHariIni.status === 'Hadir' ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white';
+                    htmlAksiMobile = `<div class="flex items-center justify-between w-full">
+                                        <span class="font-bold text-xs px-4 py-2 rounded-lg text-center flex-1 ${bgB}">Status: ${m.absenHariIni.status}</span>
+                                        <button onclick="bukaEditStatus('${m.id}')" class="bg-slate-100 text-blue-600 text-xs font-semibold px-3 py-2 rounded-lg ml-2 border border-slate-200 cursor-pointer">Ubah</button>
+                                      </div>`;
+                } else {
+                    htmlAksiMobile = `<div class="grid grid-cols-2 gap-2 w-full">
+                                        <button onclick="kirimKeLogAbsen('${m.id}', '${m.name}', 'Hadir', this)" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold py-2.5 rounded-lg cursor-pointer flex items-center justify-center gap-1">✅ Hadir</button>
+                                        <button onclick="kirimKeLogAbsen('${m.id}', '${m.name}', 'Tidak Hadir', this)" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold py-2.5 rounded-lg cursor-pointer flex items-center justify-center gap-1">❌ Absen</button>
+                                      </div>`;
+                }
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="font-bold text-slate-800 text-sm">${m.name}</h4>
+                            <p class="text-2xs font-mono text-slate-400 mt-0.5">ID Siswa: ${m.id}</p>
+                        </div>
+                        <button onclick="hapusSiswaDariMasterCloud('${m.id}', '${m.name}', this)" class="text-slate-300 hover:text-rose-600 p-1 text-xs">🗑️</button>
+                    </div>
+                    <div class="area-tombol-aksi flex w-full">${htmlAksiMobile}</div>
+                `;
+                memberMobileCards.appendChild(card);
             });
         }
 
-        // AMBIL DATA & PROSES HITUNG REKAP TOTAL (PROSES BERAT DIPISAH DISINI)
+        // KIRIM DATA KE LOG GOOGLE SHEETS DENGAN PROSES LOADING SPINNER INTERAKTIF
+        function kirimKeLogAbsen(idUser, nama, status, btn) {
+            const urlApi = scriptUrlInput.value.trim(); if(!urlApi) return;
+            const tglSesi = attendanceDateInput.value;
+            
+            // 1. CARI AREA ASAL (Apakah tombol ditekan dari tabel PC atau dari Kartu HP)
+            const parentArea = btn.closest('div'); 
+            const seluruhTombolDiAreaTersebut = parentArea.querySelectorAll('button');
+            
+            // Simpan teks asli tombol untuk dikembalikan jika gagal
+            const teksAsliTombolTerpilih = btn.innerHTML;
+            
+            // 2. AKTIFKAN ANIMASI LOADING & MATIKAN TOMBOL AGAR TIDAK BISA DIKLIK DOUBLE
+            seluruhTombolDiAreaTersebut.forEach(b => {
+                b.disabled = true;
+                b.classList.add('opacity-40');
+            });
+            btn.classList.remove('opacity-40');
+            btn.innerHTML = `<span class="spinner mr-1.5"></span> Memproses...`;
+
+            // 3. MULAI PENGIRIMAN DATA KE CLOUD
+            fetch(urlApi, {
+                method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify({ aksi: "absen", id_user: idUser, nama: `${nama} (${selectedClassName.textContent})`, status: status, tanggal: tglSesi })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === "success") {
+                    // Cari object siswa bersangkutan di data lokal dan update statusnya
+                    const member = appData.classes.find(c => c.id == currentClassId).members.find(m => m.id === idUser);
+                    if (member) member.absenHariIni = { tanggal: tglSesi, status: status };
+                    
+                    // Render ulang panel absensi agar langsung memunculkan tanda centang hijau/merah
+                    renderTableSiswaAbsen();
+                } else {
+                    alert("Gagal mencatat absensi: " + data.message);
+                    resetTombolKeSemula(btn, seluruhTombolDiAreaTersebut, teksAsliTombolTerpilih);
+                }
+            })
+            .catch(err => {
+                console.error("Error:", err);
+                alert("Koneksi gagal/terputus!");
+                resetTombolKeSemula(btn, seluruhTombolDiAreaTersebut, teksAsliTombolTerpilih);
+            });
+        }
+
+        function resetTombolKeSemula(btn, kumpulanTombol, teksAsli) {
+            kumpulanTombol.forEach(b => {
+                b.disabled = false;
+                b.classList.remove('opacity-40');
+            });
+            btn.innerHTML = teksAsli;
+        }
+
+        // AMBIL DATA & PROSES REKAP TOTAL
         function muatDataRekapTotal() {
             const urlApi = scriptUrlInput.value.trim(); if(!urlApi) return;
             const tbody = document.getElementById('siswaTableBody');
-            tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center italic text-blue-600 animate-pulse">⏳ Mengkalkulasi seluruh statistik kehadiran cloud...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center italic text-blue-600 animate-pulse text-xs md:text-sm">⏳ Mengkalkulasi seluruh statistik kehadiran cloud...</td></tr>';
             
             fetch(`${urlApi}?mode=rekap_total`, { method: "GET" })
             .then(res => res.json())
@@ -279,7 +392,6 @@
                 if(siswaMap[id]) { siswaMap[id].total += 1; if(logAbsensi[j][5] === "Hadir") siswaMap[id].hadir += 1; }
             }
 
-            // Render Tabel Analitik Anggota
             const tbody = document.getElementById('siswaTableBody'); tbody.innerHTML = '';
             let kelasStat = {};
             
@@ -289,21 +401,19 @@
                 kelasStat[s.kelas].hadir += s.hadir; kelasStat[s.kelas].total += s.total;
 
                 tbody.innerHTML += `<tr class="hover:bg-slate-50"><td class="p-3 font-medium">${s.name}</td>
-                    <td class="p-3 text-xs"><span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded">${s.kelas}</span></td>
+                    <td class="p-3 text-2xs md:text-xs"><span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded">${s.kelas}</span></td>
                     <td class="p-3 text-center text-emerald-600 font-bold">${s.hadir}</td><td class="p-3 text-center text-rose-500">${s.total - s.hadir}</td>
                     <td class="p-3 text-right font-mono font-bold ${persen >= 80 ? 'text-emerald-600' : 'text-amber-500'}">${persen}%</td></tr>`;
             });
 
-            // Render Progress Bar Kelas
             const containerK = document.getElementById('classSummaryContainer'); containerK.innerHTML = '';
             Object.keys(kelasStat).forEach(nk => {
                 let k = kelasStat[nk]; let pk = k.total > 0 ? Math.round((k.hadir / k.total) * 100) : 0;
                 containerK.innerHTML += `<div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                    <div class="flex justify-between items-center mb-1 text-xs"><span class="font-bold text-slate-700">${nk}</span><span class="font-bold">${pk}%</span></div>
+                    <div class="flex justify-between items-center mb-1 text-2xs md:text-xs"><span class="font-bold text-slate-700">${nk}</span><span class="font-bold">${pk}%</span></div>
                     <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden"><div class="h-1.5 rounded-full ${pk >= 80 ? 'bg-emerald-500' : 'bg-amber-500'}" style="width: ${pk}%"></div></div></div>`;
             });
 
-            // Gambar Grafik Line Chart Tren
             let trenMap = {};
             for(let j = 1; j < logAbsensi.length; j++) {
                 let tgl = logAbsensi[j][3].split(" ")[0];
@@ -322,27 +432,7 @@
             });
         }
 
-        // KIRIM DATA KE LOG GOOGLE SHEETS
-        function kirimKeLogAbsen(idUser, nama, status, btn) {
-            const urlApi = scriptUrlInput.value.trim(); if(!urlApi) return;
-            const tglSesi = attendanceDateInput.value;
-            btn.parentElement.querySelectorAll('button').forEach(b => b.disabled = true);
-
-            fetch(urlApi, {
-                method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
-                body: JSON.stringify({ aksi: "absen", id_user: idUser, nama: `${nama} (${selectedClassName.textContent})`, status: status, tanggal: tglSesi })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.status === "success") {
-                    const member = appData.classes.find(c => c.id == currentClassId).members.find(m => m.id === idUser);
-                    if (member) member.absenHariIni = { tanggal: tglSesi, status: status };
-                    renderTableSiswaAbsen();
-                }
-            });
-        }
-
-        // AKSI TAMBAH MASTER SISWA & KELAS (POST)
+        // AKSI MASTER (POST)
         document.getElementById('classForm').addEventListener('submit', () => {
             const urlApi = scriptUrlInput.value.trim();
             fetch(urlApi, { method: "POST", mode: "cors", body: JSON.stringify({ aksi: "tambah_kelas_master", nama_kelas: document.getElementById('className').value.trim() }) })
