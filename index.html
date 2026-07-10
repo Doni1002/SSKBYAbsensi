@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Absensi & Analitik Terpadu (V17)</title>
+    <title>Sistem Absensi UKSS GMAHK Kebayoran</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -27,7 +27,7 @@
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-100 pb-4">
                 <div>
                     <h1 class="text-xl md:text-2xl font-bold text-slate-800 flex items-center gap-2">
-                        <span>📋</span> Sistem Absensi Terpadu
+                        <span>📋</span> Sistem Absensi UKSS GMAHK Kebayoran
                     </h1>
                     <p class="text-slate-500 text-xs md:text-sm mt-1">Kelola master kelas, pencatatan absensi harian, dan analisis tren dalam satu aplikasi tunggal.</p>
                 </div>
@@ -45,14 +45,13 @@
             <div class="mt-4 bg-slate-50 border border-slate-200 p-3 md:p-4 rounded-xl text-xs md:text-sm flex flex-col md:flex-row gap-3 md:gap-4 items-end">
                 <div class="flex-1 w-full">
                     <label class="block font-semibold mb-1 text-blue-800">URL Web App Google Apps Script Anda:</label>
-                    <input type="text" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/XXXXX/exec" 
-                           class="w-full p-2 rounded-md border border-slate-300 bg-white text-slate-700 text-xs md:text-sm">
+                    <input type="text" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/XXXXX/exec" class="w-full p-2 rounded-md border border-slate-300 bg-white text-slate-700 text-xs md:text-sm">
                 </div>
                 <div id="filterTanggalArea" class="w-full md:w-auto">
                     <label class="block font-semibold mb-1 text-emerald-800">📆 Pilih Tanggal Absensi:</label>
                     <input type="date" id="attendanceDateInput" onchange="muatDataDariSheets()" class="w-full p-2 rounded-md border border-slate-300 bg-white font-medium text-slate-800 text-xs md:text-sm">
                 </div>
-                <button id="btnSinkronUtama" onclick="jalankanSinkronisasiBerdasarkanMenu()" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-md text-xs md:text-sm cursor-pointer whitespace-nowrap h-[38px] flex items-center justify-center gap-2">
+                <button id="btnSinkronUtama" onclick="jalankanSinkronisasiBerdasarkanMenu()" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-md text-xs md:text-sm cursor-pointer h-[38px] flex items-center justify-center gap-2">
                     <span>🔄</span> Tarik Data Cloud
                 </button>
             </div>
@@ -111,6 +110,30 @@
         </div>
 
         <div id="panel-rekap" class="hidden space-y-6 md:space-y-8">
+            <div id="modalEditSiswa" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                <div class="bg-white p-5 md:p-6 rounded-2xl max-w-sm w-full shadow-xl border border-slate-200 space-y-4">
+                    <h3 class="text-base font-bold text-slate-800 flex items-center gap-2"><span>✏️</span> Edit Data Master Siswa</h3>
+                    <div class="space-y-3 text-xs md:text-sm">
+                        <div>
+                            <label class="block text-slate-500 mb-1">ID Siswa (Permanen):</label>
+                            <input type="text" id="editSiswaId" disabled class="w-full p-2 bg-slate-100 border border-slate-200 rounded-lg font-mono text-slate-500">
+                        </div>
+                        <div>
+                            <label class="block text-slate-700 font-medium mb-1">Nama Lengkap Baru:</label>
+                            <input type="text" id="editSiswaNama" class="w-full p-2 border border-slate-300 rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-slate-700 font-medium mb-1">Pindah Ke Kelas:</label>
+                            <select id="editSiswaKelasSelect" class="w-full p-2 border border-slate-300 rounded-lg"></select>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 justify-end pt-2 text-xs md:text-sm">
+                        <button onclick="tutupModalEdit()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium rounded-lg cursor-pointer">Batal</button>
+                        <button onclick="simpanPerubahanSiswaCloud()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg cursor-pointer">Simpan Data</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-200">
                 <h2 class="text-md md:text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2"><span>📈</span> Grafik Tren Kehadiran</h2>
                 <div class="h-[220px] md:h-[260px] w-full">
@@ -126,14 +149,14 @@
 
                 <div class="lg:col-span-2 bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-200">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-                        <h2 class="text-md md:text-lg font-semibold text-slate-800 flex items-center gap-2"><span>👥</span> Persentase Anggota & Pengaturan Master</h2>
+                        <h2 class="text-md md:text-lg font-semibold text-slate-800 flex items-center gap-2"><span>👥</span> Manajemen Database Master Siswa</h2>
                         <input type="text" id="searchSiswa" oninput="filterTabelSiswa()" placeholder="Cari nama siswa..." class="p-2 text-xs border border-slate-300 rounded-lg w-full sm:w-44">
                     </div>
-                    <div class="overflow-x-auto border border-slate-100 rounded-xl max-h-[350px]">
+                    <div class="overflow-x-auto border border-slate-100 rounded-xl max-h-[380px]">
                         <table class="w-full text-left border-collapse text-xs md:text-sm">
                             <thead>
                                 <tr class="bg-slate-50 border-b border-slate-200 text-2xs md:text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                                    <th class="p-3">Nama</th><th class="p-3">Kelas</th><th class="p-3 text-center">Hadir</th><th class="p-3 text-center">Absen</th><th class="p-3 text-center">Persentase</th><th class="p-3 text-right">Kelola</th>
+                                    <th class="p-3">Nama</th><th class="p-3">Kelas</th><th class="p-3 text-center">Hadir</th><th class="p-3 text-center">Absen</th><th class="p-3 text-center">Persentase</th><th class="p-3 text-right">Kelola Master</th>
                                 </tr>
                             </thead>
                             <tbody id="siswaTableBody" class="divide-y divide-slate-100 text-slate-600"></tbody>
@@ -146,6 +169,7 @@
 
     <script>
         let appData = { classes: [] };
+        let dataKelasGlobal = []; 
         let currentClassId = null;
         let menuAktif = "menu-absen";
         let chartInstance = null;
@@ -240,12 +264,10 @@
             selectedClassName.textContent = activeClass.name;
             memberCount.textContent = `${activeClass.members.length} Anggota`;
             
-            memberTableBody.innerHTML = '';
-            memberMobileCards.innerHTML = '';
+            memberTableBody.innerHTML = ''; memberMobileCards.innerHTML = '';
 
             if(activeClass.members.length === 0) {
-                const barisKosong = `<tr><td colspan="3" class="p-4 text-center text-slate-400 italic text-xs md:text-sm">Kelas Kosong.</td></tr>`;
-                memberTableBody.innerHTML = barisKosong;
+                memberTableBody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-400 italic text-xs">Kelas Kosong.</td></tr>`;
                 memberMobileCards.innerHTML = `<p class="p-4 bg-slate-50 border rounded-xl text-center text-slate-400 italic text-xs">Kelas Kosong.</p>`;
                 return;
             }
@@ -253,7 +275,7 @@
             activeClass.members.forEach(m => {
                 let statusSudahAbsen = (m.absenHariIni && m.absenHariIni.tanggal === attendanceDateInput.value);
                 
-                // --- RENDER DESKTOP (HANYA HAPUS LOG ABSEN HARI INI) ---
+                // DESKTOP
                 const tr = document.createElement('tr');
                 let htmlAksiPc = '';
                 if (statusSudahAbsen) {
@@ -267,37 +289,17 @@
                 tr.innerHTML = `<td class="p-3 font-mono text-xs text-slate-400">${m.id}</td>
                                 <td class="p-3 font-medium text-slate-700">${m.name}</td>
                                 <td class="p-3 text-right flex items-center justify-end gap-3"><div>${htmlAksiPc}</div>
-                                <button onclick="hapusLogAbsenHariIniCloud('${m.id}', '${m.name}', this)" class="text-slate-300 hover:text-rose-600 text-xs pl-2 border-l border-slate-200 cursor-pointer" title="Hapus catatan absen hari ini saja">🗑️</button></td>`;
+                                <button onclick="hapusLogAbsenHariIniCloud('${m.id}', '${m.name}', this)" class="text-slate-300 hover:text-rose-600 text-xs pl-2 border-l border-slate-200 cursor-pointer" title="Hapus log absen hari ini">🗑️</button></td>`;
                 memberTableBody.appendChild(tr);
 
-                // --- RENDER MOBILE ---
+                // MOBILE
                 const card = document.createElement('div');
                 card.className = "p-4 bg-white rounded-xl border border-slate-200 shadow-xs flex flex-col gap-3";
-                
-                let htmlAksiMobile = '';
-                if (statusSudahAbsen) {
-                    const bgB = m.absenHariIni.status === 'Hadir' ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white';
-                    htmlAksiMobile = `<div class="flex items-center justify-between w-full">
-                                        <span class="font-bold text-xs px-4 py-2 rounded-lg text-center flex-1 ${bgB}">Status: ${m.absenHariIni.status}</span>
-                                        <button onclick="bukaEditStatus('${m.id}')" class="bg-slate-100 text-blue-600 text-xs font-semibold px-3 py-2 rounded-lg ml-2 border border-slate-200 cursor-pointer">Ubah</button>
-                                      </div>`;
-                } else {
-                    htmlAksiMobile = `<div class="grid grid-cols-2 gap-2 w-full">
-                                        <button onclick="kirimKeLogAbsen('${m.id}', '${m.name}', 'Hadir', this)" class="bg-emerald-600 text-white text-xs font-semibold py-2.5 rounded-lg cursor-pointer flex items-center justify-center">✅ Hadir</button>
-                                        <button onclick="kirimKeLogAbsen('${m.id}', '${m.name}', 'Tidak Hadir', this)" class="bg-rose-600 text-white text-xs font-semibold py-2.5 rounded-lg cursor-pointer flex items-center justify-center">❌ Absen</button>
-                                      </div>`;
-                }
+                let htmlAksiMobile = statusSudahAbsen ? 
+                    `<div class="flex items-center justify-between w-full"><span class="font-bold text-xs px-4 py-2 rounded-lg text-center flex-1 bg-emerald-600 text-white">Status: ${m.absenHariIni.status}</span><button onclick="bukaEditStatus('${m.id}')" class="bg-slate-100 text-blue-600 text-xs font-semibold px-3 py-2 rounded-lg ml-2 border border-slate-200 cursor-pointer">Ubah</button></div>` :
+                    `<div class="grid grid-cols-2 gap-2 w-full"><button onclick="kirimKeLogAbsen('${m.id}', '${m.name}', 'Hadir', this)" class="bg-emerald-600 text-white text-xs font-semibold py-2.5 rounded-lg cursor-pointer">✅ Hadir</button><button onclick="kirimKeLogAbsen('${m.id}', '${m.name}', 'Tidak Hadir', this)" class="bg-rose-600 text-white text-xs font-semibold py-2.5 rounded-lg cursor-pointer">❌ Absen</button></div>`;
 
-                card.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h4 class="font-bold text-slate-800 text-sm">${m.name}</h4>
-                            <p class="text-2xs font-mono text-slate-400 mt-0.5">ID: ${m.id}</p>
-                        </div>
-                        <button onclick="hapusLogAbsenHariIniCloud('${m.id}', '${m.name}', this)" class="text-slate-300 hover:text-rose-600 p-1 text-xs" title="Hapus catatan absen hari ini saja">🗑️</button>
-                    </div>
-                    <div class="area-tombol-aksi flex w-full">${htmlAksiMobile}</div>
-                `;
+                card.innerHTML = `<div class="flex justify-between items-start"><div><h4 class="font-bold text-slate-800 text-sm">${m.name}</h4><p class="text-2xs font-mono text-slate-400 mt-0.5">ID: ${m.id}</p></div><button onclick="hapusLogAbsenHariIniCloud('${m.id}', '${m.name}', this)" class="text-slate-300 hover:text-rose-600 p-1 text-xs">🗑️</button></div><div class="flex w-full">${htmlAksiMobile}</div>`;
                 memberMobileCards.appendChild(card);
             });
         }
@@ -305,13 +307,11 @@
         function kirimKeLogAbsen(idUser, nama, status, btn) {
             const urlApi = scriptUrlInput.value.trim(); if(!urlApi) return;
             const tglSesi = attendanceDateInput.value;
-            const parentArea = btn.closest('div'); 
-            const seluruhTombolDiAreaTersebut = parentArea.querySelectorAll('button');
-            const teksAsliTombolTerpilih = btn.innerHTML;
+            const parentArea = btn.closest('div'); const seluruhTombol = parentArea.querySelectorAll('button');
+            const teksAsli = btn.innerHTML;
             
-            seluruhTombolDiAreaTersebut.forEach(b => { b.disabled = true; b.classList.add('opacity-40'); });
-            btn.classList.remove('opacity-40');
-            btn.innerHTML = `<span class="spinner mr-1.5"></span>...`;
+            seluruhTombol.forEach(b => { b.disabled = true; b.classList.add('opacity-40'); });
+            btn.classList.remove('opacity-40'); btn.innerHTML = `<span class="spinner mr-1.5"></span>...`;
 
             fetch(urlApi, {
                 method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
@@ -323,51 +323,38 @@
                     const member = appData.classes.find(c => c.id == currentClassId).members.find(m => m.id === idUser);
                     if (member) member.absenHariIni = { tanggal: tglSesi, status: status };
                     renderTableSiswaAbsen();
-                } else {
-                    alert("Gagal: " + data.message);
-                    resetTombolKeSemula(btn, seluruhTombolDiAreaTersebut, teksAsliTombolTerpilih);
-                }
-            })
-            .catch(() => {
-                alert("Koneksi gagal!");
-                resetTombolKeSemula(btn, seluruhTombolDiAreaTersebut, teksAsliTombolTerpilih);
-            });
+                } else { alert("Gagal: " + data.message); resetTombolKeSemula(btn, seluruhTombol, teksAsli); }
+            }).catch(() => { alert("Koneksi gagal!"); resetTombolKeSemula(btn, seluruhTombol, teksAsli); });
         }
 
-        function resetTombolKeSemula(btn, kumpulanTombol, teksAsli) {
-            kumpulanTombol.forEach(b => { b.disabled = false; b.classList.remove('opacity-40'); });
-            btn.innerHTML = teksAsli;
-        }
+        function resetTombolKeSemula(btn, kumpulan, teks) { kumpulan.forEach(b => { b.disabled = false; b.classList.remove('opacity-40'); }); btn.innerHTML = teks; }
 
-        // Hapus Log Absensi Hari Ini Saja
         function hapusLogAbsenHariIniCloud(id, nama, btn) {
             const tglSesi = attendanceDateInput.value;
             if(!confirm(`Hapus catatan absensi ${nama} pada tanggal ${tglSesi}?`)) return;
-            
             btn.disabled = true; btn.innerHTML = "⏳";
-
-            fetch(scriptUrlInput.value.trim(), { 
-                method: "POST", mode: "cors", 
-                body: JSON.stringify({ aksi: "hapus_log_absen", id_user: id, tanggal: tglSesi }) 
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.status === "success") { muatDataDariSheets(); } 
-                else { alert("Gagal: " + data.message); btn.disabled = false; btn.innerHTML = "🗑️"; }
-            })
-            .catch(() => { alert("Koneksi bermasalah!"); btn.disabled = false; btn.innerHTML = "🗑️"; });
+            fetch(scriptUrlInput.value.trim(), { method: "POST", mode: "cors", body: JSON.stringify({ aksi: "hapus_log_absen", id_user: id, tanggal: tglSesi }) })
+            .then(() => muatDataDariSheets());
         }
 
-        // AMBIL DATA & PROSES REKAP TOTAL
+        // ==========================================
+        // PROSES UTAMA REKAP & MANAJEMEN MASTER
+        // ==========================================
         function muatDataRekapTotal() {
             const urlApi = scriptUrlInput.value.trim(); if(!urlApi) return;
             const tbody = document.getElementById('siswaTableBody');
-            tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center italic text-blue-600 animate-pulse text-xs">⏳ Mengkalkulasi statistik cloud...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center italic text-blue-600 animate-pulse text-xs">⏳ Sinkronisasi data induk cloud...</td></tr>';
             
             fetch(`${urlApi}?mode=rekap_total`, { method: "GET" })
             .then(res => res.json())
             .then(data => {
-                if(data.status === "success") kumpulkanStatistik(data.master_siswa, data.log_absensi);
+                if(data.status === "success") {
+                    dataKelasGlobal = [];
+                    for(let k=1; k<data.master_kelas.length; k++) { 
+                        if(data.master_kelas[k][0]) dataKelasGlobal.push(data.master_kelas[k][0]); 
+                    }
+                    kumpulkanStatistik(data.master_siswa, data.log_absensi);
+                }
             });
         }
 
@@ -390,26 +377,30 @@
                 if(!kelasStat[s.kelas]) kelasStat[s.kelas] = { hadir: 0, total: 0 };
                 kelasStat[s.kelas].hadir += s.hadir; kelasStat[s.kelas].total += s.total;
 
-                // REVISI BARU: Di sini dipasang tombol merah 💥 untuk HAPUS MASTER SISWA secara total
-                tbody.innerHTML += `<tr class="hover:bg-slate-50"><td class="p-3 font-medium">${s.name}</td>
+                // TAMBAHAN FITUR: Ditambahkan tombol '✏️ Edit' berdampingan dengan '💥 Hapus' di Kelola Master
+                tbody.innerHTML += `<tr class="hover:bg-slate-50">
+                    <td class="p-3 font-medium">${s.name}</td>
                     <td class="p-3 text-2xs"><span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded">${s.kelas}</span></td>
-                    <td class="p-3 text-center text-emerald-600 font-bold">${s.hadir}</td><td class="p-3 text-center text-rose-500">${s.total - s.hadir}</td>
+                    <td class="p-3 text-center text-emerald-600 font-bold">${s.hadir}</td>
+                    <td class="p-3 text-center text-rose-500">${s.total - s.hadir}</td>
                     <td class="p-3 text-center font-mono font-bold ${persen >= 80 ? 'text-emerald-600' : 'text-amber-500'}">${persen}%</td>
-                    <td class="p-3 text-right"><button onclick="hapusSiswaDariMasterCloud('${id}', '${s.name}', this)" class="bg-rose-50 hover:bg-rose-100 text-rose-600 text-2xs font-semibold px-2 py-1 rounded border border-rose-200 cursor-pointer" title="Hapus siswa ini dari database selamanya">💥 Hapus Master</button></td></tr>`;
+                    <td class="p-3 text-right space-x-1 whitespace-nowrap">
+                        <button onclick="bukaModalEdit('${id}', '${s.name}', '${s.kelas}')" class="bg-blue-50 hover:bg-blue-100 text-blue-600 text-2xs font-semibold px-2 py-1 rounded border border-blue-200 cursor-pointer">✏️ Edit</button>
+                        <button onclick="hapusSiswaDariMasterCloud('${id}', '${s.name}', this)" class="bg-rose-50 hover:bg-rose-100 text-rose-600 text-2xs font-semibold px-2 py-1 rounded border border-rose-200 cursor-pointer">💥 Hapus</button>
+                    </td>
+                </tr>`;
             });
 
+            // Tampilkan Ringkasan Kelas & Grafik Tren
             const containerK = document.getElementById('classSummaryContainer'); containerK.innerHTML = '';
             Object.keys(kelasStat).forEach(nk => {
                 let k = kelasStat[nk]; let pk = k.total > 0 ? Math.round((k.hadir / k.total) * 100) : 0;
-                containerK.innerHTML += `<div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                    <div class="flex justify-between items-center mb-1 text-2xs"><span class="font-bold text-slate-700">${nk}</span><span class="font-bold">${pk}%</span></div>
-                    <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden"><div class="h-1.5 rounded-full ${pk >= 80 ? 'bg-emerald-500' : 'bg-amber-500'}" style="width: ${pk}%"></div></div></div>`;
+                containerK.innerHTML += `<div class="p-3 bg-slate-50 rounded-xl border border-slate-200"><div class="flex justify-between items-center mb-1 text-2xs"><span class="font-bold text-slate-700">${nk}</span><span class="font-bold">${pk}%</span></div><div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden"><div class="h-1.5 rounded-full ${pk >= 80 ? 'bg-emerald-500' : 'bg-amber-500'}" style="width: ${pk}%"></div></div></div>`;
             });
 
             let trenMap = {};
             for(let j = 1; j < logAbsensi.length; j++) {
-                let tgl = logAbsensi[j][3].split(" ")[0];
-                if(!trenMap[tgl]) trenMap[tgl] = { h: 0, t: 0 };
+                let tgl = logAbsensi[j][3].split(" ")[0]; if(!trenMap[tgl]) trenMap[tgl] = { h: 0, t: 0 };
                 trenMap[tgl].t += 1; if(logAbsensi[j][5] === "Hadir") trenMap[tgl].h += 1;
             }
             let urutTgl = Object.keys(trenMap).sort((a,b) => new Date(a.split('/').reverse().join('-')) - new Date(b.split('/').reverse().join('-')));
@@ -424,7 +415,47 @@
             });
         }
 
-        // FUNGSI AKSI POST KE CLOUD
+        // ==========================================
+        // OPERASI MODAL & AKSI EDIT MASTER SISWA
+        // ==========================================
+        function bukaModalEdit(id, nama, kelasAktif) {
+            document.getElementById('editSiswaId').value = id;
+            document.getElementById('editSiswaNama').value = nama;
+            
+            const selectK = document.getElementById('editSiswaKelasSelect');
+            selectK.innerHTML = '';
+            dataKelasGlobal.forEach(kls => {
+                const opt = document.createElement('option'); opt.value = kls; opt.textContent = kls;
+                if(kls === kelasAktif) opt.selected = true;
+                selectK.appendChild(opt);
+            });
+            document.getElementById('modalEditSiswa').classList.remove('hidden');
+        }
+
+        function tutupModalEdit() { document.getElementById('modalEditSiswa').classList.add('hidden'); }
+
+        function simpanPerubahanSiswaCloud() {
+            const urlApi = scriptUrlInput.value.trim();
+            const id = document.getElementById('editSiswaId').value;
+            const namaBaru = document.getElementById('editSiswaNama').value.trim();
+            const kelasBaru = document.getElementById('editSiswaKelasSelect').value;
+
+            if(!namaBaru) { alert("Nama tidak boleh kosong!"); return; }
+
+            fetch(urlApi, {
+                method: "POST", mode: "cors",
+                body: JSON.stringify({ aksi: "edit_master", id_user: id, nama: namaBaru, kelas: kelasBaru })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === "success") {
+                    tutupModalEdit();
+                    muatDataRekapTotal(); // Refresh tabel master total
+                } else { alert("Gagal memperbarui: " + data.message); }
+            }).catch(() => alert("Koneksi cloud bermasalah!"));
+        }
+
+        // FUNGSI SUBMIT INPUT TAMBAH DATA MASTER
         document.getElementById('classForm').addEventListener('submit', () => {
             fetch(scriptUrlInput.value.trim(), { method: "POST", mode: "cors", body: JSON.stringify({ aksi: "tambah_kelas_master", nama_kelas: document.getElementById('className').value.trim() }) })
             .then(() => { document.getElementById('className').value = ''; muatDataDariSheets(); });
@@ -442,30 +473,11 @@
             fetch(scriptUrlInput.value.trim(), { method: "POST", mode: "cors", body: JSON.stringify({ aksi: "hapus_kelas_master", nama_kelas: activeClass.name }) }).then(() => { currentClassId = null; muatDataDariSheets(); });
         }
 
-        // AKSI BARU - JALUR PENGHAPUSAN MASTER SISWA UTAMA (TERISOLASI DI MENU REKAP)
         function hapusSiswaDariMasterCloud(id, nama, btn) {
-            if(!confirm(`⚠️ PERINGATAN KELOLA DATA MASTER:\n\nApakah Anda yakin ingin menghapus ${nama} (ID: ${id}) dari database Master Siswa?\nSiswa ini tidak akan muncul lagi di sesi absen manapun.`)) return;
-            
+            if(!confirm(`⚠️ PERINGATAN HAPUS MASTER:\n\nApakah Anda yakin ingin menghapus ${nama} (ID: ${id}) secara permanen?\nSiswa ini akan dihapus dari seluruh sesi absen.`)) return;
             btn.disabled = true; btn.textContent = "⏳...";
-            
-            fetch(scriptUrlInput.value.trim(), { 
-                method: "POST", mode: "cors", 
-                body: JSON.stringify({ aksi: "hapus_master", id_user: id }) 
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.status === "success") {
-                    alert("Sukses menghapus siswa dari database master.");
-                    muatDataRekapTotal(); // Segarkan isi tabel rekap total
-                } else {
-                    alert("Gagal: " + data.message);
-                    btn.disabled = false; btn.textContent = "💥 Hapus Master";
-                }
-            })
-            .catch(() => {
-                alert("Koneksi gagal!");
-                btn.disabled = false; btn.textContent = "💥 Hapus Master";
-            });
+            fetch(scriptUrlInput.value.trim(), { method: "POST", mode: "cors", body: JSON.stringify({ aksi: "hapus_master", id_user: id }) })
+            .then(() => muatDataRekapTotal());
         }
 
         function bukaEditStatus(idUser) {
