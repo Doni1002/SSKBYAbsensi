@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Absensi UKSS GMAHK Kebayoran</title>
+    <title>Sistem Absensi & Analitik Terpadu (V17)</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -27,7 +27,7 @@
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-100 pb-4">
                 <div>
                     <h1 class="text-xl md:text-2xl font-bold text-slate-800 flex items-center gap-2">
-                        <span>📋</span> Sistem Absensi UKSS GMAHK Kebayoran
+                        <span>📋</span> Sistem Absensi Terpadu
                     </h1>
                     <p class="text-slate-500 text-xs md:text-sm mt-1">Kelola master kelas, pencatatan absensi harian, dan analisis tren dalam satu aplikasi tunggal.</p>
                 </div>
@@ -126,14 +126,14 @@
 
                 <div class="lg:col-span-2 bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-200">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-                        <h2 class="text-md md:text-lg font-semibold text-slate-800 flex items-center gap-2"><span>👥</span> Persentase Anggota</h2>
+                        <h2 class="text-md md:text-lg font-semibold text-slate-800 flex items-center gap-2"><span>👥</span> Persentase Anggota & Pengaturan Master</h2>
                         <input type="text" id="searchSiswa" oninput="filterTabelSiswa()" placeholder="Cari nama siswa..." class="p-2 text-xs border border-slate-300 rounded-lg w-full sm:w-44">
                     </div>
                     <div class="overflow-x-auto border border-slate-100 rounded-xl max-h-[350px]">
                         <table class="w-full text-left border-collapse text-xs md:text-sm">
                             <thead>
                                 <tr class="bg-slate-50 border-b border-slate-200 text-2xs md:text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                                    <th class="p-3">Nama</th><th class="p-3">Kelas</th><th class="p-3 text-center">Hadir</th><th class="p-3 text-center">Absen</th><th class="p-3 text-right">Persentase</th>
+                                    <th class="p-3">Nama</th><th class="p-3">Kelas</th><th class="p-3 text-center">Hadir</th><th class="p-3 text-center">Absen</th><th class="p-3 text-center">Persentase</th><th class="p-3 text-right">Kelola</th>
                                 </tr>
                             </thead>
                             <tbody id="siswaTableBody" class="divide-y divide-slate-100 text-slate-600"></tbody>
@@ -253,7 +253,7 @@
             activeClass.members.forEach(m => {
                 let statusSudahAbsen = (m.absenHariIni && m.absenHariIni.tanggal === attendanceDateInput.value);
                 
-                // --- RENDER DESKTOP ---
+                // --- RENDER DESKTOP (HANYA HAPUS LOG ABSEN HARI INI) ---
                 const tr = document.createElement('tr');
                 let htmlAksiPc = '';
                 if (statusSudahAbsen) {
@@ -267,7 +267,7 @@
                 tr.innerHTML = `<td class="p-3 font-mono text-xs text-slate-400">${m.id}</td>
                                 <td class="p-3 font-medium text-slate-700">${m.name}</td>
                                 <td class="p-3 text-right flex items-center justify-end gap-3"><div>${htmlAksiPc}</div>
-                                <button onclick="hapusLogAbsenHariIniCloud('${m.id}', '${m.name}', this)" class="text-slate-300 hover:text-rose-600 text-xs pl-2 border-l border-slate-200 cursor-pointer" title="Hapus catatan absen hari ini">🗑️</button></td>`;
+                                <button onclick="hapusLogAbsenHariIniCloud('${m.id}', '${m.name}', this)" class="text-slate-300 hover:text-rose-600 text-xs pl-2 border-l border-slate-200 cursor-pointer" title="Hapus catatan absen hari ini saja">🗑️</button></td>`;
                 memberTableBody.appendChild(tr);
 
                 // --- RENDER MOBILE ---
@@ -294,7 +294,7 @@
                             <h4 class="font-bold text-slate-800 text-sm">${m.name}</h4>
                             <p class="text-2xs font-mono text-slate-400 mt-0.5">ID: ${m.id}</p>
                         </div>
-                        <button onclick="hapusLogAbsenHariIniCloud('${m.id}', '${m.name}', this)" class="text-slate-300 hover:text-rose-600 p-1 text-xs">🗑️</button>
+                        <button onclick="hapusLogAbsenHariIniCloud('${m.id}', '${m.name}', this)" class="text-slate-300 hover:text-rose-600 p-1 text-xs" title="Hapus catatan absen hari ini saja">🗑️</button>
                     </div>
                     <div class="area-tombol-aksi flex w-full">${htmlAksiMobile}</div>
                 `;
@@ -339,7 +339,7 @@
             btn.innerHTML = teksAsli;
         }
 
-        // FUNGSI JAVASCRIPT FIX REVISI: Hanya Menghapus Baris Catatan Absen Hari Ini
+        // Hapus Log Absensi Hari Ini Saja
         function hapusLogAbsenHariIniCloud(id, nama, btn) {
             const tglSesi = attendanceDateInput.value;
             if(!confirm(`Hapus catatan absensi ${nama} pada tanggal ${tglSesi}?`)) return;
@@ -358,10 +358,11 @@
             .catch(() => { alert("Koneksi bermasalah!"); btn.disabled = false; btn.innerHTML = "🗑️"; });
         }
 
+        // AMBIL DATA & PROSES REKAP TOTAL
         function muatDataRekapTotal() {
             const urlApi = scriptUrlInput.value.trim(); if(!urlApi) return;
             const tbody = document.getElementById('siswaTableBody');
-            tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center italic text-blue-600 animate-pulse text-xs">⏳ Mengkalkulasi statistik cloud...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center italic text-blue-600 animate-pulse text-xs">⏳ Mengkalkulasi statistik cloud...</td></tr>';
             
             fetch(`${urlApi}?mode=rekap_total`, { method: "GET" })
             .then(res => res.json())
@@ -389,10 +390,12 @@
                 if(!kelasStat[s.kelas]) kelasStat[s.kelas] = { hadir: 0, total: 0 };
                 kelasStat[s.kelas].hadir += s.hadir; kelasStat[s.kelas].total += s.total;
 
+                // REVISI BARU: Di sini dipasang tombol merah 💥 untuk HAPUS MASTER SISWA secara total
                 tbody.innerHTML += `<tr class="hover:bg-slate-50"><td class="p-3 font-medium">${s.name}</td>
                     <td class="p-3 text-2xs"><span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded">${s.kelas}</span></td>
                     <td class="p-3 text-center text-emerald-600 font-bold">${s.hadir}</td><td class="p-3 text-center text-rose-500">${s.total - s.hadir}</td>
-                    <td class="p-3 text-right font-mono font-bold ${persen >= 80 ? 'text-emerald-600' : 'text-amber-500'}">${persen}%</td></tr>`;
+                    <td class="p-3 text-center font-mono font-bold ${persen >= 80 ? 'text-emerald-600' : 'text-amber-500'}">${persen}%</td>
+                    <td class="p-3 text-right"><button onclick="hapusSiswaDariMasterCloud('${id}', '${s.name}', this)" class="bg-rose-50 hover:bg-rose-100 text-rose-600 text-2xs font-semibold px-2 py-1 rounded border border-rose-200 cursor-pointer" title="Hapus siswa ini dari database selamanya">💥 Hapus Master</button></td></tr>`;
             });
 
             const containerK = document.getElementById('classSummaryContainer'); containerK.innerHTML = '';
@@ -421,6 +424,7 @@
             });
         }
 
+        // FUNGSI AKSI POST KE CLOUD
         document.getElementById('classForm').addEventListener('submit', () => {
             fetch(scriptUrlInput.value.trim(), { method: "POST", mode: "cors", body: JSON.stringify({ aksi: "tambah_kelas_master", nama_kelas: document.getElementById('className').value.trim() }) })
             .then(() => { document.getElementById('className').value = ''; muatDataDariSheets(); });
@@ -436,6 +440,32 @@
             const activeClass = appData.classes.find(c => c.id == currentClassId);
             if(!activeClass || !confirm(`Hapus kelas master ${activeClass.name}? Semua siswa di kelas ini tidak akan memiliki wadah kelas.`)) return;
             fetch(scriptUrlInput.value.trim(), { method: "POST", mode: "cors", body: JSON.stringify({ aksi: "hapus_kelas_master", nama_kelas: activeClass.name }) }).then(() => { currentClassId = null; muatDataDariSheets(); });
+        }
+
+        // AKSI BARU - JALUR PENGHAPUSAN MASTER SISWA UTAMA (TERISOLASI DI MENU REKAP)
+        function hapusSiswaDariMasterCloud(id, nama, btn) {
+            if(!confirm(`⚠️ PERINGATAN KELOLA DATA MASTER:\n\nApakah Anda yakin ingin menghapus ${nama} (ID: ${id}) dari database Master Siswa?\nSiswa ini tidak akan muncul lagi di sesi absen manapun.`)) return;
+            
+            btn.disabled = true; btn.textContent = "⏳...";
+            
+            fetch(scriptUrlInput.value.trim(), { 
+                method: "POST", mode: "cors", 
+                body: JSON.stringify({ aksi: "hapus_master", id_user: id }) 
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === "success") {
+                    alert("Sukses menghapus siswa dari database master.");
+                    muatDataRekapTotal(); // Segarkan isi tabel rekap total
+                } else {
+                    alert("Gagal: " + data.message);
+                    btn.disabled = false; btn.textContent = "💥 Hapus Master";
+                }
+            })
+            .catch(() => {
+                alert("Koneksi gagal!");
+                btn.disabled = false; btn.textContent = "💥 Hapus Master";
+            });
         }
 
         function bukaEditStatus(idUser) {
