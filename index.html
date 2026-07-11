@@ -23,13 +23,14 @@
 </head>
 <body class="p-3 md:p-8">
     <div class="max-w-6xl mx-auto">
+        <!-- HEADER UTAMA -->
         <header class="mb-6 bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-100">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-100 pb-4">
                 <div>
                     <h1 class="text-xl md:text-2xl font-bold text-slate-800 flex items-center gap-2">
-                        <span>📋</span> Sistem Absensi UKSS GMAHK Kebayoran
+                        <span>⛪</span> Sistem Absensi UKSS GMAHK Kebayoran
                     </h1>
-                    <p class="text-slate-500 text-xs md:text-sm mt-1">Kelola master kelas, pencatatan absensi harian, dan analisis tren dalam satu aplikasi tunggal.</p>
+                    <p class="text-slate-500 text-xs md:text-sm mt-1">Sistem Terpadu Manajemen Database Kelas, Siswa, dan Pencatatan Log Absensi Jamaah.</p>
                 </div>
                 
                 <div class="bg-slate-100 p-1 rounded-xl flex gap-1 w-full md:w-auto">
@@ -57,13 +58,17 @@
             </div>
         </header>
 
+        <!-- ======================= PANEL 1: MENU UTAMA ABSENSI ======================= -->
         <div id="panel-absen" class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+            <!-- Form Input Master -->
             <div class="lg:col-span-1 space-y-4 md:space-y-6">
                 <div class="bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-100">
                     <h2 class="text-md md:text-lg font-semibold text-slate-800 mb-3 flex items-center gap-2"><span>🏢</span> Tambah Master Kelas</h2>
                     <form id="classForm" class="space-y-3" onsubmit="return false;">
                         <input type="text" id="className" required placeholder="Contoh: XII RPL 1" class="w-full p-2.5 border border-slate-200 rounded-lg text-xs md:text-sm">
-                        <button type="submit" id="btnSubmitKelas" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium p-2.5 rounded-lg text-xs md:text-sm cursor-pointer">Simpan Kelas</button>
+                        <button type="submit" id="btnSubmitKelas" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium p-2.5 rounded-lg text-xs md:text-sm cursor-pointer flex items-center justify-center gap-2">
+                            <span id="textSubmitKelas">Simpan Kelas</span>
+                        </button>
                     </form>
                 </div>
 
@@ -73,11 +78,14 @@
                         <select id="memberClassSelect" required class="w-full p-2.5 border border-slate-200 rounded-lg text-xs md:text-sm"></select>
                         <input type="text" id="memberId" required placeholder="ID / NISN Unik" class="w-full p-2.5 border border-slate-200 rounded-lg text-xs md:text-sm">
                         <input type="text" id="memberName" required placeholder="Nama Lengkap" class="w-full p-2.5 border border-slate-200 rounded-lg text-xs md:text-sm">
-                        <button type="submit" id="btnSubmitSiswa" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium p-2.5 rounded-lg text-xs md:text-sm cursor-pointer">Simpan Siswa</button>
+                        <button type="submit" id="btnSubmitSiswa" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium p-2.5 rounded-lg text-xs md:text-sm cursor-pointer flex items-center justify-center gap-2">
+                            <span id="textSubmitSiswa">Simpan Siswa</span>
+                        </button>
                     </form>
                 </div>
             </div>
 
+            <!-- Panel Sesi Absen Harian -->
             <div class="lg:col-span-2 space-y-6">
                 <div class="bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-100">
                     <h2 class="text-md md:text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2"><span>🗂️</span> Panel Sesi Absensi</h2>
@@ -92,6 +100,7 @@
                             <button onclick="hapusKelasDariMasterCloud(this)" id="btnHapusKelas" class="text-2xs md:text-xs bg-rose-50 text-rose-700 px-2.5 py-1.5 rounded-md border border-rose-100 cursor-pointer w-full sm:w-auto text-center">🗑️ Hapus Kelas Master</button>
                         </div>
 
+                        <!-- Tampilan Desktop -->
                         <div class="hidden md:block overflow-x-auto border border-slate-100 rounded-xl">
                             <table class="w-full text-left border-collapse">
                                 <thead>
@@ -103,13 +112,16 @@
                             </table>
                         </div>
 
+                        <!-- Tampilan Mobile -->
                         <div id="memberMobileCards" class="block md:hidden space-y-3"></div>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- ======================= PANEL 2: MENU REKAP & PENGATURAN MASTER TOTAL ======================= -->
         <div id="panel-rekap" class="hidden space-y-6 md:space-y-8">
+            <!-- Form Pop-up Edit Siswa -->
             <div id="modalEditSiswa" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
                 <div class="bg-white p-5 md:p-6 rounded-2xl max-w-sm w-full shadow-xl border border-slate-200 space-y-4">
                     <h3 class="text-base font-bold text-slate-800 flex items-center gap-2"><span>✏️</span> Edit Data Master Siswa</h3>
@@ -129,11 +141,14 @@
                     </div>
                     <div class="flex gap-2 justify-end pt-2 text-xs md:text-sm">
                         <button onclick="tutupModalEdit()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium rounded-lg cursor-pointer">Batal</button>
-                        <button onclick="simpanPerubahanSiswaCloud()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg cursor-pointer">Simpan Data</button>
+                        <button id="btnSimpanEditSiswa" onclick="simpanPerubahanSiswaCloud()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg cursor-pointer flex items-center gap-1.5">
+                            <span id="textSimpanEditSiswa">Simpan Data</span>
+                        </button>
                     </div>
                 </div>
             </div>
 
+            <!-- Grafik Tren -->
             <div class="bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-200">
                 <h2 class="text-md md:text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2"><span>📈</span> Grafik Tren Kehadiran</h2>
                 <div class="h-[220px] md:h-[260px] w-full">
@@ -147,6 +162,7 @@
                     <div id="classSummaryContainer" class="space-y-3"></div>
                 </div>
 
+                <!-- Database Master Siswa -->
                 <div class="lg:col-span-2 bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-200">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
                         <h2 class="text-md md:text-lg font-semibold text-slate-800 flex items-center gap-2"><span>👥</span> Manajemen Database Master Siswa</h2>
@@ -167,6 +183,7 @@
         </div>
     </div>
 
+    <!-- LOGIKA UTAMA JAVASCRIPT -->
     <script>
         let appData = { classes: [] };
         let dataKelasGlobal = []; 
@@ -275,7 +292,7 @@
             activeClass.members.forEach(m => {
                 let statusSudahAbsen = (m.absenHariIni && m.absenHariIni.tanggal === attendanceDateInput.value);
                 
-                // DESKTOP
+                // DESKTOP (TABLE PC)
                 const tr = document.createElement('tr');
                 let htmlAksiPc = '';
                 if (statusSudahAbsen) {
@@ -292,7 +309,7 @@
                                 <button onclick="hapusLogAbsenHariIniCloud('${m.id}', '${m.name}', this)" class="text-slate-300 hover:text-rose-600 text-xs pl-2 border-l border-slate-200 cursor-pointer" title="Hapus log absen hari ini">🗑️</button></td>`;
                 memberTableBody.appendChild(tr);
 
-                // MOBILE
+                // MOBILE CARDS
                 const card = document.createElement('div');
                 card.className = "p-4 bg-white rounded-xl border border-slate-200 shadow-xs flex flex-col gap-3";
                 let htmlAksiMobile = statusSudahAbsen ? 
@@ -304,6 +321,7 @@
             });
         }
 
+        // INDIKATOR PROSES: Tombol Absensi Harian (Hadir / Tidak Hadir)
         function kirimKeLogAbsen(idUser, nama, status, btn) {
             const urlApi = scriptUrlInput.value.trim(); if(!urlApi) return;
             const tglSesi = attendanceDateInput.value;
@@ -338,7 +356,7 @@
         }
 
         // ==========================================
-        // PROSES UTAMA REKAP & MANAJEMEN MASTER
+        // PROSES REKAP & MANAJEMEN MASTER TOTAL
         // ==========================================
         function muatDataRekapTotal() {
             const urlApi = scriptUrlInput.value.trim(); if(!urlApi) return;
@@ -377,7 +395,6 @@
                 if(!kelasStat[s.kelas]) kelasStat[s.kelas] = { hadir: 0, total: 0 };
                 kelasStat[s.kelas].hadir += s.hadir; kelasStat[s.kelas].total += s.total;
 
-                // TAMBAHAN FITUR: Ditambahkan tombol '✏️ Edit' berdampingan dengan '💥 Hapus' di Kelola Master
                 tbody.innerHTML += `<tr class="hover:bg-slate-50">
                     <td class="p-3 font-medium">${s.name}</td>
                     <td class="p-3 text-2xs"><span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded">${s.kelas}</span></td>
@@ -391,7 +408,6 @@
                 </tr>`;
             });
 
-            // Tampilkan Ringkasan Kelas & Grafik Tren
             const containerK = document.getElementById('classSummaryContainer'); containerK.innerHTML = '';
             Object.keys(kelasStat).forEach(nk => {
                 let k = kelasStat[nk]; let pk = k.total > 0 ? Math.round((k.hadir / k.total) * 100) : 0;
@@ -434,13 +450,19 @@
 
         function tutupModalEdit() { document.getElementById('modalEditSiswa').classList.add('hidden'); }
 
+        // INDIKATOR PROSES: Form Edit Data Siswa Cloud
         function simpanPerubahanSiswaCloud() {
             const urlApi = scriptUrlInput.value.trim();
             const id = document.getElementById('editSiswaId').value;
             const namaBaru = document.getElementById('editSiswaNama').value.trim();
             const kelasBaru = document.getElementById('editSiswaKelasSelect').value;
+            const btn = document.getElementById('btnSimpanEditSiswa');
+            const txt = document.getElementById('textSimpanEditSiswa');
 
             if(!namaBaru) { alert("Nama tidak boleh kosong!"); return; }
+
+            btn.disabled = true; btn.classList.add('opacity-50');
+            txt.innerHTML = `<span class="spinner"></span> Memperbarui...`;
 
             fetch(urlApi, {
                 method: "POST", mode: "cors",
@@ -448,23 +470,65 @@
             })
             .then(res => res.json())
             .then(data => {
+                btn.disabled = false; btn.classList.remove('opacity-50'); txt.innerHTML = "Simpan Data";
                 if(data.status === "success") {
                     tutupModalEdit();
-                    muatDataRekapTotal(); // Refresh tabel master total
+                    muatDataRekapTotal();
                 } else { alert("Gagal memperbarui: " + data.message); }
-            }).catch(() => alert("Koneksi cloud bermasalah!"));
+            }).catch(() => {
+                btn.disabled = false; btn.classList.remove('opacity-50'); txt.innerHTML = "Simpan Data";
+                alert("Koneksi cloud bermasalah!");
+            });
         }
 
-        // FUNGSI SUBMIT INPUT TAMBAH DATA MASTER
+        // INDIKATOR PROSES: Form Tambah Kelas Baru
         document.getElementById('classForm').addEventListener('submit', () => {
-            fetch(scriptUrlInput.value.trim(), { method: "POST", mode: "cors", body: JSON.stringify({ aksi: "tambah_kelas_master", nama_kelas: document.getElementById('className').value.trim() }) })
-            .then(() => { document.getElementById('className').value = ''; muatDataDariSheets(); });
+            const btn = document.getElementById('btnSubmitKelas');
+            const txt = document.getElementById('textSubmitKelas');
+            const inputVal = document.getElementById('className').value.trim();
+            
+            btn.disabled = true; btn.classList.add('opacity-50');
+            txt.innerHTML = `<span class="spinner"></span> Menyimpan...`;
+
+            fetch(scriptUrlInput.value.trim(), { 
+                method: "POST", mode: "cors", 
+                body: JSON.stringify({ aksi: "tambah_kelas_master", nama_kelas: inputVal }) 
+            })
+            .then(() => { 
+                btn.disabled = false; btn.classList.remove('opacity-50'); txt.innerHTML = "Simpan Kelas";
+                document.getElementById('className').value = ''; 
+                muatDataDariSheets(); 
+            }).catch(() => {
+                btn.disabled = false; btn.classList.remove('opacity-50'); txt.innerHTML = "Simpan Kelas";
+            });
         });
 
+        // INDIKATOR PROSES: Form Tambah Siswa Baru
         document.getElementById('memberForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            fetch(scriptUrlInput.value.trim(), { method: "POST", mode: "cors", body: JSON.stringify({ aksi: "tambah_master", id_user: document.getElementById('memberId').value.trim(), nama: document.getElementById('memberName').value.trim(), kelas: memberClassSelect.options[memberClassSelect.selectedIndex].text }) })
-            .then(() => { document.getElementById('memberId').value = ''; document.getElementById('memberName').value = ''; muatDataDariSheets(); });
+            const btn = document.getElementById('btnSubmitSiswa');
+            const txt = document.getElementById('textSubmitSiswa');
+            
+            btn.disabled = true; btn.classList.add('opacity-50');
+            txt.innerHTML = `<span class="spinner"></span> Menyimpan...`;
+
+            fetch(scriptUrlInput.value.trim(), { 
+                method: "POST", mode: "cors", 
+                body: JSON.stringify({ 
+                    aksi: "tambah_master", 
+                    id_user: document.getElementById('memberId').value.trim(), 
+                    nama: document.getElementById('memberName').value.trim(), 
+                    kelas: memberClassSelect.options[memberClassSelect.selectedIndex].text 
+                }) 
+            })
+            .then(() => { 
+                btn.disabled = false; btn.classList.remove('opacity-50'); txt.innerHTML = "Simpan Siswa";
+                document.getElementById('memberId').value = ''; 
+                document.getElementById('memberName').value = ''; 
+                muatDataDariSheets(); 
+            }).catch(() => {
+                btn.disabled = false; btn.classList.remove('opacity-50'); txt.innerHTML = "Simpan Siswa";
+            });
         });
 
         function hapusKelasDariMasterCloud(btn) {
@@ -474,7 +538,7 @@
         }
 
         function hapusSiswaDariMasterCloud(id, nama, btn) {
-            if(!confirm(`⚠️ PERINGATAN HAPUS MASTER:\n\nApakah Anda yakin ingin menghapus ${nama} (ID: ${id}) secara permanen?\nSiswa ini akan dihapus dari seluruh sesi absen.`)) return;
+            if(!confirm(`⚠️ PERINGATAN HAPUS MASTER:\n\nApakah Anda yakin ingin menghapus ${nama} (ID: ${id}) secara permanen?`)) return;
             btn.disabled = true; btn.textContent = "⏳...";
             fetch(scriptUrlInput.value.trim(), { method: "POST", mode: "cors", body: JSON.stringify({ aksi: "hapus_master", id_user: id }) })
             .then(() => muatDataRekapTotal());
