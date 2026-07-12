@@ -316,10 +316,11 @@
                 // MOBILE CARDS
                 const card = document.createElement('div');
                 card.className = "p-4 bg-white rounded-xl border border-slate-200 shadow-xs flex flex-col gap-3";
+                let colorMobile = m.absenHariIni && m.absenHariIni.status === 'Hadir' ? 'bg-emerald-600' : 'bg-rose-600';
                 let htmlAksiMobile = statusSudahAbsen ? 
-                    `<div class="flex items-center justify-between w-full"><span class="font-bold text-xs px-4 py-2 rounded-lg text-center flex-1 bg-emerald-600 text-white">Status: ${m.absenHariIni.status}</span><button onclick="bukaEditStatus('${m.id}')" class="bg-slate-100 text-blue-600 text-xs font-semibold px-3 py-2 rounded-lg ml-2 border border-slate-200 cursor-pointer">Ubah</button></div>` :
+                    `<div class="flex items-center justify-between w-full"><span class="font-bold text-xs px-4 py-2 rounded-lg text-center flex-1 ${colorMobile} text-white">Status: ${m.absenHariIni.status}</span><button onclick="bukaEditStatus('${m.id}')" class="bg-slate-100 text-blue-600 text-xs font-semibold px-3 py-2 rounded-lg ml-2 border border-slate-200 cursor-pointer">Ubah</button></div>` :
                     `<div class="grid grid-cols-2 gap-2 w-full"><button onclick="kirimKeLogAbsen('${m.id}', '${m.name}', 'Hadir', this)" class="bg-emerald-600 text-white text-xs font-semibold py-2.5 rounded-lg cursor-pointer">✅ Hadir</button><button onclick="kirimKeLogAbsen('${m.id}', '${m.name}', 'Tidak Hadir', this)" class="bg-rose-600 text-white text-xs font-semibold py-2.5 rounded-lg cursor-pointer">❌ Absen</button></div>`;
-
+                
                 card.innerHTML = `<div class="flex justify-between items-start"><div><h4 class="font-bold text-slate-800 text-sm">${m.name}</h4><p class="text-2xs font-mono text-slate-400 mt-0.5">ID: ${m.id}</p></div><button onclick="hapusLogAbsenHariIniCloud('${m.id}', '${m.name}', this)" class="text-slate-300 hover:text-rose-600 p-1 text-xs">🗑️</button></div><div class="flex w-full">${htmlAksiMobile}</div>`;
                 memberMobileCards.appendChild(card);
             });
