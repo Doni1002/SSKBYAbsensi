@@ -43,17 +43,16 @@
                 </div>
             </div>
             
-            <div class="mt-4 bg-slate-50 border border-slate-200 p-3 md:p-4 rounded-xl text-xs md:text-sm flex flex-col md:flex-row gap-3 md:gap-4 items-end">
-                <div class="flex-1 w-full">
-                    <label class="block font-semibold mb-1 text-blue-800">URL Web App Google Apps Script Anda:</label>
-                    <input type="text" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/XXXXX/exec" class="w-full p-2 rounded-md border border-slate-300 bg-white text-slate-700 text-xs md:text-sm">
-                </div>
-                <div id="filterTanggalArea" class="w-full md:w-auto">
+            <div class="mt-4 bg-slate-50 border border-slate-200 p-3 md:p-4 rounded-xl text-xs md:text-sm flex flex-col md:flex-row gap-3 md:gap-4 items-end justify-between">
+                <!-- Input URL Tersembunyi untuk kompatibilitas sistem lama -->
+                <input type="hidden" id="scriptUrlInput">
+                
+                <div id="filterTanggalArea" class="w-full sm:w-auto flex-1 max-w-xs">
                     <label class="block font-semibold mb-1 text-emerald-800">📆 Pilih Tanggal Absensi:</label>
                     <input type="date" id="attendanceDateInput" onchange="muatDataDariSheets()" class="w-full p-2 rounded-md border border-slate-300 bg-white font-medium text-slate-800 text-xs md:text-sm">
                 </div>
-                <button id="btnSinkronUtama" onclick="jalankanSinkronisasiBerdasarkanMenu()" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-md text-xs md:text-sm cursor-pointer h-[38px] flex items-center justify-center gap-2">
-                    <span>🔄</span> Tarik Data Cloud
+                <button id="btnSinkronUtama" onclick="jalankanSinkronisasiBerdasarkanMenu()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-md text-xs md:text-sm cursor-pointer h-[38px] flex items-center justify-center gap-2">
+                    <span>🔄</span> Sinkronisasi Cloud
                 </button>
             </div>
         </header>
@@ -65,7 +64,7 @@
                 <div class="bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-100">
                     <h2 class="text-md md:text-lg font-semibold text-slate-800 mb-3 flex items-center gap-2"><span>🏢</span> Tambah Master Kelas</h2>
                     <form id="classForm" class="space-y-3" onsubmit="return false;">
-                        <input type="text" id="className" required placeholder="Contoh: XII RPL 1" class="w-full p-2.5 border border-slate-200 rounded-lg text-xs md:text-sm">
+                        <input type="text" id="className" required placeholder="Contoh: Pemimpin Diskusi A" class="w-full p-2.5 border border-slate-200 rounded-lg text-xs md:text-sm">
                         <button type="submit" id="btnSubmitKelas" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium p-2.5 rounded-lg text-xs md:text-sm cursor-pointer flex items-center justify-center gap-2">
                             <span id="textSubmitKelas">Simpan Kelas</span>
                         </button>
@@ -76,8 +75,8 @@
                     <h2 class="text-md md:text-lg font-semibold text-slate-800 mb-3 flex items-center gap-2"><span>👤</span> Tambah Master Siswa</h2>
                     <form id="memberForm" class="space-y-3" onsubmit="return false;">
                         <select id="memberClassSelect" required class="w-full p-2.5 border border-slate-200 rounded-lg text-xs md:text-sm"></select>
-                        <input type="text" id="memberId" required placeholder="ID / NISN Unik" class="w-full p-2.5 border border-slate-200 rounded-lg text-xs md:text-sm">
-                        <input type="text" id="memberName" required placeholder="Nama Lengkap" class="w-full p-2.5 border border-slate-200 rounded-lg text-xs md:text-sm">
+                        <input type="text" id="memberId" required placeholder="ID / Nomor Anggota Unik" class="w-full p-2.5 border border-slate-200 rounded-lg text-xs md:text-sm">
+                        <input type="text" id="memberName" required placeholder="Nama Lengkap Anggota" class="w-full p-2.5 border border-slate-200 rounded-lg text-xs md:text-sm">
                         <button type="submit" id="btnSubmitSiswa" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium p-2.5 rounded-lg text-xs md:text-sm cursor-pointer flex items-center justify-center gap-2">
                             <span id="textSubmitSiswa">Simpan Siswa</span>
                         </button>
@@ -165,8 +164,8 @@
                 <!-- Database Master Siswa -->
                 <div class="lg:col-span-2 bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-200">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-                        <h2 class="text-md md:text-lg font-semibold text-slate-800 flex items-center gap-2"><span>👥</span> Manajemen Database Master Siswa</h2>
-                        <input type="text" id="searchSiswa" oninput="filterTabelSiswa()" placeholder="Cari nama siswa..." class="p-2 text-xs border border-slate-300 rounded-lg w-full sm:w-44">
+                        <h2 class="text-md md:text-lg font-semibold text-slate-800 flex items-center gap-2"><span>👥</span> Database Master Anggota</h2>
+                        <input type="text" id="searchSiswa" oninput="filterTabelSiswa()" placeholder="Cari nama..." class="p-2 text-xs border border-slate-300 rounded-lg w-full sm:w-44">
                     </div>
                     <div class="overflow-x-auto border border-slate-100 rounded-xl max-h-[380px]">
                         <table class="w-full text-left border-collapse text-xs md:text-sm">
@@ -185,6 +184,11 @@
 
     <!-- LOGIKA UTAMA JAVASCRIPT -->
     <script>
+        // =========================================================================
+        // 🛠️ MASUKKAN LINK URL GOOGLE APPS SCRIPT ANDA DI BAWAH INI
+        // =========================================================================
+        const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwm5gD9O6uZE2xu--hyhiIedNuULqwElRSbgq8vXVN8jNILGP_885aJJlGadA1AE1FNDQ/exec";
+
         let appData = { classes: [] };
         let dataKelasGlobal = []; 
         let currentClassId = null;
@@ -201,10 +205,9 @@
         const attendanceDateInput = document.getElementById('attendanceDateInput');
         const memberClassSelect = document.getElementById('memberClassSelect');
 
+        // Mengatur tanggal hari ini secara default
         if(!attendanceDateInput.value) { attendanceDateInput.value = new Date().toISOString().split('T')[0]; }
-        if(localStorage.getItem('gas_url')) { scriptUrlInput.value = localStorage.getItem('gas_url'); }
-        function saveUrlToLocalStorage() { localStorage.setItem('gas_url', scriptUrlInput.value.trim()); }
-        scriptUrlInput.addEventListener('input', saveUrlToLocalStorage);
+        scriptUrlInput.value = APP_SCRIPT_URL;
 
         function pindahMenu(targetMenu) {
             menuAktif = targetMenu;
@@ -235,7 +238,8 @@
         }
 
         function muatDataDariSheets() {
-            const urlApi = scriptUrlInput.value.trim(); if(!urlApi) return;
+            const urlApi = APP_SCRIPT_URL; 
+            if(!urlApi || urlApi.includes("ISI_LINK_WEB_APP")) { alert("Silakan tempel URL Apps Script Anda di dalam kode terlebih dahulu!"); return; }
             const tglTerpilih = attendanceDateInput.value;
             classTabs.innerHTML = '<p class="text-xs text-blue-600 italic animate-pulse">⏳ Membaca Sesi Absensi...</p>';
             
@@ -249,7 +253,7 @@
                     }
                     refreshTampilanAbsen();
                 }
-            });
+            }).catch(() => { classTabs.innerHTML = '<p class="text-rose-600 text-xs font-semibold">Gagal memuat data dari cloud.</p>'; });
         }
 
         function refreshTampilanAbsen() {
@@ -292,7 +296,7 @@
             activeClass.members.forEach(m => {
                 let statusSudahAbsen = (m.absenHariIni && m.absenHariIni.tanggal === attendanceDateInput.value);
                 
-                // DESKTOP (TABLE PC)
+                // DESKTOP TABLE
                 const tr = document.createElement('tr');
                 let htmlAksiPc = '';
                 if (statusSudahAbsen) {
@@ -321,9 +325,8 @@
             });
         }
 
-        // INDIKATOR PROSES: Tombol Absensi Harian (Hadir / Tidak Hadir)
         function kirimKeLogAbsen(idUser, nama, status, btn) {
-            const urlApi = scriptUrlInput.value.trim(); if(!urlApi) return;
+            const urlApi = APP_SCRIPT_URL;
             const tglSesi = attendanceDateInput.value;
             const parentArea = btn.closest('div'); const seluruhTombol = parentArea.querySelectorAll('button');
             const teksAsli = btn.innerHTML;
@@ -351,19 +354,15 @@
             const tglSesi = attendanceDateInput.value;
             if(!confirm(`Hapus catatan absensi ${nama} pada tanggal ${tglSesi}?`)) return;
             btn.disabled = true; btn.innerHTML = "⏳";
-            fetch(scriptUrlInput.value.trim(), { method: "POST", mode: "cors", body: JSON.stringify({ aksi: "hapus_log_absen", id_user: id, tanggal: tglSesi }) })
+            fetch(APP_SCRIPT_URL, { method: "POST", mode: "cors", body: JSON.stringify({ aksi: "hapus_log_absen", id_user: id, tanggal: tglSesi }) })
             .then(() => muatDataDariSheets());
         }
 
-        // ==========================================
-        // PROSES REKAP & MANAJEMEN MASTER TOTAL
-        // ==========================================
         function muatDataRekapTotal() {
-            const urlApi = scriptUrlInput.value.trim(); if(!urlApi) return;
             const tbody = document.getElementById('siswaTableBody');
             tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center italic text-blue-600 animate-pulse text-xs">⏳ Sinkronisasi data induk cloud...</td></tr>';
             
-            fetch(`${urlApi}?mode=rekap_total`, { method: "GET" })
+            fetch(`${APP_SCRIPT_URL}?mode=rekap_total`, { method: "GET" })
             .then(res => res.json())
             .then(data => {
                 if(data.status === "success") {
@@ -431,9 +430,6 @@
             });
         }
 
-        // ==========================================
-        // OPERASI MODAL & AKSI EDIT MASTER SISWA
-        // ==========================================
         function bukaModalEdit(id, nama, kelasAktif) {
             document.getElementById('editSiswaId').value = id;
             document.getElementById('editSiswaNama').value = nama;
@@ -450,9 +446,7 @@
 
         function tutupModalEdit() { document.getElementById('modalEditSiswa').classList.add('hidden'); }
 
-        // INDIKATOR PROSES: Form Edit Data Siswa Cloud
         function simpanPerubahanSiswaCloud() {
-            const urlApi = scriptUrlInput.value.trim();
             const id = document.getElementById('editSiswaId').value;
             const namaBaru = document.getElementById('editSiswaNama').value.trim();
             const kelasBaru = document.getElementById('editSiswaKelasSelect').value;
@@ -464,7 +458,7 @@
             btn.disabled = true; btn.classList.add('opacity-50');
             txt.innerHTML = `<span class="spinner"></span> Memperbarui...`;
 
-            fetch(urlApi, {
+            fetch(APP_SCRIPT_URL, {
                 method: "POST", mode: "cors",
                 body: JSON.stringify({ aksi: "edit_master", id_user: id, nama: namaBaru, kelas: kelasBaru })
             })
@@ -481,7 +475,6 @@
             });
         }
 
-        // INDIKATOR PROSES: Form Tambah Kelas Baru
         document.getElementById('classForm').addEventListener('submit', () => {
             const btn = document.getElementById('btnSubmitKelas');
             const txt = document.getElementById('textSubmitKelas');
@@ -490,7 +483,7 @@
             btn.disabled = true; btn.classList.add('opacity-50');
             txt.innerHTML = `<span class="spinner"></span> Menyimpan...`;
 
-            fetch(scriptUrlInput.value.trim(), { 
+            fetch(APP_SCRIPT_URL, { 
                 method: "POST", mode: "cors", 
                 body: JSON.stringify({ aksi: "tambah_kelas_master", nama_kelas: inputVal }) 
             })
@@ -503,7 +496,6 @@
             });
         });
 
-        // INDIKATOR PROSES: Form Tambah Siswa Baru
         document.getElementById('memberForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSubmitSiswa');
@@ -512,7 +504,7 @@
             btn.disabled = true; btn.classList.add('opacity-50');
             txt.innerHTML = `<span class="spinner"></span> Menyimpan...`;
 
-            fetch(scriptUrlInput.value.trim(), { 
+            fetch(APP_SCRIPT_URL, { 
                 method: "POST", mode: "cors", 
                 body: JSON.stringify({ 
                     aksi: "tambah_master", 
@@ -534,13 +526,13 @@
         function hapusKelasDariMasterCloud(btn) {
             const activeClass = appData.classes.find(c => c.id == currentClassId);
             if(!activeClass || !confirm(`Hapus kelas master ${activeClass.name}? Semua siswa di kelas ini tidak akan memiliki wadah kelas.`)) return;
-            fetch(scriptUrlInput.value.trim(), { method: "POST", mode: "cors", body: JSON.stringify({ aksi: "hapus_kelas_master", nama_kelas: activeClass.name }) }).then(() => { currentClassId = null; muatDataDariSheets(); });
+            fetch(APP_SCRIPT_URL, { method: "POST", mode: "cors", body: JSON.stringify({ aksi: "hapus_kelas_master", nama_kelas: activeClass.name }) }).then(() => { currentClassId = null; muatDataDariSheets(); });
         }
 
         function hapusSiswaDariMasterCloud(id, nama, btn) {
             if(!confirm(`⚠️ PERINGATAN HAPUS MASTER:\n\nApakah Anda yakin ingin menghapus ${nama} (ID: ${id}) secara permanen?`)) return;
             btn.disabled = true; btn.textContent = "⏳...";
-            fetch(scriptUrlInput.value.trim(), { method: "POST", mode: "cors", body: JSON.stringify({ aksi: "hapus_master", id_user: id }) })
+            fetch(APP_SCRIPT_URL, { method: "POST", mode: "cors", body: JSON.stringify({ aksi: "hapus_master", id_user: id }) })
             .then(() => muatDataRekapTotal());
         }
 
@@ -555,7 +547,7 @@
             for (let r of rows) { r.style.display = r.getElementsByTagName('td')[0]?.textContent.toLowerCase().includes(val) ? "" : "none"; }
         }
 
-        window.addEventListener('load', () => { if(scriptUrlInput.value.trim()) muatDataDariSheets(); });
+        window.addEventListener('load', () => { if(!APP_SCRIPT_URL.includes("ISI_LINK_WEB_APP")) muatDataDariSheets(); });
     </script>
 </body>
 </html>
