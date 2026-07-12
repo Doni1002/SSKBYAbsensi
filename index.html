@@ -34,24 +34,23 @@
                 </div>
                 
                 <div class="bg-slate-100 p-1 rounded-xl flex gap-1 w-full md:w-auto">
-                    <button onclick="pindahMenu('menu-absen')" id="btnMenuAbsen" class="flex-1 md:flex-none text-center px-3 py-2 text-xs md:text-sm font-medium rounded-lg cursor-pointer transition-all bg-white text-slate-800 shadow-xs">
+                    <button onclick="pindahMenu('menu-absen')" id="btnMenuAbsen" class="flex-1 md:flex-none text-center px-4 py-2.5 text-xs md:text-sm font-semibold rounded-xl cursor-pointer transition-all bg-white text-blue-600 shadow-sm">
                         📝 Sesi Absensi
                     </button>
-                    <button onclick="pindahMenu('menu-rekap')" id="btnMenuRekap" class="flex-1 md:flex-none text-center px-3 py-2 text-xs md:text-sm font-medium rounded-lg cursor-pointer transition-all text-slate-600 hover:text-slate-900">
-                        📊 Tren & Rekap Total
+                    <button onclick="pindahMenu('menu-rekap')" id="btnMenuRekap" class="flex-1 md:flex-none text-center px-4 py-2.5 text-xs md:text-sm font-semibold rounded-xl cursor-pointer transition-all text-slate-600 hover:text-slate-900">
+                        📊 Tren & Dashboard KPI
                     </button>
                 </div>
             </div>
             
-            <div class="mt-4 bg-slate-50 border border-slate-200 p-3 md:p-4 rounded-xl text-xs md:text-sm flex flex-col md:flex-row gap-3 md:gap-4 items-end justify-between">
-                <!-- Input URL Tersembunyi untuk kompatibilitas sistem lama -->
+            <div class="mt-4 bg-slate-50 border border-slate-200 p-3 md:p-4 rounded-2xl text-xs md:text-sm flex flex-col md:flex-row gap-3 md:gap-4 items-end justify-between">
                 <input type="hidden" id="scriptUrlInput">
                 
                 <div id="filterTanggalArea" class="w-full sm:w-auto flex-1 max-w-xs">
-                    <label class="block font-semibold mb-1 text-emerald-800">📆 Pilih Tanggal Absensi:</label>
-                    <input type="date" id="attendanceDateInput" onchange="muatDataDariSheets()" class="w-full p-2 rounded-md border border-slate-300 bg-white font-medium text-slate-800 text-xs md:text-sm">
+                    <label class="block font-semibold mb-1 text-slate-700">📆 Pilih Tanggal Absensi:</label>
+                    <input type="date" id="attendanceDateInput" onchange="muatDataDariSheets()" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white font-medium text-slate-800 text-xs md:text-sm">
                 </div>
-                <button id="btnSinkronUtama" onclick="jalankanSinkronisasiBerdasarkanMenu()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-md text-xs md:text-sm cursor-pointer h-[38px] flex items-center justify-center gap-2">
+                <button id="btnSinkronUtama" onclick="jalankanSinkronisasiBerdasarkanMenu()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2.5 rounded-xl text-xs md:text-sm cursor-pointer h-[42px] flex items-center justify-center gap-2 shadow-xs transition-colors">
                     <span>🔄</span> Sinkronisasi Cloud
                 </button>
             </div>
@@ -62,23 +61,23 @@
             <!-- Form Input Master -->
             <div class="lg:col-span-1 space-y-4 md:space-y-6">
                 <div class="bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-100">
-                    <h2 class="text-md md:text-lg font-semibold text-slate-800 mb-3 flex items-center gap-2"><span>🏢</span> Tambah Master Kelas</h2>
+                    <h2 class="text-md md:text-lg font-bold text-slate-800 mb-3 flex items-center gap-2"><span>🏢</span> Tambah Master Kelas</h2>
                     <form id="classForm" class="space-y-3" onsubmit="return false;">
-                        <input type="text" id="className" required placeholder="Contoh: Pemimpin Diskusi A" class="w-full p-2.5 border border-slate-200 rounded-lg text-xs md:text-sm">
-                        <button type="submit" id="btnSubmitKelas" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium p-2.5 rounded-lg text-xs md:text-sm cursor-pointer flex items-center justify-center gap-2">
-                            <span id="textSubmitKelas">Simpan Kelas</span>
+                        <input type="text" id="className" required placeholder="Contoh: Pemimpin Diskusi A" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs md:text-sm focus:outline-blue-600">
+                        <button type="submit" id="btnSubmitKelas" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold p-2.5 rounded-xl text-xs md:text-sm cursor-pointer flex items-center justify-center gap-2 transition-colors">
+                            <span id="textSubmitKelas">Simpan Kelas Baru</span>
                         </button>
                     </form>
                 </div>
 
                 <div class="bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-100">
-                    <h2 class="text-md md:text-lg font-semibold text-slate-800 mb-3 flex items-center gap-2"><span>👤</span> Tambah Master Siswa</h2>
+                    <h2 class="text-md md:text-lg font-bold text-slate-800 mb-3 flex items-center gap-2"><span>👤</span> Tambah Master Siswa</h2>
                     <form id="memberForm" class="space-y-3" onsubmit="return false;">
-                        <select id="memberClassSelect" required class="w-full p-2.5 border border-slate-200 rounded-lg text-xs md:text-sm"></select>
-                        <input type="text" id="memberId" required placeholder="ID / Nomor Anggota Unik" class="w-full p-2.5 border border-slate-200 rounded-lg text-xs md:text-sm">
-                        <input type="text" id="memberName" required placeholder="Nama Lengkap Anggota" class="w-full p-2.5 border border-slate-200 rounded-lg text-xs md:text-sm">
-                        <button type="submit" id="btnSubmitSiswa" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium p-2.5 rounded-lg text-xs md:text-sm cursor-pointer flex items-center justify-center gap-2">
-                            <span id="textSubmitSiswa">Simpan Siswa</span>
+                        <select id="memberClassSelect" required class="w-full p-2.5 border border-slate-200 rounded-xl text-xs md:text-sm bg-white"></select>
+                        <input type="text" id="memberId" required placeholder="ID / Nomor Anggota Unik" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs md:text-sm focus:outline-blue-600">
+                        <input type="text" id="memberName" required placeholder="Nama Lengkap Anggota" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs md:text-sm focus:outline-blue-600">
+                        <button type="submit" id="btnSubmitSiswa" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold p-2.5 rounded-xl text-xs md:text-sm cursor-pointer flex items-center justify-center gap-2 transition-colors">
+                            <span id="textSubmitSiswa">Simpan Siswa Baru</span>
                         </button>
                     </form>
                 </div>
@@ -87,24 +86,24 @@
             <!-- Panel Sesi Absen Harian -->
             <div class="lg:col-span-2 space-y-6">
                 <div class="bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-100">
-                    <h2 class="text-md md:text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2"><span>🗂️</span> Panel Sesi Absensi</h2>
+                    <h2 class="text-md md:text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><span>🗂️</span> Panel Sesi Absensi</h2>
                     <div id="classTabs" class="flex flex-wrap gap-2 mb-4 border-b border-slate-100 pb-4"></div>
 
                     <div id="attendanceArea" class="hidden">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 bg-slate-50 p-3 md:p-4 rounded-xl border border-slate-100">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 bg-slate-50 p-3 md:p-4 rounded-2xl border border-slate-100">
                             <div>
                                 <h3 id="selectedClassName" class="text-sm md:text-md font-bold text-slate-700 uppercase tracking-wide inline-block mr-2">Kelas</h3>
-                                <span id="memberCount" class="bg-slate-200 text-slate-700 text-2xs md:text-xs font-semibold px-2 py-0.5 rounded-full">0</span>
+                                <span id="memberCount" class="bg-slate-200 text-slate-700 text-2xs md:text-xs font-semibold px-2.5 py-1 rounded-full">0</span>
                             </div>
-                            <button onclick="hapusKelasDariMasterCloud(this)" id="btnHapusKelas" class="text-2xs md:text-xs bg-rose-50 text-rose-700 px-2.5 py-1.5 rounded-md border border-rose-100 cursor-pointer w-full sm:w-auto text-center">🗑️ Hapus Kelas Master</button>
+                            <button onclick="hapusKelasDariMasterCloud(this)" id="btnHapusKelas" class="text-2xs md:text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 px-3 py-2 rounded-xl border border-rose-200 cursor-pointer w-full sm:w-auto text-center font-medium transition-colors">🗑️ Hapus Kelas Master</button>
                         </div>
 
                         <!-- Tampilan Desktop -->
-                        <div class="hidden md:block overflow-x-auto border border-slate-100 rounded-xl">
+                        <div class="hidden md:block overflow-x-auto border border-slate-100 rounded-2xl">
                             <table class="w-full text-left border-collapse">
                                 <thead>
                                     <tr class="bg-slate-50 border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                                        <th class="p-3">ID</th><th class="p-3">Nama</th><th class="p-3 text-right">Tombol Tindakan Absensi</th>
+                                        <th class="p-4">ID</th><th class="p-4">Nama</th><th class="p-4 text-right">Tombol Tindakan Absensi</th>
                                     </tr>
                                 </thead>
                                 <tbody id="memberTableBody" class="divide-y divide-slate-100 text-sm text-slate-600"></tbody>
@@ -118,56 +117,70 @@
             </div>
         </div>
 
-        <!-- ======================= PANEL 2: MENU REKAP & PENGATURAN MASTER TOTAL ======================= -->
-        <div id="panel-rekap" class="hidden space-y-6 md:space-y-8">
-            <!-- Form Pop-up Edit Siswa -->
-            <div id="modalEditSiswa" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                <div class="bg-white p-5 md:p-6 rounded-2xl max-w-sm w-full shadow-xl border border-slate-200 space-y-4">
-                    <h3 class="text-base font-bold text-slate-800 flex items-center gap-2"><span>✏️</span> Edit Data Master Siswa</h3>
-                    <div class="space-y-3 text-xs md:text-sm">
-                        <div>
-                            <label class="block text-slate-500 mb-1">ID Siswa (Permanen):</label>
-                            <input type="text" id="editSiswaId" disabled class="w-full p-2 bg-slate-100 border border-slate-200 rounded-lg font-mono text-slate-500">
-                        </div>
-                        <div>
-                            <label class="block text-slate-700 font-medium mb-1">Nama Lengkap Baru:</label>
-                            <input type="text" id="editSiswaNama" class="w-full p-2 border border-slate-300 rounded-lg">
-                        </div>
-                        <div>
-                            <label class="block text-slate-700 font-medium mb-1">Pindah Ke Kelas:</label>
-                            <select id="editSiswaKelasSelect" class="w-full p-2 border border-slate-300 rounded-lg"></select>
-                        </div>
+        <!-- ======================= PANEL 2: MENU REKAP & DASHBOARD KPI ======================= -->
+        <div id="panel-rekap" class="hidden space-y-6">
+            
+            <!-- SEKSI DASHBOARD KPI UTAMA -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- KPI 1 -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-2xs flex flex-col justify-between">
+                    <span class="text-slate-400 font-medium text-2xs md:text-xs uppercase tracking-wider">Total Jamaah</span>
+                    <div class="flex items-baseline gap-2 mt-2">
+                        <span id="kpiTotalSiswa" class="text-2xl md:text-3xl font-bold text-slate-800">0</span>
+                        <span class="text-xs text-slate-500 font-normal">Orang</span>
                     </div>
-                    <div class="flex gap-2 justify-end pt-2 text-xs md:text-sm">
-                        <button onclick="tutupModalEdit()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium rounded-lg cursor-pointer">Batal</button>
-                        <button id="btnSimpanEditSiswa" onclick="simpanPerubahanSiswaCloud()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg cursor-pointer flex items-center gap-1.5">
-                            <span id="textSimpanEditSiswa">Simpan Data</span>
-                        </button>
+                    <div class="text-2xs text-emerald-600 mt-2 font-medium">📋 Terdaftar Aktif</div>
+                </div>
+                <!-- KPI 2 -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-2xs flex flex-col justify-between">
+                    <span class="text-slate-400 font-medium text-2xs md:text-xs uppercase tracking-wider">Total Kelas</span>
+                    <div class="flex items-baseline gap-2 mt-2">
+                        <span id="kpiTotalKelas" class="text-2xl md:text-3xl font-bold text-slate-800">0</span>
+                        <span class="text-xs text-slate-500 font-normal">Kelompok</span>
                     </div>
+                    <div class="text-2xs text-blue-600 mt-2 font-medium">🏢 Kelompok Diskusi</div>
+                </div>
+                <!-- KPI 3 -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-2xs flex flex-col justify-between">
+                    <span class="text-slate-400 font-medium text-2xs md:text-xs uppercase tracking-wider">Rata-rata Hadir</span>
+                    <div class="flex items-baseline gap-2 mt-2">
+                        <span id="kpiAvgHadir" class="text-2xl md:text-3xl font-bold text-blue-600">0%</span>
+                    </div>
+                    <div class="text-2xs text-slate-500 mt-2 font-medium">📈 Dari seluruh riwayat sesi</div>
+                </div>
+                <!-- KPI 4 -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-2xs flex flex-col justify-between">
+                    <span class="text-slate-400 font-medium text-2xs md:text-xs uppercase tracking-wider">Total Log Sesi</span>
+                    <div class="flex items-baseline gap-2 mt-2">
+                        <span id="kpiTotalLog" class="text-2xl md:text-3xl font-bold text-slate-800">0</span>
+                        <span class="text-xs text-slate-500 font-normal">Data</span>
+                    </div>
+                    <div class="text-2xs text-amber-600 mt-2 font-medium">⏱️ Total Entri Absensi</div>
                 </div>
             </div>
 
             <!-- Grafik Tren -->
             <div class="bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-200">
-                <h2 class="text-md md:text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2"><span>📈</span> Grafik Tren Kehadiran</h2>
+                <h2 class="text-md md:text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><span>📈</span> Grafik Tren Kehadiran Umum</h2>
                 <div class="h-[220px] md:h-[260px] w-full">
                     <canvas id="trendChart"></canvas>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+                <!-- Rasio Per Kelas -->
                 <div class="lg:col-span-1 bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-200">
-                    <h2 class="text-md md:text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2"><span>🏢</span> Rasio Per Kelas</h2>
+                    <h2 class="text-md md:text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><span>🏢</span> Kehadiran Per Kelas</h2>
                     <div id="classSummaryContainer" class="space-y-3"></div>
                 </div>
 
                 <!-- Database Master Siswa -->
                 <div class="lg:col-span-2 bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-200">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-                        <h2 class="text-md md:text-lg font-semibold text-slate-800 flex items-center gap-2"><span>👥</span> Database Master Anggota</h2>
-                        <input type="text" id="searchSiswa" oninput="filterTabelSiswa()" placeholder="Cari nama..." class="p-2 text-xs border border-slate-300 rounded-lg w-full sm:w-44">
+                        <h2 class="text-md md:text-lg font-bold text-slate-800 flex items-center gap-2"><span>👥</span> Database Master Anggota</h2>
+                        <input type="text" id="searchSiswa" oninput="filterTabelSiswa()" placeholder="Cari nama anggota..." class="p-2.5 text-xs border border-slate-300 rounded-xl w-full sm:w-48 focus:outline-blue-600 bg-white">
                     </div>
-                    <div class="overflow-x-auto border border-slate-100 rounded-xl max-h-[380px]">
+                    <div class="overflow-x-auto border border-slate-100 rounded-2xl max-h-[380px]">
                         <table class="w-full text-left border-collapse text-xs md:text-sm">
                             <thead>
                                 <tr class="bg-slate-50 border-b border-slate-200 text-2xs md:text-xs font-semibold text-slate-500 uppercase tracking-wider">
@@ -179,14 +192,39 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Form Pop-up Edit Siswa -->
+            <div id="modalEditSiswa" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 animate-fade-in">
+                <div class="bg-white p-5 md:p-6 rounded-2xl max-w-sm w-full shadow-xl border border-slate-200 space-y-4">
+                    <h3 class="text-base font-bold text-slate-800 flex items-center gap-2"><span>✏️</span> Edit Data Master Siswa</h3>
+                    <div class="space-y-3 text-xs md:text-sm">
+                        <div>
+                            <label class="block text-slate-500 mb-1">ID Siswa (Permanen):</label>
+                            <input type="text" id="editSiswaId" disabled class="w-full p-2.5 bg-slate-100 border border-slate-200 rounded-xl font-mono text-slate-500">
+                        </div>
+                        <div>
+                            <label class="block text-slate-700 font-medium mb-1">Nama Lengkap Baru:</label>
+                            <input type="text" id="editSiswaNama" class="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-blue-600">
+                        </div>
+                        <div>
+                            <label class="block text-slate-700 font-medium mb-1">Pindah Ke Kelas:</label>
+                            <select id="editSiswaKelasSelect" class="w-full p-2.5 border border-slate-300 rounded-xl bg-white"></select>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 justify-end pt-2 text-xs md:text-sm">
+                        <button onclick="tutupModalEdit()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-xl cursor-pointer transition-colors">Batal</button>
+                        <button id="btnSimpanEditSiswa" onclick="simpanPerubahanSiswaCloud()" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl cursor-pointer flex items-center gap-1.5 transition-colors shadow-xs">
+                            <span id="textSimpanEditSiswa">Simpan Perubahan</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
     <!-- LOGIKA UTAMA JAVASCRIPT -->
     <script>
-        // =========================================================================
-        // 🛠️ MASUKKAN LINK URL GOOGLE APPS SCRIPT ANDA DI BAWAH INI
-        // =========================================================================
         const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwm5gD9O6uZE2xu--hyhiIedNuULqwElRSbgq8vXVN8jNILGP_885aJJlGadA1AE1FNDQ/exec";
 
         let appData = { classes: [] };
@@ -205,7 +243,6 @@
         const attendanceDateInput = document.getElementById('attendanceDateInput');
         const memberClassSelect = document.getElementById('memberClassSelect');
 
-        // Mengatur tanggal hari ini secara default
         if(!attendanceDateInput.value) { attendanceDateInput.value = new Date().toISOString().split('T')[0]; }
         scriptUrlInput.value = APP_SCRIPT_URL;
 
@@ -218,14 +255,14 @@
             const filterTgl = document.getElementById('filterTanggalArea');
 
             if(targetMenu === 'menu-absen') {
-                btnA.className = "flex-1 md:flex-none text-center px-3 py-2 text-xs md:text-sm font-medium rounded-lg cursor-pointer bg-white text-slate-800 shadow-xs";
-                btnR.className = "flex-1 md:flex-none text-center px-3 py-2 text-xs md:text-sm font-medium rounded-lg cursor-pointer text-slate-600 hover:text-slate-900";
+                btnA.className = "flex-1 md:flex-none text-center px-4 py-2.5 text-xs md:text-sm font-semibold rounded-xl cursor-pointer bg-white text-blue-600 shadow-xs";
+                btnR.className = "flex-1 md:flex-none text-center px-4 py-2.5 text-xs md:text-sm font-semibold rounded-xl cursor-pointer text-slate-600 hover:text-slate-900";
                 panelA.classList.remove('hidden'); panelR.classList.add('hidden');
                 filterTgl.classList.remove('hidden');
                 muatDataDariSheets();
             } else {
-                btnR.className = "flex-1 md:flex-none text-center px-3 py-2 text-xs md:text-sm font-medium rounded-lg cursor-pointer bg-white text-slate-800 shadow-xs";
-                btnA.className = "flex-1 md:flex-none text-center px-3 py-2 text-xs md:text-sm font-medium rounded-lg cursor-pointer text-slate-600 hover:text-slate-900";
+                btnR.className = "flex-1 md:flex-none text-center px-4 py-2.5 text-xs md:text-sm font-semibold rounded-xl cursor-pointer bg-white text-blue-600 shadow-xs";
+                btnA.className = "flex-1 md:flex-none text-center px-4 py-2.5 text-xs md:text-sm font-semibold rounded-xl cursor-pointer text-slate-600 hover:text-slate-900";
                 panelR.classList.remove('hidden'); panelA.classList.add('hidden');
                 filterTgl.classList.add('hidden');
                 muatDataRekapTotal();
@@ -239,7 +276,6 @@
 
         function muatDataDariSheets() {
             const urlApi = APP_SCRIPT_URL; 
-            if(!urlApi || urlApi.includes("ISI_LINK_WEB_APP")) { alert("Silakan tempel URL Apps Script Anda di dalam kode terlebih dahulu!"); return; }
             const tglTerpilih = attendanceDateInput.value;
             classTabs.innerHTML = '<p class="text-xs text-blue-600 italic animate-pulse">⏳ Membaca Sesi Absensi...</p>';
             
@@ -270,7 +306,7 @@
             classTabs.innerHTML = '';
             appData.classes.forEach(c => {
                 const btn = document.createElement('button');
-                btn.className = `px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-medium rounded-lg cursor-pointer transition-all ${currentClassId == c.id ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
+                btn.className = `px-3.5 py-2 text-xs md:text-sm font-semibold rounded-xl cursor-pointer transition-all ${currentClassId == c.id ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
                 btn.textContent = c.name; btn.onclick = () => { currentClassId = c.id; refreshTampilanAbsen(); };
                 classTabs.appendChild(btn);
             });
@@ -296,31 +332,32 @@
             activeClass.members.forEach(m => {
                 let statusSudahAbsen = (m.absenHariIni && m.absenHariIni.tanggal === attendanceDateInput.value);
                 
-                // DESKTOP TABLE
-                const tr = document.createElement('tr');
+                // DESKTOP TABLE ACTION
                 let htmlAksiPc = '';
                 if (statusSudahAbsen) {
-                    const bgB = m.absenHariIni.status === 'Hadir' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-rose-100 text-rose-800 border-rose-200';
-                    htmlAksiPc = `<span class="font-semibold text-xs px-3 py-1.5 rounded-md border ${bgB}">✅ ${m.absenHariIni.status}</span>
-                                 <button onclick="bukaEditStatus('${m.id}')" class="text-blue-600 text-xs ml-2 hover:underline cursor-pointer">Ubah</button>`;
+                    const colorPc = m.absenHariIni.status === 'Hadir' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200';
+                    htmlAksiPc = `<span class="font-bold text-xs px-3 py-2 rounded-xl border ${colorPc}">Status: ${m.absenHariIni.status}</span>
+                                 <button onclick="bukaEditStatus('${m.id}')" class="bg-slate-100 hover:bg-slate-200 text-blue-600 font-semibold text-xs px-3 py-2 rounded-xl border border-slate-200 ml-2 cursor-pointer transition-colors">Ubah</button>`;
                 } else {
-                    htmlAksiPc = `<button onclick="kirimKeLogAbsen('${m.id}', '${m.name}', 'Hadir', this)" class="bg-emerald-50 text-emerald-700 text-xs px-2.5 py-1.5 rounded border border-emerald-200 mr-1 cursor-pointer hover:bg-emerald-100">✅ Hadir</button>
-                                 <button onclick="kirimKeLogAbsen('${m.id}', '${m.name}', 'Tidak Hadir', this)" class="bg-rose-50 text-rose-700 text-xs px-2.5 py-1.5 rounded border border-rose-200 cursor-pointer hover:bg-rose-100">❌ Absen</button>`;
+                    htmlAksiPc = `<button onclick="kirimKeLogAbsen('${m.id}', '${m.name}', 'Hadir', this)" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-2 rounded-xl mr-1 cursor-pointer transition-colors shadow-2xs">✅ Hadir</button>
+                                 <button onclick="kirimKeLogAbsen('${m.id}', '${m.name}', 'Tidak Hadir', this)" class="bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold px-3 py-2 rounded-xl border border-rose-200 cursor-pointer transition-colors">❌ Absen</button>`;
                 }
-                tr.innerHTML = `<td class="p-3 font-mono text-xs text-slate-400">${m.id}</td>
-                                <td class="p-3 font-medium text-slate-700">${m.name}</td>
-                                <td class="p-3 text-right flex items-center justify-end gap-3"><div>${htmlAksiPc}</div>
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td class="p-4 font-mono text-xs text-slate-400">${m.id}</td>
+                                <td class="p-4 font-semibold text-slate-700">${m.name}</td>
+                                <td class="p-4 text-right flex items-center justify-end gap-3"><div>${htmlAksiPc}</div>
                                 <button onclick="hapusLogAbsenHariIniCloud('${m.id}', '${m.name}', this)" class="text-slate-300 hover:text-rose-600 text-xs pl-2 border-l border-slate-200 cursor-pointer" title="Hapus log absen hari ini">🗑️</button></td>`;
                 memberTableBody.appendChild(tr);
 
-                // MOBILE CARDS
-                const card = document.createElement('div');
-                card.className = "p-4 bg-white rounded-xl border border-slate-200 shadow-xs flex flex-col gap-3";
+                // MOBILE CARDS DENGAN LOGIKA WARNA DINAMIS
                 let colorMobile = m.absenHariIni && m.absenHariIni.status === 'Hadir' ? 'bg-emerald-600' : 'bg-rose-600';
                 let htmlAksiMobile = statusSudahAbsen ? 
-                    `<div class="flex items-center justify-between w-full"><span class="font-bold text-xs px-4 py-2 rounded-lg text-center flex-1 ${colorMobile} text-white">Status: ${m.absenHariIni.status}</span><button onclick="bukaEditStatus('${m.id}')" class="bg-slate-100 text-blue-600 text-xs font-semibold px-3 py-2 rounded-lg ml-2 border border-slate-200 cursor-pointer">Ubah</button></div>` :
-                    `<div class="grid grid-cols-2 gap-2 w-full"><button onclick="kirimKeLogAbsen('${m.id}', '${m.name}', 'Hadir', this)" class="bg-emerald-600 text-white text-xs font-semibold py-2.5 rounded-lg cursor-pointer">✅ Hadir</button><button onclick="kirimKeLogAbsen('${m.id}', '${m.name}', 'Tidak Hadir', this)" class="bg-rose-600 text-white text-xs font-semibold py-2.5 rounded-lg cursor-pointer">❌ Absen</button></div>`;
-                
+                    `<div class="flex items-center justify-between w-full"><span class="font-bold text-xs px-4 py-2.5 rounded-xl text-center flex-1 ${colorMobile} text-white">Status: ${m.absenHariIni.status}</span><button onclick="bukaEditStatus('${m.id}')" class="bg-slate-100 text-blue-600 text-xs font-semibold px-4 py-2.5 rounded-xl ml-2 border border-slate-200 cursor-pointer transition-colors">Ubah</button></div>` :
+                    `<div class="grid grid-cols-2 gap-2 w-full"><button onclick="kirimKeLogAbsen('${m.id}', '${m.name}', 'Hadir', this)" class="bg-blue-600 text-white text-xs font-semibold py-2.5 rounded-xl cursor-pointer transition-colors shadow-2xs">✅ Hadir</button><button onclick="kirimKeLogAbsen('${m.id}', '${m.name}', 'Tidak Hadir', this)" class="bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold py-2.5 rounded-xl cursor-pointer transition-colors">❌ Absen</button></div>`;
+
+                const card = document.createElement('div');
+                card.className = "p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs flex flex-col gap-3";
                 card.innerHTML = `<div class="flex justify-between items-start"><div><h4 class="font-bold text-slate-800 text-sm">${m.name}</h4><p class="text-2xs font-mono text-slate-400 mt-0.5">ID: ${m.id}</p></div><button onclick="hapusLogAbsenHariIniCloud('${m.id}', '${m.name}', this)" class="text-slate-300 hover:text-rose-600 p-1 text-xs">🗑️</button></div><div class="flex w-full">${htmlAksiMobile}</div>`;
                 memberMobileCards.appendChild(card);
             });
@@ -378,14 +415,36 @@
 
         function kumpulkanStatistik(masterSiswa, logAbsensi) {
             let siswaMap = {};
+            let totalSiswa = 0;
+            
             for(let i = 1; i < masterSiswa.length; i++) {
                 let id = masterSiswa[i][0];
-                if(id) siswaMap[id] = { name: masterSiswa[i][1], kelas: masterSiswa[i][2], hadir: 0, total: 0 };
+                if(id) {
+                    siswaMap[id] = { name: masterSiswa[i][1], kelas: masterSiswa[i][2], hadir: 0, total: 0 };
+                    totalSiswa++;
+                }
             }
+
+            let totalLogData = 0;
+            let totalKehadiranHadir = 0;
             for(let j = 1; j < logAbsensi.length; j++) {
                 let id = logAbsensi[j][0];
-                if(siswaMap[id]) { siswaMap[id].total += 1; if(logAbsensi[j][5] === "Hadir") siswaMap[id].hadir += 1; }
+                if(siswaMap[id]) { 
+                    siswaMap[id].total += 1; 
+                    totalLogData++;
+                    if(logAbsensi[j][5] === "Hadir") {
+                        siswaMap[id].hadir += 1; 
+                        totalKehadiranHadir++;
+                    }
+                }
             }
+
+            document.getElementById('kpiTotalSiswa').textContent = totalSiswa;
+            document.getElementById('kpiTotalKelas').textContent = dataKelasGlobal.length;
+            document.getElementById('kpiTotalLog').textContent = totalLogData;
+            
+            let avgHadirPersen = totalLogData > 0 ? Math.round((totalKehadiranHadir / totalLogData) * 100) : 0;
+            document.getElementById('kpiAvgHadir').textContent = `${avgHadirPersen}%`;
 
             const tbody = document.getElementById('siswaTableBody'); tbody.innerHTML = '';
             let kelasStat = {};
@@ -396,14 +455,14 @@
                 kelasStat[s.kelas].hadir += s.hadir; kelasStat[s.kelas].total += s.total;
 
                 tbody.innerHTML += `<tr class="hover:bg-slate-50">
-                    <td class="p-3 font-medium">${s.name}</td>
-                    <td class="p-3 text-2xs"><span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded">${s.kelas}</span></td>
+                    <td class="p-3 font-semibold text-slate-700">${s.name}</td>
+                    <td class="p-3 text-2xs"><span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md font-medium">${s.kelas}</span></td>
                     <td class="p-3 text-center text-emerald-600 font-bold">${s.hadir}</td>
                     <td class="p-3 text-center text-rose-500">${s.total - s.hadir}</td>
                     <td class="p-3 text-center font-mono font-bold ${persen >= 80 ? 'text-emerald-600' : 'text-amber-500'}">${persen}%</td>
                     <td class="p-3 text-right space-x-1 whitespace-nowrap">
-                        <button onclick="bukaModalEdit('${id}', '${s.name}', '${s.kelas}')" class="bg-blue-50 hover:bg-blue-100 text-blue-600 text-2xs font-semibold px-2 py-1 rounded border border-blue-200 cursor-pointer">✏️ Edit</button>
-                        <button onclick="hapusSiswaDariMasterCloud('${id}', '${s.name}', this)" class="bg-rose-50 hover:bg-rose-100 text-rose-600 text-2xs font-semibold px-2 py-1 rounded border border-rose-200 cursor-pointer">💥 Hapus</button>
+                        <button onclick="bukaModalEdit('${id}', '${s.name}', '${s.kelas}')" class="bg-slate-100 hover:bg-slate-200 text-blue-600 text-2xs font-bold px-2.5 py-1.5 rounded-xl border border-slate-200 cursor-pointer transition-colors">✏️ Edit</button>
+                        <button onclick="hapusSiswaDariMasterCloud('${id}', '${s.name}', this)" class="bg-rose-50 hover:bg-rose-100 text-rose-600 text-2xs font-bold px-2.5 py-1.5 rounded-xl border border-rose-200 cursor-pointer transition-colors">💥 Hapus</button>
                     </td>
                 </tr>`;
             });
@@ -411,7 +470,7 @@
             const containerK = document.getElementById('classSummaryContainer'); containerK.innerHTML = '';
             Object.keys(kelasStat).forEach(nk => {
                 let k = kelasStat[nk]; let pk = k.total > 0 ? Math.round((k.hadir / k.total) * 100) : 0;
-                containerK.innerHTML += `<div class="p-3 bg-slate-50 rounded-xl border border-slate-200"><div class="flex justify-between items-center mb-1 text-2xs"><span class="font-bold text-slate-700">${nk}</span><span class="font-bold">${pk}%</span></div><div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden"><div class="h-1.5 rounded-full ${pk >= 80 ? 'bg-emerald-500' : 'bg-amber-500'}" style="width: ${pk}%"></div></div></div>`;
+                containerK.innerHTML += `<div class="p-3 bg-slate-50 rounded-xl border border-slate-200"><div class="flex justify-between items-center mb-1 text-2xs"><span class="font-bold text-slate-700">${nk}</span><span class="font-bold text-slate-800">${pk}%</span></div><div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden"><div class="h-1.5 rounded-full ${pk >= 80 ? 'bg-emerald-500' : 'bg-amber-500'}" style="width: ${pk}%"></div></div></div>`;
             });
 
             let trenMap = {};
@@ -465,13 +524,13 @@
             })
             .then(res => res.json())
             .then(data => {
-                btn.disabled = false; btn.classList.remove('opacity-50'); txt.innerHTML = "Simpan Data";
+                btn.disabled = false; btn.classList.remove('opacity-50'); txt.innerHTML = "Simpan Perubahan";
                 if(data.status === "success") {
                     tutupModalEdit();
                     muatDataRekapTotal();
                 } else { alert("Gagal memperbarui: " + data.message); }
             }).catch(() => {
-                btn.disabled = false; btn.classList.remove('opacity-50'); txt.innerHTML = "Simpan Data";
+                btn.disabled = false; btn.classList.remove('opacity-50'); txt.innerHTML = "Simpan Perubahan";
                 alert("Koneksi cloud bermasalah!");
             });
         }
@@ -489,11 +548,11 @@
                 body: JSON.stringify({ aksi: "tambah_kelas_master", nama_kelas: inputVal }) 
             })
             .then(() => { 
-                btn.disabled = false; btn.classList.remove('opacity-50'); txt.innerHTML = "Simpan Kelas";
+                btn.disabled = false; btn.classList.remove('opacity-50'); txt.innerHTML = "Simpan Kelas Baru";
                 document.getElementById('className').value = ''; 
                 muatDataDariSheets(); 
             }).catch(() => {
-                btn.disabled = false; btn.classList.remove('opacity-50'); txt.innerHTML = "Simpan Kelas";
+                btn.disabled = false; btn.classList.remove('opacity-50'); txt.innerHTML = "Simpan Kelas Baru";
             });
         });
 
@@ -515,12 +574,12 @@
                 }) 
             })
             .then(() => { 
-                btn.disabled = false; btn.classList.remove('opacity-50'); txt.innerHTML = "Simpan Siswa";
+                btn.disabled = false; btn.classList.remove('opacity-50'); txt.innerHTML = "Simpan Siswa Baru";
                 document.getElementById('memberId').value = ''; 
                 document.getElementById('memberName').value = ''; 
                 muatDataDariSheets(); 
             }).catch(() => {
-                btn.disabled = false; btn.classList.remove('opacity-50'); txt.innerHTML = "Simpan Siswa";
+                btn.disabled = false; btn.classList.remove('opacity-50'); txt.innerHTML = "Simpan Siswa Baru";
             });
         });
 
