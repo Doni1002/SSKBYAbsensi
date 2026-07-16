@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         .spinner {
             border: 2px solid transparent;
@@ -30,7 +30,6 @@
                     <h1 class="text-xl md:text-2xl font-bold text-slate-800 flex items-center gap-2">
                         <span>⛪</span> Sistem Absensi UKSS GMAHK Kebayoran
                     </h1>
-                    <!-- MODIFIKASI TEKS SUB-HEADER -->
                     <p class="text-slate-500 text-xs md:text-sm mt-1">Sistem Terpadu Manajemen Database Kelas, Siswa, dan Pencatatan Absensi Anggota Sekolah Sabat.</p>
                 </div>
                 
@@ -77,10 +76,10 @@
                         <!-- Select Kelas memicu auto-fill ID saat diganti -->
                         <select id="memberClassSelect" required onchange="generateOtomatisIdSiswa()" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs md:text-sm bg-white"></select>
                         
-                        <!-- Input ID dibuat readonly/disabled tipis agar rapi, tapi tetap dikirim -->
+                        <!-- Input ID dibuat readonly, user tidak perlu mengetik manual -->
                         <div class="relative">
-                            <input type="text" id="memberId" required placeholder="ID / Nomor Anggota Unik (Otomatis)" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs md:text-sm bg-slate-50 font-mono text-slate-700 focus:outline-blue-600">
-                            <span class="absolute right-3 top-3 text-2xs text-slate-400 font-bold">OTOMATIS</span>
+                            <input type="text" id="memberId" readonly placeholder="Pilih kelas untuk generate ID" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs md:text-sm bg-slate-100 font-mono text-slate-800 focus:outline-none cursor-not-allowed">
+                            <span class="absolute right-3 top-3.5 text-[9px] text-blue-600 font-bold bg-blue-50 px-1.5 py-0.5 rounded-sm border border-blue-200">SISTEM</span>
                         </div>
                         
                         <input type="text" id="memberName" required placeholder="Nama Lengkap Anggota" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs md:text-sm focus:outline-blue-600">
@@ -127,7 +126,6 @@
 
         <!-- ======================= PANEL 2: MENU REKAP & DASHBOARD KPI ======================= -->
         <div id="panel-rekap" class="hidden space-y-6">
-            
             <!-- SEKSI DASHBOARD KPI UTAMA -->
             <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
                 <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-2xs flex flex-col justify-between">
@@ -307,7 +305,7 @@
     <!-- LOGIKA UTAMA JAVASCRIPT -->
     <script>
         // ==========================================
-        // MASUKKAN LINK WEB APP GOOGLE APPS SCRIPT ANDA DI SINI
+        // LINK WEB APP GOOGLE APPS SCRIPT ANDA
         // ==========================================
         const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwm5gD9O6uZE2xu--hyhiIedNuULqwElRSbgq8vXVN8jNILGP_885aJJlGadA1AE1FNDQ/exec";
 
@@ -386,10 +384,15 @@
                 memberClassSelect.appendChild(opt);
             });
 
+            if (appData.classes.length > 0) {
+                memberClassSelect.selectedIndex = 1; 
+            }
+
             if(appData.classes.length === 0) {
                 classTabs.innerHTML = '<p class="text-slate-400 text-xs italic">Belum ada kelas terdaftar.</p>';
                 attendanceArea.classList.add('hidden'); return;
             }
+            
             classTabs.innerHTML = '';
             appData.classes.forEach(c => {
                 const btn = document.createElement('button');
@@ -399,56 +402,55 @@
             });
 
             renderTableSiswaAbsen();
-            generateOtomatisIdSiswa(); // Panggil generator ID setelah kelas dimuat
+            generateOtomatisIdSiswa(); 
         }
 
         // =========================================================================
-        // LOGIKA PENOMORAN ID SECARA OTOMATIS BERDASARKAN KELAS YANG DIPILIH
+        // LOGIKA PENOMORAN ID OTOMATIS BERDASARKAN DATABASE KELAS RIIL
         // =========================================================================
         function generateOtomatisIdSiswa() {
             const selectKelas = document.getElementById('memberClassSelect');
             const inputId = document.getElementById('memberId');
             
-            if (!selectKelas.value) {
+            if (!selectKelas || !selectKelas.value) {
                 inputId.value = '';
                 return;
             }
             
-            // Ambil Nama Kelas Terpilih
-            const namaKelas = selectKelas.options[selectKelas.selectedIndex].text;
-            
-            // Format inisial kelas (Ambil huruf pertama dari setiap kata, contoh: "Pemimpin A" -> "PA")
-            let inisial = namaKelas.split(' ')
-                                   .map(kata => kata.charAt(0))
-                                   .join('')
-                                   .toUpperCase()
-                                   .replace(/[^A-Z0-9]/g, ''); // bersihkan simbol jika ada
-            
-            if (inisial.length < 2) inisial = namaKelas.substring(0, 3).toUpperCase();
-
-            // Cari ID terbesar dari anggota kelas yang terpilih saat ini
             const kelasTerpilih = appData.classes.find(c => c.id == selectKelas.value);
-            let nomorUrutTerakhir = 0;
-
-            if (kelasTerpilih && kelasTerpilih.members.length > 0) {
-                kelasTerpilih.members.forEach(m => {
-                    // Cari pola angka di belakang ID (contoh ID: PA-01 atau PA-2)
-                    const matches = m.id.match(/\d+$/);
-                    if (matches) {
-                        const nomor = parseInt(matches[0], 10);
-                        if (nomor > nomorUrutTerakhir) {
-                            nomorUrutTerakhir = nomor;
-                        }
-                    }
-                });
+            
+            if (!kelasTerpilih || !kelasTerpilih.members || kelasTerpilih.members.length === 0) {
+                inputId.value = ""; 
+                inputId.placeholder = "ID pertama kelas (Contoh format database Anda)";
+                inputId.readOnly = false; 
+                inputId.classList.remove('bg-slate-100', 'cursor-not-allowed');
+                return;
             }
 
-            // Tentukan nomor berikutnya dan format menjadi 2 digit (misal: 01, 02, ... atau 10, 11)
-            const nomorBaru = nomorUrutTerakhir + 1;
-            const nomorFormatted = nomorBaru.toString().padStart(2, '0');
-            
-            // Set ke kolom input ID siswa
-            inputId.value = `${inisial}-${nomorFormatted}`;
+            const siswaTerakhir = kelasTerpilih.members[kelasTerpilih.members.length - 1];
+            const idTerakhirDb = siswaTerakhir.id.toString().trim();
+
+            // Memisahkan karakter depan dengan digit angka akhir secara non-greedy
+            const match = idTerakhirDb.match(/^(.*?)(\d+)$/);
+
+            if (match) {
+                const awalan = match[1]; 
+                const stringAngka = match[2]; 
+                
+                const nomorBaru = parseInt(stringAngka, 10) + 1; 
+                const nomorBaruFormatted = nomorBaru.toString().padStart(stringAngka.length, '0');
+                
+                inputId.value = `${awalan}${nomorBaruFormatted}`;
+                inputId.readOnly = true; 
+                if (!inputId.classList.contains('bg-slate-100')) {
+                    inputId.classList.add('bg-slate-100', 'cursor-not-allowed');
+                }
+            } else {
+                inputId.value = "";
+                inputId.placeholder = "Ketik ID manual (pola ID di DB tidak dikenali)";
+                inputId.readOnly = false;
+                inputId.classList.remove('bg-slate-100', 'cursor-not-allowed');
+            }
         }
 
         function renderTableSiswaAbsen() {
