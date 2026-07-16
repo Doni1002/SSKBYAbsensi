@@ -30,7 +30,8 @@
                     <h1 class="text-xl md:text-2xl font-bold text-slate-800 flex items-center gap-2">
                         <span>⛪</span> Sistem Absensi UKSS GMAHK Kebayoran
                     </h1>
-                    <p class="text-slate-500 text-xs md:text-sm mt-1">Sistem Terpadu Manajemen Database Kelas, Siswa, dan Pencatatan Log Absensi Jamaah.</p>
+                    <!-- MODIFIKASI TEKS SUB-HEADER -->
+                    <p class="text-slate-500 text-xs md:text-sm mt-1">Sistem Terpadu Manajemen Database Kelas, Siswa, dan Pencatatan Absensi Anggota Sekolah Sabat.</p>
                 </div>
                 
                 <div class="bg-slate-100 p-1 rounded-xl flex gap-1 w-full md:w-auto">
@@ -73,8 +74,15 @@
                 <div class="bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-100">
                     <h2 class="text-md md:text-lg font-bold text-slate-800 mb-3 flex items-center gap-2"><span>👤</span> Tambah Master Siswa</h2>
                     <form id="memberForm" class="space-y-3" onsubmit="return false;">
-                        <select id="memberClassSelect" required class="w-full p-2.5 border border-slate-200 rounded-xl text-xs md:text-sm bg-white"></select>
-                        <input type="text" id="memberId" required placeholder="ID / Nomor Anggota Unik" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs md:text-sm focus:outline-blue-600">
+                        <!-- Select Kelas memicu auto-fill ID saat diganti -->
+                        <select id="memberClassSelect" required onchange="generateOtomatisIdSiswa()" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs md:text-sm bg-white"></select>
+                        
+                        <!-- Input ID dibuat readonly/disabled tipis agar rapi, tapi tetap dikirim -->
+                        <div class="relative">
+                            <input type="text" id="memberId" required placeholder="ID / Nomor Anggota Unik (Otomatis)" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs md:text-sm bg-slate-50 font-mono text-slate-700 focus:outline-blue-600">
+                            <span class="absolute right-3 top-3 text-2xs text-slate-400 font-bold">OTOMATIS</span>
+                        </div>
+                        
                         <input type="text" id="memberName" required placeholder="Nama Lengkap Anggota" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs md:text-sm focus:outline-blue-600">
                         <button type="submit" id="btnSubmitSiswa" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold p-2.5 rounded-xl text-xs md:text-sm cursor-pointer flex items-center justify-center gap-2 transition-colors">
                             <span id="textSubmitSiswa">Simpan Siswa Baru</span>
@@ -391,6 +399,56 @@
             });
 
             renderTableSiswaAbsen();
+            generateOtomatisIdSiswa(); // Panggil generator ID setelah kelas dimuat
+        }
+
+        // =========================================================================
+        // LOGIKA PENOMORAN ID SECARA OTOMATIS BERDASARKAN KELAS YANG DIPILIH
+        // =========================================================================
+        function generateOtomatisIdSiswa() {
+            const selectKelas = document.getElementById('memberClassSelect');
+            const inputId = document.getElementById('memberId');
+            
+            if (!selectKelas.value) {
+                inputId.value = '';
+                return;
+            }
+            
+            // Ambil Nama Kelas Terpilih
+            const namaKelas = selectKelas.options[selectKelas.selectedIndex].text;
+            
+            // Format inisial kelas (Ambil huruf pertama dari setiap kata, contoh: "Pemimpin A" -> "PA")
+            let inisial = namaKelas.split(' ')
+                                   .map(kata => kata.charAt(0))
+                                   .join('')
+                                   .toUpperCase()
+                                   .replace(/[^A-Z0-9]/g, ''); // bersihkan simbol jika ada
+            
+            if (inisial.length < 2) inisial = namaKelas.substring(0, 3).toUpperCase();
+
+            // Cari ID terbesar dari anggota kelas yang terpilih saat ini
+            const kelasTerpilih = appData.classes.find(c => c.id == selectKelas.value);
+            let nomorUrutTerakhir = 0;
+
+            if (kelasTerpilih && kelasTerpilih.members.length > 0) {
+                kelasTerpilih.members.forEach(m => {
+                    // Cari pola angka di belakang ID (contoh ID: PA-01 atau PA-2)
+                    const matches = m.id.match(/\d+$/);
+                    if (matches) {
+                        const nomor = parseInt(matches[0], 10);
+                        if (nomor > nomorUrutTerakhir) {
+                            nomorUrutTerakhir = nomor;
+                        }
+                    }
+                });
+            }
+
+            // Tentukan nomor berikutnya dan format menjadi 2 digit (misal: 01, 02, ... atau 10, 11)
+            const nomorBaru = nomorUrutTerakhir + 1;
+            const nomorFormatted = nomorBaru.toString().padStart(2, '0');
+            
+            // Set ke kolom input ID siswa
+            inputId.value = `${inisial}-${nomorFormatted}`;
         }
 
         function renderTableSiswaAbsen() {
