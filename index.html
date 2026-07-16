@@ -679,10 +679,11 @@
             let trenMap = {};
             for(let j = 1; j < logAbsensi.length; j++) {
                 let tgl = logAbsensi[j][4];
-                if (tgl instanceof Date) {
-                    tgl = Utilities.formatDate(tgl, "GMT+7", "yyyy-MM-dd");
-                }
                 if (tgl) {
+                    // Cek jika objek tanggal, format ke string YYYY-MM-DD
+                    if (tgl.indexOf && tgl.indexOf('T') !== -1) {
+                        tgl = tgl.split('T')[0];
+                    }
                     if(!trenMap[tgl]) trenMap[tgl] = { h: 0, t: 0 };
                     trenMap[tgl].t += 1; 
                     if(logAbsensi[j][5] === "Hadir") trenMap[tgl].h += 1;
