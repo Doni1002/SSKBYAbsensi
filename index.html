@@ -69,7 +69,7 @@
                     </form>
                 </div>
 
-                <!-- Master Anggota Baru (Kategori dipindah ke sini) -->
+                <!-- Master Anggota Baru -->
                 <div class="bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-100">
                     <h2 class="text-md md:text-lg font-bold text-slate-800 mb-3 flex items-center gap-2"><span>👤</span> Tambah Master Siswa</h2>
                     <form id="memberForm" class="space-y-3" onsubmit="return false;">
@@ -114,7 +114,7 @@
                             <button onclick="hapusKelasDariMasterCloud()" id="btnHapusKelas" class="text-2xs md:text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 px-3 py-2 rounded-xl border border-rose-200 cursor-pointer w-full sm:w-auto text-center font-medium transition-colors">🗑️ Hapus Kelas Master</button>
                         </div>
 
-                        <!-- Tampilan Tabel Desktop (Cepat: Hanya Hadir & Absen) -->
+                        <!-- Tampilan Tabel Desktop (Tombol Terpisah + Indikator Loading) -->
                         <div class="hidden md:block overflow-x-auto border border-slate-100 rounded-2xl">
                             <table class="w-full text-left border-collapse">
                                 <thead>
@@ -129,10 +129,10 @@
                             </table>
                         </div>
 
-                        <!-- Tampilan Mobile -->
+                        <!-- Tampilan Mobile (Tombol Terpisah + Indikator Loading) -->
                         <div id="memberMobileCards" class="block md:hidden space-y-3"></div>
 
-                        <!-- ================= INPUT KEGIATAN KELAS (DIPINDAH KE SINI) ================= -->
+                        <!-- INPUT KEGIATAN KELAS -->
                         <div class="bg-slate-50 p-4 md:p-6 rounded-2xl border border-slate-200 space-y-4">
                             <div>
                                 <h3 class="text-sm md:text-md font-bold text-slate-800 flex items-center gap-2">
@@ -464,6 +464,7 @@
                 let statusHadir = m.absenHariIni && m.absenHariIni.status === 'Hadir';
                 let statusTidakHadir = m.absenHariIni && m.absenHariIni.status === 'Tidak Hadir';
                 
+                // TABEL DESKTOP
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td class="p-4 font-mono text-xs text-slate-400">${m.id}</td>
@@ -474,17 +475,18 @@
                         </span>
                     </td>
                     <td class="p-4 text-center">
-                        <div class="inline-flex rounded-xl p-0.5 bg-slate-100 border border-slate-200">
-                            <button onclick="kirimAbsensiCepat('${m.id}', '${m.name}', 'Hadir')" class="px-4 py-1.5 text-xs font-bold rounded-lg cursor-pointer transition-all ${statusHadir ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'}">
-                                ✅ Hadir
+                        <div class="flex items-center justify-center gap-2">
+                            <button id="btn-hadir-${m.id}" onclick="kirimAbsensiCepat('${m.id}', '${m.name}', 'Hadir')" class="px-4 py-2 text-xs font-bold rounded-xl cursor-pointer border transition-all ${statusHadir ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' : 'bg-white hover:bg-emerald-50 text-emerald-600 border-emerald-200'}">
+                                <span id="label-hadir-${m.id}">✅ Hadir</span>
                             </button>
-                            <button onclick="kirimAbsensiCepat('${m.id}', '${m.name}', 'Tidak Hadir')" class="px-4 py-1.5 text-xs font-bold rounded-lg cursor-pointer transition-all ${statusTidakHadir ? 'bg-rose-600 text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'}">
-                                ❌ Absen
+                            <button id="btn-absen-${m.id}" onclick="kirimAbsensiCepat('${m.id}', '${m.name}', 'Tidak Hadir')" class="px-4 py-2 text-xs font-bold rounded-xl cursor-pointer border transition-all ${statusTidakHadir ? 'bg-rose-600 text-white border-rose-600 shadow-sm' : 'bg-white hover:bg-rose-50 text-rose-600 border-rose-200'}">
+                                <span id="label-absen-${m.id}">❌ Absen</span>
                             </button>
                         </div>
                     </td>`;
                 memberTableBody.appendChild(tr);
 
+                // MOBILE CARDS
                 const card = document.createElement('div');
                 card.className = "p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs flex flex-col gap-3";
                 card.innerHTML = `
@@ -497,12 +499,12 @@
                             </div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-2 bg-slate-50 p-1 rounded-xl border border-slate-150">
-                        <button onclick="kirimAbsensiCepat('${m.id}', '${m.name}', 'Hadir')" class="py-2 text-xs font-bold rounded-lg cursor-pointer transition-all ${statusHadir ? 'bg-emerald-600 text-white' : 'text-slate-500 bg-white border border-slate-200'}">
-                            ✅ Hadir
+                    <div class="grid grid-cols-2 gap-2 mt-1">
+                        <button id="m-btn-hadir-${m.id}" onclick="kirimAbsensiCepat('${m.id}', '${m.name}', 'Hadir')" class="py-2.5 text-xs font-bold rounded-xl cursor-pointer border transition-all ${statusHadir ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs' : 'bg-white hover:bg-emerald-50 text-emerald-600 border-emerald-200'}">
+                            <span id="m-label-hadir-${m.id}">✅ Hadir</span>
                         </button>
-                        <button onclick="kirimAbsensiCepat('${m.id}', '${m.name}', 'Tidak Hadir')" class="py-2 text-xs font-bold rounded-lg cursor-pointer transition-all ${statusTidakHadir ? 'bg-rose-600 text-white' : 'text-slate-500 bg-white border border-slate-200'}">
-                            ❌ Absen
+                        <button id="m-btn-absen-${m.id}" onclick="kirimAbsensiCepat('${m.id}', '${m.name}', 'Tidak Hadir')" class="py-2.5 text-xs font-bold rounded-xl cursor-pointer border transition-all ${statusTidakHadir ? 'bg-rose-600 text-white border-rose-600 shadow-xs' : 'bg-white hover:bg-rose-50 text-rose-600 border-rose-200'}">
+                            <span id="m-label-absen-${m.id}">❌ Absen</span>
                         </button>
                     </div>`;
                 memberMobileCards.appendChild(card);
@@ -511,6 +513,43 @@
 
         function kirimAbsensiCepat(idUser, nama, status) {
             const tglSesi = attendanceDateInput.value;
+            
+            // Definisikan tombol aktif & pasangannya (Desktop & Mobile)
+            const btnHadir = document.getElementById(`btn-hadir-${idUser}`);
+            const btnAbsen = document.getElementById(`btn-absen-${idUser}`);
+            const lblHadir = document.getElementById(`label-hadir-${idUser}`);
+            const lblAbsen = document.getElementById(`label-absen-${idUser}`);
+
+            const mBtnHadir = document.getElementById(`m-btn-hadir-${idUser}`);
+            const mBtnAbsen = document.getElementById(`m-btn-absen-${idUser}`);
+            const mLblHadir = document.getElementById(`m-label-hadir-${idUser}`);
+            const mLblAbsen = document.getElementById(`m-label-absen-${idUser}`);
+
+            // Ubah keadaan tombol ke mode LOADING
+            if(status === 'Hadir') {
+                if(btnHadir) {
+                    btnHadir.disabled = true;
+                    lblHadir.innerHTML = `<span class="spinner mr-1"></span> Mengirim...`;
+                }
+                if(btnAbsen) btnAbsen.disabled = true;
+                if(mBtnHadir) {
+                    mBtnHadir.disabled = true;
+                    mLblHadir.innerHTML = `<span class="spinner mr-1"></span> Mengirim...`;
+                }
+                if(mBtnAbsen) mBtnAbsen.disabled = true;
+            } else {
+                if(btnAbsen) {
+                    btnAbsen.disabled = true;
+                    lblAbsen.innerHTML = `<span class="spinner mr-1"></span> Mengirim...`;
+                }
+                if(btnHadir) btnHadir.disabled = true;
+                if(mBtnAbsen) {
+                    mBtnAbsen.disabled = true;
+                    mLblAbsen.innerHTML = `<span class="spinner mr-1"></span> Mengirim...`;
+                }
+                if(mBtnHadir) mBtnHadir.disabled = true;
+            }
+
             const payload = {
                 aksi: "absen",
                 id_user: idUser,
@@ -527,8 +566,14 @@
             .then(data => {
                 if(data.status === "success") {
                     muatDataDariSheets();
-                } else { alert("Gagal absen: " + data.message); }
-            }).catch(() => alert("Koneksi cloud bermasalah!"));
+                } else { 
+                    alert("Gagal absen: " + data.message); 
+                    muatDataDariSheets(); // Reset state tampilan tombol
+                }
+            }).catch(() => {
+                alert("Koneksi cloud bermasalah!");
+                muatDataDariSheets(); // Reset state tampilan tombol
+            });
         }
 
         function simpanKegiatanKelasHarian() {
