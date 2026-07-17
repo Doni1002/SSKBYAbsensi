@@ -75,7 +75,6 @@
                     <form id="memberForm" class="space-y-3" onsubmit="return false;">
                         <select id="memberClassSelect" required onchange="generateOtomatisIdSiswa()" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs md:text-sm bg-white"></select>
                         
-                        <!-- Penomoran ID Otomatis -->
                         <div class="relative">
                             <input type="text" id="memberId" readonly placeholder="Pilih kelas untuk generate ID" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs md:text-sm bg-slate-100 font-mono text-slate-800 focus:outline-none cursor-not-allowed">
                             <span class="absolute right-3 top-3.5 text-[9px] text-blue-600 font-bold bg-blue-50 px-1.5 py-0.5 rounded-sm border border-blue-200">SISTEM</span>
@@ -83,7 +82,6 @@
                         
                         <input type="text" id="memberName" required placeholder="Nama Lengkap Anggota" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs md:text-sm focus:outline-blue-600">
                         
-                        <!-- Dropdown Kategori Anggota Baru -->
                         <div>
                             <label class="block text-2xs font-semibold text-slate-500 mb-1">Pilih Kategori Keanggotaan:</label>
                             <select id="memberCategory" required class="w-full p-2.5 border border-slate-200 rounded-xl text-xs md:text-sm bg-white">
@@ -114,7 +112,7 @@
                             <button onclick="hapusKelasDariMasterCloud()" id="btnHapusKelas" class="text-2xs md:text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 px-3 py-2 rounded-xl border border-rose-200 cursor-pointer w-full sm:w-auto text-center font-medium transition-colors">🗑️ Hapus Kelas Master</button>
                         </div>
 
-                        <!-- Tampilan Tabel Desktop (Tombol Terpisah + Indikator Loading) -->
+                        <!-- Tampilan Tabel Desktop (Tombol Terpisah, Status Indikator & Tombol Hapus Log) -->
                         <div class="hidden md:block overflow-x-auto border border-slate-100 rounded-2xl">
                             <table class="w-full text-left border-collapse">
                                 <thead>
@@ -129,7 +127,7 @@
                             </table>
                         </div>
 
-                        <!-- Tampilan Mobile (Tombol Terpisah + Indikator Loading) -->
+                        <!-- Tampilan Mobile -->
                         <div id="memberMobileCards" class="block md:hidden space-y-3"></div>
 
                         <!-- INPUT KEGIATAN KELAS -->
@@ -171,7 +169,6 @@
 
         <!-- ======================= PANEL 2: MENU REKAP & DASHBOARD KPI ======================= -->
         <div id="panel-rekap" class="hidden space-y-6">
-            <!-- SEKSI DASHBOARD KPI UTAMA -->
             <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
                 <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-2xs flex flex-col justify-between">
                     <span class="text-slate-400 font-medium text-2xs md:text-xs uppercase tracking-wider">👥 Anggota SS Hadir</span>
@@ -300,9 +297,6 @@
 
     <!-- LOGIKA JAVASCRIPT UTAMA -->
     <script>
-        // ==========================================
-        // LINK WEB APP GOOGLE APPS SCRIPT ANDA
-        // ==========================================
         const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwm5gD9O6uZE2xu--hyhiIedNuULqwElRSbgq8vXVN8jNILGP_885aJJlGadA1AE1FNDQ/exec";
 
         let appData = { classes: [] };
@@ -410,7 +404,7 @@
             
             if (!kelasTerpilih || !kelasTerpilih.members || kelasTerpilih.members.length === 0) {
                 inputId.value = ""; 
-                inputId.placeholder = "ID pertama kelas (Contoh format database Anda)";
+                inputId.placeholder = "ID pertama kelas";
                 inputId.readOnly = false; 
                 inputId.classList.remove('bg-slate-100', 'cursor-not-allowed');
                 return;
@@ -433,7 +427,7 @@
                 }
             } else {
                 inputId.value = "";
-                inputId.placeholder = "Ketik ID manual (pola ID di DB tidak dikenali)";
+                inputId.placeholder = "Ketik ID manual";
                 inputId.readOnly = false;
                 inputId.classList.remove('bg-slate-100', 'cursor-not-allowed');
             }
@@ -446,7 +440,6 @@
             selectedClassName.textContent = activeClass.name;
             memberCount.textContent = `${activeClass.members.length} Anggota`;
             
-            // Isi angka input kegiatan kelas
             document.getElementById('inputBelajarSS').value = activeClass.kegiatan?.belajar_ss || 0;
             document.getElementById('inputMenginjil').value = activeClass.kegiatan?.menginjil || 0;
             document.getElementById('inputRenungan').value = activeClass.kegiatan?.renungan_pagi || 0;
@@ -463,7 +456,20 @@
             activeClass.members.forEach(m => {
                 let statusHadir = m.absenHariIni && m.absenHariIni.status === 'Hadir';
                 let statusTidakHadir = m.absenHariIni && m.absenHariIni.status === 'Tidak Hadir';
-                
+                let hasLog = m.absenHariIni && (m.absenHariIni.status === 'Hadir' || m.absenHariIni.status === 'Tidak Hadir');
+
+                // Styling Tombol berdasarkan status Kehadiran Aktif
+                let btnHadirStyle = "bg-white hover:bg-emerald-50 text-emerald-600 border-emerald-200";
+                let btnAbsenStyle = "bg-white hover:bg-rose-50 text-rose-600 border-rose-200";
+
+                if (statusHadir) {
+                    btnHadirStyle = "bg-emerald-600 text-white border-emerald-600 shadow-sm font-bold";
+                    btnAbsenStyle = "bg-slate-50 text-slate-300 border-slate-200 opacity-40";
+                } else if (statusTidakHadir) {
+                    btnAbsenStyle = "bg-rose-600 text-white border-rose-600 shadow-sm font-bold";
+                    btnHadirStyle = "bg-slate-50 text-slate-300 border-slate-200 opacity-40";
+                }
+
                 // TABEL DESKTOP
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -476,11 +482,15 @@
                     </td>
                     <td class="p-4 text-center">
                         <div class="flex items-center justify-center gap-2">
-                            <button id="btn-hadir-${m.id}" onclick="kirimAbsensiCepat('${m.id}', '${m.name}', 'Hadir')" class="px-4 py-2 text-xs font-bold rounded-xl cursor-pointer border transition-all ${statusHadir ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' : 'bg-white hover:bg-emerald-50 text-emerald-600 border-emerald-200'}">
+                            <button id="btn-hadir-${m.id}" onclick="kirimAbsensiCepat('${m.id}', '${m.name}', 'Hadir')" class="px-4 py-2 text-xs font-semibold rounded-xl cursor-pointer border transition-all ${btnHadirStyle}">
                                 <span id="label-hadir-${m.id}">✅ Hadir</span>
                             </button>
-                            <button id="btn-absen-${m.id}" onclick="kirimAbsensiCepat('${m.id}', '${m.name}', 'Tidak Hadir')" class="px-4 py-2 text-xs font-bold rounded-xl cursor-pointer border transition-all ${statusTidakHadir ? 'bg-rose-600 text-white border-rose-600 shadow-sm' : 'bg-white hover:bg-rose-50 text-rose-600 border-rose-200'}">
+                            <button id="btn-absen-${m.id}" onclick="kirimAbsensiCepat('${m.id}', '${m.name}', 'Tidak Hadir')" class="px-4 py-2 text-xs font-semibold rounded-xl cursor-pointer border transition-all ${btnAbsenStyle}">
                                 <span id="label-absen-${m.id}">❌ Absen</span>
+                            </button>
+                            <!-- Tombol Hapus Log Absensi -->
+                            <button id="btn-hapuslog-${m.id}" onclick="hapusLogAbsenCepat('${m.id}', '${m.name}')" class="px-2.5 py-2 text-xs rounded-xl cursor-pointer border border-rose-100 bg-rose-50 hover:bg-rose-100 text-rose-600 transition-all ${hasLog ? 'inline-block' : 'hidden'}" title="Hapus catatan kehadiran hari ini">
+                                <span id="label-hapuslog-${m.id}">🗑️</span>
                             </button>
                         </div>
                     </td>`;
@@ -498,12 +508,16 @@
                                 <span class="text-3xs font-bold bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-sm">${m.kategori || 'Anggota'}</span>
                             </div>
                         </div>
+                        <!-- Tombol Hapus Log Absen Mobile -->
+                        <button id="m-btn-hapuslog-${m.id}" onclick="hapusLogAbsenCepat('${m.id}', '${m.name}')" class="p-1.5 text-xs rounded-lg border border-rose-100 bg-rose-50 hover:bg-rose-100 text-rose-600 transition-all ${hasLog ? 'block' : 'hidden'}">
+                            <span id="m-label-hapuslog-${m.id}">🗑️ Batal Absen</span>
+                        </button>
                     </div>
                     <div class="grid grid-cols-2 gap-2 mt-1">
-                        <button id="m-btn-hadir-${m.id}" onclick="kirimAbsensiCepat('${m.id}', '${m.name}', 'Hadir')" class="py-2.5 text-xs font-bold rounded-xl cursor-pointer border transition-all ${statusHadir ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs' : 'bg-white hover:bg-emerald-50 text-emerald-600 border-emerald-200'}">
+                        <button id="m-btn-hadir-${m.id}" onclick="kirimAbsensiCepat('${m.id}', '${m.name}', 'Hadir')" class="py-2.5 text-xs font-semibold rounded-xl cursor-pointer border transition-all ${btnHadirStyle}">
                             <span id="m-label-hadir-${m.id}">✅ Hadir</span>
                         </button>
-                        <button id="m-btn-absen-${m.id}" onclick="kirimAbsensiCepat('${m.id}', '${m.name}', 'Tidak Hadir')" class="py-2.5 text-xs font-bold rounded-xl cursor-pointer border transition-all ${statusTidakHadir ? 'bg-rose-600 text-white border-rose-600 shadow-xs' : 'bg-white hover:bg-rose-50 text-rose-600 border-rose-200'}">
+                        <button id="m-btn-absen-${m.id}" onclick="kirimAbsensiCepat('${m.id}', '${m.name}', 'Tidak Hadir')" class="py-2.5 text-xs font-semibold rounded-xl cursor-pointer border transition-all ${btnAbsenStyle}">
                             <span id="m-label-absen-${m.id}">❌ Absen</span>
                         </button>
                     </div>`;
@@ -514,41 +528,32 @@
         function kirimAbsensiCepat(idUser, nama, status) {
             const tglSesi = attendanceDateInput.value;
             
-            // Definisikan tombol aktif & pasangannya (Desktop & Mobile)
             const btnHadir = document.getElementById(`btn-hadir-${idUser}`);
             const btnAbsen = document.getElementById(`btn-absen-${idUser}`);
             const lblHadir = document.getElementById(`label-hadir-${idUser}`);
             const lblAbsen = document.getElementById(`label-absen-${idUser}`);
+            const btnHapusLog = document.getElementById(`btn-hapuslog-${idUser}`);
 
             const mBtnHadir = document.getElementById(`m-btn-hadir-${idUser}`);
             const mBtnAbsen = document.getElementById(`m-btn-absen-${idUser}`);
             const mLblHadir = document.getElementById(`m-label-hadir-${idUser}`);
             const mLblAbsen = document.getElementById(`m-label-absen-${idUser}`);
+            const mBtnHapusLog = document.getElementById(`m-btn-hapuslog-${idUser}`);
 
-            // Ubah keadaan tombol ke mode LOADING
+            // Set Loading state
             if(status === 'Hadir') {
-                if(btnHadir) {
-                    btnHadir.disabled = true;
-                    lblHadir.innerHTML = `<span class="spinner mr-1"></span> Mengirim...`;
-                }
+                if(btnHadir) { btnHadir.disabled = true; lblHadir.innerHTML = `<span class="spinner"></span>`; }
                 if(btnAbsen) btnAbsen.disabled = true;
-                if(mBtnHadir) {
-                    mBtnHadir.disabled = true;
-                    mLblHadir.innerHTML = `<span class="spinner mr-1"></span> Mengirim...`;
-                }
+                if(mBtnHadir) { mBtnHadir.disabled = true; mLblHadir.innerHTML = `<span class="spinner"></span>`; }
                 if(mBtnAbsen) mBtnAbsen.disabled = true;
             } else {
-                if(btnAbsen) {
-                    btnAbsen.disabled = true;
-                    lblAbsen.innerHTML = `<span class="spinner mr-1"></span> Mengirim...`;
-                }
+                if(btnAbsen) { btnAbsen.disabled = true; lblAbsen.innerHTML = `<span class="spinner"></span>`; }
                 if(btnHadir) btnHadir.disabled = true;
-                if(mBtnAbsen) {
-                    mBtnAbsen.disabled = true;
-                    mLblAbsen.innerHTML = `<span class="spinner mr-1"></span> Mengirim...`;
-                }
+                if(mBtnAbsen) { mBtnAbsen.disabled = true; mLblAbsen.innerHTML = `<span class="spinner"></span>`; }
                 if(mBtnHadir) mBtnHadir.disabled = true;
             }
+            if(btnHapusLog) btnHapusLog.classList.add('hidden');
+            if(mBtnHapusLog) mBtnHapusLog.classList.add('hidden');
 
             const payload = {
                 aksi: "absen",
@@ -568,11 +573,48 @@
                     muatDataDariSheets();
                 } else { 
                     alert("Gagal absen: " + data.message); 
-                    muatDataDariSheets(); // Reset state tampilan tombol
+                    muatDataDariSheets();
                 }
             }).catch(() => {
                 alert("Koneksi cloud bermasalah!");
-                muatDataDariSheets(); // Reset state tampilan tombol
+                muatDataDariSheets();
+            });
+        }
+
+        // FUNGSI BARU: HAPUS LOG ABSEN
+        function hapusLogAbsenCepat(idUser, nama) {
+            const tglSesi = attendanceDateInput.value;
+            if(!confirm(`Hapus catatan kehadiran untuk ${nama} tanggal ${tglSesi}?`)) return;
+
+            const btnHapusLog = document.getElementById(`btn-hapuslog-${idUser}`);
+            const lblHapusLog = document.getElementById(`label-hapuslog-${idUser}`);
+            const mBtnHapusLog = document.getElementById(`m-btn-hapuslog-${idUser}`);
+            const mLblHapusLog = document.getElementById(`m-label-hapuslog-${idUser}`);
+
+            if(btnHapusLog) { btnHapusLog.disabled = true; lblHapusLog.innerHTML = `⌛`; }
+            if(mBtnHapusLog) { mBtnHapusLog.disabled = true; mLblHapusLog.innerHTML = `⌛`; }
+
+            const payload = {
+                aksi: "hapus_absen",
+                id_user: idUser,
+                tanggal: tglSesi
+            };
+
+            fetch(APP_SCRIPT_URL, {
+                method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === "success") {
+                    muatDataDariSheets();
+                } else {
+                    alert("Gagal menghapus log: " + data.message);
+                    muatDataDariSheets();
+                }
+            }).catch(() => {
+                alert("Koneksi cloud bermasalah!");
+                muatDataDariSheets();
             });
         }
 
@@ -659,7 +701,6 @@
                 }
             }
 
-            // Hitung akumulasi nilai komitmen rohani dari log_kegiatan
             let sumBelajarSS = 0;
             let sumMenginjil = 0;
             let sumRenungan = 0;
@@ -714,7 +755,6 @@
                 containerK.innerHTML += `<div class="p-3 bg-slate-50 rounded-xl border border-slate-200"><div class="flex justify-between items-center mb-1 text-2xs"><span class="font-bold text-slate-700">${nk}</span><span class="font-bold text-slate-800">${pk}%</span></div><div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden"><div class="h-1.5 rounded-full ${pk >= 80 ? 'bg-emerald-500' : 'bg-amber-500'}" style="width: ${pk}%"></div></div></div>`;
             });
 
-            // Olah tren absensi per tanggal
             let trenMap = {};
             for(let j = 1; j < logAbsensi.length; j++) {
                 let tgl = logAbsensi[j][4];
