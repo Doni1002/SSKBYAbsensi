@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         .spinner {
             border: 2px solid transparent;
@@ -30,7 +30,7 @@
                     <h1 class="text-xl md:text-2xl font-bold text-slate-800 flex items-center gap-2">
                         <span>⛪</span> Sistem Absensi UKSS GMAHK Kebayoran
                     </h1>
-                    <p class="text-slate-500 text-xs md:text-sm mt-1">Sistem Terpadu Manajemen Database Kelas, Siswa, dan Pencatatan Absensi Anggota Sekolah Sabat.</p>
+                    <p class="text-slate-500 text-xs md:text-sm mt-1">Sistem Terpadu Manajemen Database Kelas, Siswa, dan Pencatatan Log Absensi Jamaah.</p>
                 </div>
                 
                 <div class="bg-slate-100 p-1 rounded-xl flex gap-1 w-full md:w-auto">
@@ -44,6 +44,8 @@
             </div>
             
             <div class="mt-4 bg-slate-50 border border-slate-200 p-3 md:p-4 rounded-2xl text-xs md:text-sm flex flex-col md:flex-row gap-3 md:gap-4 items-end justify-between">
+                <input type="hidden" id="scriptUrlInput">
+                
                 <div id="filterTanggalArea" class="w-full sm:w-auto flex-1 max-w-xs">
                     <label class="block font-semibold mb-1 text-slate-700">📆 Pilih Tanggal Absensi:</label>
                     <input type="date" id="attendanceDateInput" onchange="muatDataDariSheets()" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white font-medium text-slate-800 text-xs md:text-sm">
@@ -58,7 +60,6 @@
         <div id="panel-absen" class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
             <!-- Form Input Master -->
             <div class="lg:col-span-1 space-y-4 md:space-y-6">
-                <!-- Master Kelas -->
                 <div class="bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-100">
                     <h2 class="text-md md:text-lg font-bold text-slate-800 mb-3 flex items-center gap-2"><span>🏢</span> Tambah Master Kelas</h2>
                     <form id="classForm" class="space-y-3" onsubmit="return false;">
@@ -69,29 +70,12 @@
                     </form>
                 </div>
 
-                <!-- Master Anggota Baru (Kategori dipindah ke sini) -->
                 <div class="bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-100">
                     <h2 class="text-md md:text-lg font-bold text-slate-800 mb-3 flex items-center gap-2"><span>👤</span> Tambah Master Siswa</h2>
                     <form id="memberForm" class="space-y-3" onsubmit="return false;">
-                        <select id="memberClassSelect" required onchange="generateOtomatisIdSiswa()" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs md:text-sm bg-white"></select>
-                        
-                        <!-- Penomoran ID Otomatis -->
-                        <div class="relative">
-                            <input type="text" id="memberId" readonly placeholder="Pilih kelas untuk generate ID" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs md:text-sm bg-slate-100 font-mono text-slate-800 focus:outline-none cursor-not-allowed">
-                            <span class="absolute right-3 top-3.5 text-[9px] text-blue-600 font-bold bg-blue-50 px-1.5 py-0.5 rounded-sm border border-blue-200">SISTEM</span>
-                        </div>
-                        
+                        <select id="memberClassSelect" required class="w-full p-2.5 border border-slate-200 rounded-xl text-xs md:text-sm bg-white"></select>
+                        <input type="text" id="memberId" required placeholder="ID / Nomor Anggota Unik" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs md:text-sm focus:outline-blue-600">
                         <input type="text" id="memberName" required placeholder="Nama Lengkap Anggota" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs md:text-sm focus:outline-blue-600">
-                        
-                        <!-- Dropdown Kategori Anggota Baru -->
-                        <div>
-                            <label class="block text-2xs font-semibold text-slate-500 mb-1">Pilih Kategori Keanggotaan:</label>
-                            <select id="memberCategory" required class="w-full p-2.5 border border-slate-200 rounded-xl text-xs md:text-sm bg-white">
-                                <option value="Anggota">👥 Anggota SS</option>
-                                <option value="Tamu">🤝 Tamu Kelas</option>
-                            </select>
-                        </div>
-
                         <button type="submit" id="btnSubmitSiswa" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold p-2.5 rounded-xl text-xs md:text-sm cursor-pointer flex items-center justify-center gap-2 transition-colors">
                             <span id="textSubmitSiswa">Simpan Siswa Baru</span>
                         </button>
@@ -105,24 +89,21 @@
                     <h2 class="text-md md:text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><span>🗂️</span> Panel Sesi Absensi</h2>
                     <div id="classTabs" class="flex flex-wrap gap-2 mb-4 border-b border-slate-100 pb-4"></div>
 
-                    <div id="attendanceArea" class="hidden space-y-6">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-slate-50 p-3 md:p-4 rounded-2xl border border-slate-100">
+                    <div id="attendanceArea" class="hidden">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 bg-slate-50 p-3 md:p-4 rounded-2xl border border-slate-100">
                             <div>
                                 <h3 id="selectedClassName" class="text-sm md:text-md font-bold text-slate-700 uppercase tracking-wide inline-block mr-2">Kelas</h3>
                                 <span id="memberCount" class="bg-slate-200 text-slate-700 text-2xs md:text-xs font-semibold px-2.5 py-1 rounded-full">0</span>
                             </div>
-                            <button onclick="hapusKelasDariMasterCloud()" id="btnHapusKelas" class="text-2xs md:text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 px-3 py-2 rounded-xl border border-rose-200 cursor-pointer w-full sm:w-auto text-center font-medium transition-colors">🗑️ Hapus Kelas Master</button>
+                            <button onclick="hapusKelasDariMasterCloud(this)" id="btnHapusKelas" class="text-2xs md:text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 px-3 py-2 rounded-xl border border-rose-200 cursor-pointer w-full sm:w-auto text-center font-medium transition-colors">🗑️ Hapus Kelas Master</button>
                         </div>
 
-                        <!-- Tampilan Tabel Desktop (Cepat: Hanya Hadir & Absen) -->
+                        <!-- Tampilan Desktop -->
                         <div class="hidden md:block overflow-x-auto border border-slate-100 rounded-2xl">
                             <table class="w-full text-left border-collapse">
                                 <thead>
                                     <tr class="bg-slate-50 border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                                        <th class="p-4">ID</th>
-                                        <th class="p-4">Nama</th>
-                                        <th class="p-4">Kategori</th>
-                                        <th class="p-4 text-center">Tindakan Cepat Absensi</th>
+                                        <th class="p-4">ID</th><th class="p-4">Nama</th><th class="p-4 text-right">Tombol Tindakan Absensi</th>
                                     </tr>
                                 </thead>
                                 <tbody id="memberTableBody" class="divide-y divide-slate-100 text-sm text-slate-600"></tbody>
@@ -131,39 +112,6 @@
 
                         <!-- Tampilan Mobile -->
                         <div id="memberMobileCards" class="block md:hidden space-y-3"></div>
-
-                        <!-- ================= INPUT KEGIATAN KELAS (DIPINDAH KE SINI) ================= -->
-                        <div class="bg-slate-50 p-4 md:p-6 rounded-2xl border border-slate-200 space-y-4">
-                            <div>
-                                <h3 class="text-sm md:text-md font-bold text-slate-800 flex items-center gap-2">
-                                    <span>📊</span> Rekap Kegiatan Rohani Kelas (Input Angka Kumulatif)
-                                </h3>
-                                <p class="text-slate-500 text-2xs md:text-xs">Isi jumlah anggota kelas yang memenuhi komitmen rohani pekan ini.</p>
-                            </div>
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                                <div>
-                                    <label class="block font-medium text-slate-600 mb-1">📖 Belajar SS</label>
-                                    <input type="number" id="inputBelajarSS" min="0" placeholder="0" class="w-full p-2 bg-white border border-slate-300 rounded-xl text-center font-bold">
-                                </div>
-                                <div>
-                                    <label class="block font-medium text-slate-600 mb-1">📢 Menginjil</label>
-                                    <input type="number" id="inputMenginjil" min="0" placeholder="0" class="w-full p-2 bg-white border border-slate-300 rounded-xl text-center font-bold">
-                                </div>
-                                <div>
-                                    <label class="block font-medium text-slate-600 mb-1">☀️ Renungan Pagi</label>
-                                    <input type="number" id="inputRenungan" min="0" placeholder="0" class="w-full p-2 bg-white border border-slate-300 rounded-xl text-center font-bold">
-                                </div>
-                                <div>
-                                    <label class="block font-medium text-slate-600 mb-1">📜 Baca Alkitab</label>
-                                    <input type="number" id="inputBacaAlkitab" min="0" placeholder="0" class="w-full p-2 bg-white border border-slate-300 rounded-xl text-center font-bold">
-                                </div>
-                            </div>
-                            <div class="flex justify-end">
-                                <button onclick="simpanKegiatanKelasHarian()" id="btnSimpanKegiatanKelas" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white font-semibold px-6 py-2.5 rounded-xl text-xs cursor-pointer flex items-center justify-center gap-2 transition-colors">
-                                    <span id="textSimpanKegiatan">💾 Simpan Data Kegiatan</span>
-                                </button>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -171,6 +119,7 @@
 
         <!-- ======================= PANEL 2: MENU REKAP & DASHBOARD KPI ======================= -->
         <div id="panel-rekap" class="hidden space-y-6">
+            
             <!-- SEKSI DASHBOARD KPI UTAMA -->
             <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
                 <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-2xs flex flex-col justify-between">
@@ -179,7 +128,7 @@
                         <span id="kpiAnggotaHadir" class="text-xl md:text-2xl font-bold text-slate-800">0</span>
                         <span class="text-xs text-slate-500 font-normal">Orang</span>
                     </div>
-                    <div id="kpiAnggotaHadirSub" class="text-2xs text-emerald-600 mt-2 font-medium">0% dari Total Kehadiran</div>
+                    <div id="kpiAnggotaHadirSub" class="text-2xs text-emerald-600 mt-2 font-medium">0% dari Anggota Hadir</div>
                 </div>
                 <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-2xs flex flex-col justify-between">
                     <span class="text-slate-400 font-medium text-2xs md:text-xs uppercase tracking-wider">🤝 Tamu Kelas Hadir</span>
@@ -190,12 +139,12 @@
                     <div id="kpiTamuHadirSub" class="text-2xs text-blue-600 mt-2 font-medium">0% dari Total Kehadiran</div>
                 </div>
                 <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-2xs flex flex-col justify-between">
-                    <span class="text-slate-400 font-medium text-2xs md:text-xs uppercase tracking-wider">📖 Belajar SS (Total)</span>
+                    <span class="text-slate-400 font-medium text-2xs md:text-xs uppercase tracking-wider">📖 Belajar SS</span>
                     <div class="flex items-baseline gap-2 mt-2">
                         <span id="kpiBelajarSS" class="text-xl md:text-2xl font-bold text-slate-800">0</span>
                         <span class="text-xs text-slate-500 font-normal">Orang</span>
                     </div>
-                    <div id="kpiBelajarSSSub" class="text-2xs text-amber-600 mt-2 font-medium">Akumulasi Pekan Ini</div>
+                    <div id="kpiBelajarSSSub" class="text-2xs text-amber-600 mt-2 font-medium">0% dari Total Hadir</div>
                 </div>
                 <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-2xs flex flex-col justify-between">
                     <span class="text-slate-400 font-medium text-2xs md:text-xs uppercase tracking-wider">📢 Menginjil & Bersaksi</span>
@@ -203,7 +152,7 @@
                         <span id="kpiMenginjil" class="text-xl md:text-2xl font-bold text-slate-800">0</span>
                         <span class="text-xs text-slate-500 font-normal">Orang</span>
                     </div>
-                    <div id="kpiMenginjilSub" class="text-2xs text-purple-600 mt-2 font-medium">Akumulasi Pekan Ini</div>
+                    <div id="kpiMenginjilSub" class="text-2xs text-purple-600 mt-2 font-medium">0% dari Total Hadir</div>
                 </div>
                 <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-2xs flex flex-col justify-between">
                     <span class="text-slate-400 font-medium text-2xs md:text-xs uppercase tracking-wider">☀️ Renungan Pagi</span>
@@ -211,7 +160,7 @@
                         <span id="kpiRenungan" class="text-xl md:text-2xl font-bold text-emerald-600">0</span>
                         <span class="text-xs text-slate-500 font-normal">Orang</span>
                     </div>
-                    <div id="kpiRenunganSub" class="text-2xs text-emerald-600 mt-2 font-medium">Akumulasi Pekan Ini</div>
+                    <div id="kpiRenunganSub" class="text-2xs text-emerald-600 mt-2 font-medium">0% dari Total Hadir</div>
                 </div>
                 <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-2xs flex flex-col justify-between">
                     <span class="text-slate-400 font-medium text-2xs md:text-xs uppercase tracking-wider">📜 Program Baca Alkitab</span>
@@ -219,7 +168,7 @@
                         <span id="kpiBacaAlkitab" class="text-xl md:text-2xl font-bold text-slate-800">0</span>
                         <span class="text-xs text-slate-500 font-normal">Orang</span>
                     </div>
-                    <div id="kpiBacaAlkitabSub" class="text-2xs text-teal-600 mt-2 font-medium">Akumulasi Pekan Ini</div>
+                    <div id="kpiBacaAlkitabSub" class="text-2xs text-teal-600 mt-2 font-medium">0% dari Total Hadir</div>
                 </div>
             </div>
 
@@ -232,13 +181,11 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-                <!-- Ringkasan Kehadiran Kelas -->
                 <div class="lg:col-span-1 bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-200">
                     <h2 class="text-md md:text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><span>🏢</span> Kehadiran Per Kelas (Anggota SS)</h2>
                     <div id="classSummaryContainer" class="space-y-3"></div>
                 </div>
 
-                <!-- Database Master Anggota -->
                 <div class="lg:col-span-2 bg-white p-4 md:p-6 rounded-2xl shadow-xs border border-slate-200">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
                         <h2 class="text-md md:text-lg font-bold text-slate-800 flex items-center gap-2"><span>👥</span> Database Master Anggota</h2>
@@ -248,12 +195,7 @@
                         <table class="w-full text-left border-collapse text-xs md:text-sm">
                             <thead>
                                 <tr class="bg-slate-50 border-b border-slate-200 text-2xs md:text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                                    <th class="p-3">Nama</th>
-                                    <th class="p-3">Kelas</th>
-                                    <th class="p-3">Kategori</th>
-                                    <th class="p-3 text-center">Hadir</th>
-                                    <th class="p-3 text-center">Absen</th>
-                                    <th class="p-3 text-right">Kelola Master</th>
+                                    <th class="p-3">Nama</th><th class="p-3">Kelas</th><th class="p-3 text-center">Hadir</th><th class="p-3 text-center">Absen</th><th class="p-3 text-center">Rasio Kehadiran</th><th class="p-3 text-right">Kelola Master</th>
                                 </tr>
                             </thead>
                             <tbody id="siswaTableBody" class="divide-y divide-slate-100 text-slate-600"></tbody>
@@ -263,7 +205,7 @@
             </div>
 
             <!-- Form Pop-up Edit Siswa -->
-            <div id="modalEditSiswa" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div id="modalEditSiswa" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 animate-fade-in">
                 <div class="bg-white p-5 md:p-6 rounded-2xl max-w-sm w-full shadow-xl border border-slate-200 space-y-4">
                     <h3 class="text-base font-bold text-slate-800 flex items-center gap-2"><span>✏️</span> Edit Data Master Siswa</h3>
                     <div class="space-y-3 text-xs md:text-sm">
@@ -279,29 +221,85 @@
                             <label class="block text-slate-700 font-medium mb-1">Pindah Ke Kelas:</label>
                             <select id="editSiswaKelasSelect" class="w-full p-2.5 border border-slate-300 rounded-xl bg-white"></select>
                         </div>
-                        <div>
-                            <label class="block text-slate-700 font-medium mb-1">Kategori:</label>
-                            <select id="editSiswaKategori" class="w-full p-2.5 border border-slate-300 rounded-xl bg-white">
-                                <option value="Anggota">👥 Anggota SS</option>
-                                <option value="Tamu">🤝 Tamu Kelas</option>
-                            </select>
-                        </div>
                     </div>
                     <div class="flex gap-2 justify-end pt-2 text-xs md:text-sm">
-                        <button onclick="tutupModalEdit()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-xl cursor-pointer">Batal</button>
-                        <button id="btnSimpanEditSiswa" onclick="simpanPerubahanSiswaCloud()" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl cursor-pointer flex items-center gap-1.5 shadow-xs">
+                        <button onclick="tutupModalEdit()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-xl cursor-pointer transition-colors">Batal</button>
+                        <button id="btnSimpanEditSiswa" onclick="simpanPerubahanSiswaCloud()" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl cursor-pointer flex items-center gap-1.5 transition-colors shadow-xs">
                             <span id="textSimpanEditSiswa">Simpan Perubahan</span>
                         </button>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- ======================= MODAL FORM DETIL ABSENSI ======================= -->
+        <div id="modalInputAbsen" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 animate-fade-in">
+            <div class="bg-white p-5 md:p-6 rounded-2xl max-w-md w-full shadow-xl border border-slate-200 space-y-4">
+                <div>
+                    <h3 class="text-base md:text-lg font-bold text-slate-800 flex items-center gap-1.5">
+                        <span>📝</span> Formulir Absensi Siswa
+                    </h3>
+                    <p id="labelNamaModalAbsen" class="text-sm font-semibold text-blue-600 mt-0.5">Nama Siswa</p>
+                </div>
+                
+                <input type="hidden" id="modalAbsenId">
+                <input type="hidden" id="modalAbsenNama">
+
+                <div class="space-y-4 text-xs md:text-sm border-t border-slate-100 pt-3">
+                    <div>
+                        <label class="block text-slate-700 font-semibold mb-2">Status Kehadiran:</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="btnHadirModal" onclick="pilihKehadiranModal('Hadir')" class="py-2.5 font-bold rounded-xl border text-center cursor-pointer transition-all bg-emerald-50 text-emerald-700 border-emerald-300 shadow-2xs">✅ Hadir</button>
+                            <button id="btnAbsenModal" onclick="pilihKehadiranModal('Tidak Hadir')" class="py-2.5 font-bold rounded-xl border text-center cursor-pointer transition-all bg-slate-50 text-slate-500 border-slate-200">❌ Tidak Hadir</button>
+                        </div>
+                    </div>
+
+                    <div id="areaKuesionerAbsen" class="space-y-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+                        <div>
+                            <label class="block text-slate-700 font-semibold mb-2">Kategori Keanggotaan:</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-slate-200 cursor-pointer">
+                                    <input type="radio" name="modalKategori" value="Anggota" checked> 👥 Anggota SS
+                                </label>
+                                <label class="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-slate-200 cursor-pointer">
+                                    <input type="radio" name="modalKategori" value="Tamu"> 🤝 Tamu Kelas
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 pt-1">
+                            <label class="block text-slate-700 font-semibold">Tugas & Komitmen Rohani Pekan Ini:</label>
+                            
+                            <label class="flex items-center gap-2.5 bg-white p-2.5 rounded-xl border border-slate-200 cursor-pointer">
+                                <input type="checkbox" id="chkBelajarSS" class="w-4 h-4 text-blue-600"> 📖 Belajar Sekolah Sabat
+                            </label>
+                            <label class="flex items-center gap-2.5 bg-white p-2.5 rounded-xl border border-slate-200 cursor-pointer">
+                                <input type="checkbox" id="chkMenginjil" class="w-4 h-4 text-blue-600"> 📢 Menginjil & Bersaksi
+                            </label>
+                            <label class="flex items-center gap-2.5 bg-white p-2.5 rounded-xl border border-slate-200 cursor-pointer">
+                                <input type="checkbox" id="chkRenungan" class="w-4 h-4 text-blue-600"> ☀️ Melakukan Renungan Pagi
+                            </label>
+                            <label class="flex items-center gap-2.5 bg-white p-2.5 rounded-xl border border-slate-200 cursor-pointer">
+                                <input type="checkbox" id="chkBacaAlkitab" class="w-4 h-4 text-blue-600"> 📜 Mengikuti Baca Alkitab
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-2 justify-end pt-3 text-xs md:text-sm border-t border-slate-100">
+                    <button onclick="tutupModalAbsen()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-xl cursor-pointer transition-colors">Batal</button>
+                    <button id="btnSimpanDetilAbsen" onclick="simpanDetilAbsenCloud()" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl cursor-pointer flex items-center gap-1.5 transition-colors shadow-sm">
+                        <span id="textSimpanDetilAbsen">Simpan & Kirim</span>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- LOGIKA JAVASCRIPT UTAMA -->
+    <!-- LOGIKA UTAMA JAVASCRIPT -->
     <script>
         // ==========================================
-        // LINK WEB APP GOOGLE APPS SCRIPT ANDA
+        // MASUKKAN LINK WEB APP GOOGLE APPS SCRIPT ANDA DI SINI
         // ==========================================
         const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwm5gD9O6uZE2xu--hyhiIedNuULqwElRSbgq8vXVN8jNILGP_885aJJlGadA1AE1FNDQ/exec";
 
@@ -310,6 +308,7 @@
         let currentClassId = null;
         let menuAktif = "menu-absen";
         let chartInstance = null;
+        let selectedStatusKehadiranModal = 'Hadir';
 
         const classTabs = document.getElementById('classTabs');
         const attendanceArea = document.getElementById('attendanceArea');
@@ -317,10 +316,12 @@
         const memberCount = document.getElementById('memberCount');
         const memberTableBody = document.getElementById('memberTableBody');
         const memberMobileCards = document.getElementById('memberMobileCards');
+        const scriptUrlInput = document.getElementById('scriptUrlInput');
         const attendanceDateInput = document.getElementById('attendanceDateInput');
         const memberClassSelect = document.getElementById('memberClassSelect');
 
         if(!attendanceDateInput.value) { attendanceDateInput.value = new Date().toISOString().split('T')[0]; }
+        scriptUrlInput.value = APP_SCRIPT_URL;
 
         function pindahMenu(targetMenu) {
             menuAktif = targetMenu;
@@ -351,10 +352,11 @@
         }
 
         function muatDataDariSheets() {
+            const urlApi = APP_SCRIPT_URL; 
             const tglTerpilih = attendanceDateInput.value;
             classTabs.innerHTML = '<p class="text-xs text-blue-600 italic animate-pulse">⏳ Membaca Sesi Absensi...</p>';
             
-            fetch(`${APP_SCRIPT_URL}?tanggal=${tglTerpilih}`, { method: "GET" })
+            fetch(`${urlApi}?tanggal=${tglTerpilih}`, { method: "GET" })
             .then(res => res.json())
             .then(data => {
                 if(data.status === "success") {
@@ -376,15 +378,10 @@
                 memberClassSelect.appendChild(opt);
             });
 
-            if (appData.classes.length > 0) {
-                memberClassSelect.selectedIndex = 1; 
-            }
-
             if(appData.classes.length === 0) {
                 classTabs.innerHTML = '<p class="text-slate-400 text-xs italic">Belum ada kelas terdaftar.</p>';
                 attendanceArea.classList.add('hidden'); return;
             }
-            
             classTabs.innerHTML = '';
             appData.classes.forEach(c => {
                 const btn = document.createElement('button');
@@ -394,49 +391,6 @@
             });
 
             renderTableSiswaAbsen();
-            generateOtomatisIdSiswa(); 
-        }
-
-        function generateOtomatisIdSiswa() {
-            const selectKelas = document.getElementById('memberClassSelect');
-            const inputId = document.getElementById('memberId');
-            
-            if (!selectKelas || !selectKelas.value) {
-                inputId.value = '';
-                return;
-            }
-            
-            const kelasTerpilih = appData.classes.find(c => c.id == selectKelas.value);
-            
-            if (!kelasTerpilih || !kelasTerpilih.members || kelasTerpilih.members.length === 0) {
-                inputId.value = ""; 
-                inputId.placeholder = "ID pertama kelas (Contoh format database Anda)";
-                inputId.readOnly = false; 
-                inputId.classList.remove('bg-slate-100', 'cursor-not-allowed');
-                return;
-            }
-
-            const siswaTerakhir = kelasTerpilih.members[kelasTerpilih.members.length - 1];
-            const idTerakhirDb = siswaTerakhir.id.toString().trim();
-            const match = idTerakhirDb.match(/^(.*?)(\d+)$/);
-
-            if (match) {
-                const awalan = match[1]; 
-                const stringAngka = match[2]; 
-                const nomorBaru = parseInt(stringAngka, 10) + 1; 
-                const nomorBaruFormatted = nomorBaru.toString().padStart(stringAngka.length, '0');
-                
-                inputId.value = `${awalan}${nomorBaruFormatted}`;
-                inputId.readOnly = true; 
-                if (!inputId.classList.contains('bg-slate-100')) {
-                    inputId.classList.add('bg-slate-100', 'cursor-not-allowed');
-                }
-            } else {
-                inputId.value = "";
-                inputId.placeholder = "Ketik ID manual (pola ID di DB tidak dikenali)";
-                inputId.readOnly = false;
-                inputId.classList.remove('bg-slate-100', 'cursor-not-allowed');
-            }
         }
 
         function renderTableSiswaAbsen() {
@@ -446,110 +400,128 @@
             selectedClassName.textContent = activeClass.name;
             memberCount.textContent = `${activeClass.members.length} Anggota`;
             
-            // Isi angka input kegiatan kelas
-            document.getElementById('inputBelajarSS').value = activeClass.kegiatan?.belajar_ss || 0;
-            document.getElementById('inputMenginjil').value = activeClass.kegiatan?.menginjil || 0;
-            document.getElementById('inputRenungan').value = activeClass.kegiatan?.renungan_pagi || 0;
-            document.getElementById('inputBacaAlkitab').value = activeClass.kegiatan?.bacaan_alkitab || 0;
-
             memberTableBody.innerHTML = ''; memberMobileCards.innerHTML = '';
 
             if(activeClass.members.length === 0) {
-                memberTableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic text-xs">Kelas Kosong.</td></tr>`;
+                memberTableBody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-400 italic text-xs">Kelas Kosong.</td></tr>`;
                 memberMobileCards.innerHTML = `<p class="p-4 bg-slate-50 border rounded-xl text-center text-slate-400 italic text-xs">Kelas Kosong.</p>`;
                 return;
             }
 
             activeClass.members.forEach(m => {
-                let statusHadir = m.absenHariIni && m.absenHariIni.status === 'Hadir';
-                let statusTidakHadir = m.absenHariIni && m.absenHariIni.status === 'Tidak Hadir';
+                let statusSudahAbsen = (m.absenHariIni && m.absenHariIni.tanggal === attendanceDateInput.value);
+                
+                let htmlAksiPc = '';
+                if (statusSudahAbsen) {
+                    const statusVal = m.absenHariIni.status;
+                    const kategoriVal = m.absenHariIni.kategori || "Anggota";
+                    const badgeText = statusVal === 'Hadir' ? `Hadir (${kategoriVal === 'Tamu' ? 'Tamu' : 'Anggota'})` : 'Absen';
+                    const colorPc = statusVal === 'Hadir' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200';
+                    
+                    htmlAksiPc = `<span class="font-bold text-xs px-3 py-2 rounded-xl border ${colorPc}">${badgeText}</span>
+                                 <button onclick="bukaModalAbsen('${m.id}', '${m.name}', true)" class="bg-slate-100 hover:bg-slate-200 text-blue-600 font-semibold text-xs px-3 py-2 rounded-xl border border-slate-200 ml-2 cursor-pointer transition-colors">Ubah</button>`;
+                } else {
+                    htmlAksiPc = `<button onclick="bukaModalAbsen('${m.id}', '${m.name}')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-xl cursor-pointer transition-colors shadow-2xs">📝 Sesi Absensi</button>`;
+                }
                 
                 const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="p-4 font-mono text-xs text-slate-400">${m.id}</td>
-                    <td class="p-4 font-semibold text-slate-700">${m.name}</td>
-                    <td class="p-4 text-xs">
-                        <span class="px-2 py-1 rounded-md font-semibold ${m.kategori === 'Tamu' ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-slate-100 text-slate-600'}">
-                            ${m.kategori || 'Anggota'}
-                        </span>
-                    </td>
-                    <td class="p-4 text-center">
-                        <div class="inline-flex rounded-xl p-0.5 bg-slate-100 border border-slate-200">
-                            <button onclick="kirimAbsensiCepat('${m.id}', '${m.name}', 'Hadir')" class="px-4 py-1.5 text-xs font-bold rounded-lg cursor-pointer transition-all ${statusHadir ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'}">
-                                ✅ Hadir
-                            </button>
-                            <button onclick="kirimAbsensiCepat('${m.id}', '${m.name}', 'Tidak Hadir')" class="px-4 py-1.5 text-xs font-bold rounded-lg cursor-pointer transition-all ${statusTidakHadir ? 'bg-rose-600 text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'}">
-                                ❌ Absen
-                            </button>
-                        </div>
-                    </td>`;
+                tr.innerHTML = `<td class="p-4 font-mono text-xs text-slate-400">${m.id}</td>
+                                <td class="p-4 font-semibold text-slate-700">${m.name}</td>
+                                <td class="p-4 text-right flex items-center justify-end gap-3"><div>${htmlAksiPc}</div>
+                                <button onclick="hapusLogAbsenHariIniCloud('${m.id}', '${m.name}', this)" class="text-slate-300 hover:text-rose-600 text-xs pl-2 border-l border-slate-200 cursor-pointer" title="Hapus log">🗑️</button></td>`;
                 memberTableBody.appendChild(tr);
+
+                let colorMobile = m.absenHariIni && m.absenHariIni.status === 'Hadir' ? 'bg-emerald-600' : 'bg-rose-600';
+                let cardBadgeText = m.absenHariIni ? (m.absenHariIni.status === 'Hadir' ? `Hadir (${m.absenHariIni.kategori || "Anggota"})` : 'Absen') : '';
+                
+                let htmlAksiMobile = statusSudahAbsen ? 
+                    `<div class="flex items-center justify-between w-full"><span class="font-bold text-xs px-4 py-2.5 rounded-xl text-center flex-1 ${colorMobile} text-white">${cardBadgeText}</span><button onclick="bukaModalAbsen('${m.id}', '${m.name}', true)" class="bg-slate-100 text-blue-600 text-xs font-semibold px-4 py-2.5 rounded-xl ml-2 border border-slate-200 cursor-pointer transition-colors">Ubah</button></div>` :
+                    `<button onclick="bukaModalAbsen('${m.id}', '${m.name}')" class="w-full bg-blue-600 text-white text-xs font-semibold py-2.5 rounded-xl cursor-pointer transition-colors shadow-2xs">📝 Sesi Absensi</button>`;
 
                 const card = document.createElement('div');
                 card.className = "p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs flex flex-col gap-3";
-                card.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h4 class="font-bold text-slate-800 text-sm">${m.name}</h4>
-                            <div class="flex items-center gap-2 mt-1">
-                                <span class="text-2xs font-mono text-slate-400">ID: ${m.id}</span>
-                                <span class="text-3xs font-bold bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-sm">${m.kategori || 'Anggota'}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 bg-slate-50 p-1 rounded-xl border border-slate-150">
-                        <button onclick="kirimAbsensiCepat('${m.id}', '${m.name}', 'Hadir')" class="py-2 text-xs font-bold rounded-lg cursor-pointer transition-all ${statusHadir ? 'bg-emerald-600 text-white' : 'text-slate-500 bg-white border border-slate-200'}">
-                            ✅ Hadir
-                        </button>
-                        <button onclick="kirimAbsensiCepat('${m.id}', '${m.name}', 'Tidak Hadir')" class="py-2 text-xs font-bold rounded-lg cursor-pointer transition-all ${statusTidakHadir ? 'bg-rose-600 text-white' : 'text-slate-500 bg-white border border-slate-200'}">
-                            ❌ Absen
-                        </button>
-                    </div>`;
+                card.innerHTML = `<div class="flex justify-between items-start"><div><h4 class="font-bold text-slate-800 text-sm">${m.name}</h4><p class="text-2xs font-mono text-slate-400 mt-0.5">ID: ${m.id}</p></div><button onclick="hapusLogAbsenHariIniCloud('${m.id}', '${m.name}', this)" class="text-slate-300 hover:text-rose-600 p-1 text-xs">🗑️</button></div><div class="flex w-full">${htmlAksiMobile}</div>`;
                 memberMobileCards.appendChild(card);
             });
         }
 
-        function kirimAbsensiCepat(idUser, nama, status) {
-            const tglSesi = attendanceDateInput.value;
-            const payload = {
-                aksi: "absen",
-                id_user: idUser,
-                nama: nama,
-                status: status,
-                tanggal: tglSesi
-            };
+        function bukaModalAbsen(id, nama, isEdit = false) {
+            document.getElementById('modalAbsenId').value = id;
+            document.getElementById('modalAbsenNama').value = nama;
+            document.getElementById('labelNamaModalAbsen').textContent = nama;
 
-            fetch(APP_SCRIPT_URL, {
-                method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
-                body: JSON.stringify(payload)
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.status === "success") {
-                    muatDataDariSheets();
-                } else { alert("Gagal absen: " + data.message); }
-            }).catch(() => alert("Koneksi cloud bermasalah!"));
+            pilihKehadiranModal('Hadir');
+            document.querySelector('input[name="modalKategori"][value="Anggota"]').checked = true;
+            document.getElementById('chkBelajarSS').checked = false;
+            document.getElementById('chkMenginjil').checked = false;
+            document.getElementById('chkRenungan').checked = false;
+            document.getElementById('chkBacaAlkitab').checked = false;
+
+            if (isEdit) {
+                const activeClass = appData.classes.find(c => c.id == currentClassId);
+                const m = activeClass.members.find(m => m.id === id);
+                if (m && m.absenHariIni) {
+                    pilihKehadiranModal(m.absenHariIni.status);
+                    if (m.absenHariIni.status === 'Hadir') {
+                        const kat = m.absenHariIni.kategori || "Anggota";
+                        document.querySelector(`input[name="modalKategori"][value="${kat}"]`).checked = true;
+                        document.getElementById('chkBelajarSS').checked = m.absenHariIni.belajar_ss === "Ya";
+                        document.getElementById('chkMenginjil').checked = m.absenHariIni.menginjil === "Ya";
+                        document.getElementById('chkRenungan').checked = m.absenHariIni.renungan_pagi === "Ya";
+                        document.getElementById('chkBacaAlkitab').checked = m.absenHariIni.bacaan_alkitab === "Ya";
+                    }
+                }
+            }
+            document.getElementById('modalInputAbsen').classList.remove('hidden');
         }
 
-        function simpanKegiatanKelasHarian() {
-            const activeClass = appData.classes.find(c => c.id == currentClassId);
-            if (!activeClass) return;
+        function tutupModalAbsen() {
+            document.getElementById('modalInputAbsen').classList.add('hidden');
+        }
 
-            const btn = document.getElementById('btnSimpanKegiatanKelas');
-            const txt = document.getElementById('textSimpanKegiatan');
+        function pilihKehadiranModal(status) {
+            selectedStatusKehadiranModal = status;
+            const btnHadir = document.getElementById('btnHadirModal');
+            const btnAbsen = document.getElementById('btnAbsenModal');
+            const kuesioner = document.getElementById('areaKuesionerAbsen');
+
+            if (status === 'Hadir') {
+                btnHadir.className = "py-2.5 font-bold rounded-xl border text-center cursor-pointer transition-all bg-emerald-50 text-emerald-700 border-emerald-300 shadow-2xs";
+                btnAbsen.className = "py-2.5 font-bold rounded-xl border text-center cursor-pointer transition-all bg-slate-50 text-slate-500 border-slate-200";
+                kuesioner.classList.remove('hidden');
+            } else {
+                btnAbsen.className = "py-2.5 font-bold rounded-xl border text-center cursor-pointer transition-all bg-rose-50 text-rose-700 border-rose-300 shadow-2xs";
+                btnHadir.className = "py-2.5 font-bold rounded-xl border text-center cursor-pointer transition-all bg-slate-50 text-slate-500 border-slate-200";
+                kuesioner.classList.add('hidden');
+            }
+        }
+
+        function simpanDetilAbsenCloud() {
+            const idUser = document.getElementById('modalAbsenId').value;
+            const nama = document.getElementById('modalAbsenNama').value;
+            const tglSesi = attendanceDateInput.value;
+            
+            const btn = document.getElementById('btnSimpanDetilAbsen');
+            const txt = document.getElementById('textSimpanDetilAbsen');
             
             btn.disabled = true; btn.classList.add('opacity-50');
             txt.innerHTML = `<span class="spinner mr-1.5"></span>Menyimpan...`;
 
-            const payload = {
-                aksi: "simpan_kegiatan_kelas",
-                kelas: activeClass.name,
-                tanggal: attendanceDateInput.value,
-                belajar_ss: document.getElementById('inputBelajarSS').value || 0,
-                menginjil: document.getElementById('inputMenginjil').value || 0,
-                renungan_pagi: document.getElementById('inputRenungan').value || 0,
-                bacaan_alkitab: document.getElementById('inputBacaAlkitab').value || 0
+            let payload = {
+                aksi: "absen",
+                id_user: idUser,
+                nama: `${nama} (${selectedClassName.textContent})`,
+                status: selectedStatusKehadiranModal,
+                tanggal: tglSesi
             };
+
+            if (selectedStatusKehadiranModal === "Hadir") {
+                payload.kategori = document.querySelector('input[name="modalKategori"]:checked').value;
+                payload.belajar_ss = document.getElementById('chkBelajarSS').checked ? "Ya" : "Tidak";
+                payload.menginjil = document.getElementById('chkMenginjil').checked ? "Ya" : "Tidak";
+                payload.renungan_pagi = document.getElementById('chkRenungan').checked ? "Ya" : "Tidak";
+                payload.bacaan_alkitab = document.getElementById('chkBacaAlkitab').checked ? "Ya" : "Tidak";
+            }
 
             fetch(APP_SCRIPT_URL, {
                 method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
@@ -557,14 +529,23 @@
             })
             .then(res => res.json())
             .then(data => {
-                btn.disabled = false; btn.classList.remove('opacity-50'); txt.innerHTML = "💾 Simpan Data Kegiatan";
+                btn.disabled = false; btn.classList.remove('opacity-50'); txt.innerHTML = "Simpan & Kirim";
                 if(data.status === "success") {
+                    tutupModalAbsen();
                     muatDataDariSheets();
                 } else { alert("Gagal menyimpan: " + data.message); }
             }).catch(() => {
-                btn.disabled = false; btn.classList.remove('opacity-50'); txt.innerHTML = "💾 Simpan Data Kegiatan";
+                btn.disabled = false; btn.classList.remove('opacity-50'); txt.innerHTML = "Simpan & Kirim";
                 alert("Koneksi gagal!");
             });
+        }
+
+        function hapusLogAbsenHariIniCloud(id, nama, btn) {
+            const tglSesi = attendanceDateInput.value;
+            if(!confirm(`Hapus catatan absensi ${nama} pada tanggal ${tglSesi}?`)) return;
+            btn.disabled = true; btn.innerHTML = "⏳";
+            fetch(APP_SCRIPT_URL, { method: "POST", mode: "cors", body: JSON.stringify({ aksi: "hapus_log_absen", id_user: id, tanggal: tglSesi }) })
+            .then(() => muatDataDariSheets());
         }
 
         function muatDataRekapTotal() {
@@ -579,28 +560,37 @@
                     for(let k=1; k<data.master_kelas.length; k++) { 
                         if(data.master_kelas[k][0]) dataKelasGlobal.push(data.master_kelas[k][0]); 
                     }
-                    kumpulkanStatistik(data.master_siswa, data.log_absensi, data.log_kegiatan);
+                    kumpulkanStatistik(data.master_siswa, data.log_absensi);
                 }
             });
         }
 
-        function kumpulkanStatistik(masterSiswa, logAbsensi, logKegiatan) {
+        function kumpulkanStatistik(masterSiswa, logAbsensi) {
             let siswaMap = {};
             
             for(let i = 1; i < masterSiswa.length; i++) {
                 let id = masterSiswa[i][0];
                 if(id) {
-                    siswaMap[id] = { name: masterSiswa[i][1], kelas: masterSiswa[i][2], kategori: masterSiswa[i][3] || "Anggota", hadir: 0, total: 0 };
+                    siswaMap[id] = { name: masterSiswa[i][1], kelas: masterSiswa[i][2], hadir: 0, total: 0 };
                 }
             }
 
+            let totalHadirSesi = 0;
             let countAnggotaHadir = 0;
             let countTamuHadir = 0;
-            let totalHadirSesi = 0;
+            let countBelajarSS = 0;
+            let countMenginjil = 0;
+            let countRenungan = 0;
+            let countBacaAlkitab = 0;
 
             for(let j = 1; j < logAbsensi.length; j++) {
                 let id = logAbsensi[j][0];
                 let status = logAbsensi[j][5];
+                let kategori = logAbsensi[j][6] || "Anggota";
+                let belajarSS = logAbsensi[j][7] || "Tidak";
+                let menginjilVal = logAbsensi[j][8] || "Tidak";
+                let renunganVal = logAbsensi[j][9] || "Tidak";
+                let bacaAlkitabVal = logAbsensi[j][10] || "Tidak";
 
                 if(siswaMap[id]) { 
                     siswaMap[id].total += 1; 
@@ -608,57 +598,55 @@
                         siswaMap[id].hadir += 1;
                         totalHadirSesi++;
 
-                        if (siswaMap[id].kategori === "Tamu") countTamuHadir++;
+                        if (kategori === "Tamu") countTamuHadir++;
                         else countAnggotaHadir++;
+
+                        if (belajarSS === "Ya") countBelajarSS++;
+                        if (menginjilVal === "Ya") countMenginjil++;
+                        if (renunganVal === "Ya") countRenungan++;
+                        if (bacaAlkitabVal === "Ya") countBacaAlkitab++;
                     }
                 }
             }
 
-            // Hitung akumulasi nilai komitmen rohani dari log_kegiatan
-            let sumBelajarSS = 0;
-            let sumMenginjil = 0;
-            let sumRenungan = 0;
-            let sumBacaAlkitab = 0;
-
-            for (let k = 1; k < logKegiatan.length; k++) {
-                sumBelajarSS += Number(logKegiatan[k][3]) || 0;
-                sumMenginjil += Number(logKegiatan[k][4]) || 0;
-                sumRenungan += Number(logKegiatan[k][5]) || 0;
-                sumBacaAlkitab += Number(logKegiatan[k][6]) || 0;
-            }
-
             document.getElementById('kpiAnggotaHadir').textContent = countAnggotaHadir;
             document.getElementById('kpiTamuHadir').textContent = countTamuHadir;
-            document.getElementById('kpiBelajarSS').textContent = sumBelajarSS;
-            document.getElementById('kpiMenginjil').textContent = sumMenginjil;
-            document.getElementById('kpiRenungan').textContent = sumRenungan;
-            document.getElementById('kpiBacaAlkitab').textContent = sumBacaAlkitab;
+            document.getElementById('kpiBelajarSS').textContent = countBelajarSS;
+            document.getElementById('kpiMenginjil').textContent = countMenginjil;
+            document.getElementById('kpiRenungan').textContent = countRenungan;
+            document.getElementById('kpiBacaAlkitab').textContent = countBacaAlkitab;
 
             let pAnggota = totalHadirSesi > 0 ? Math.round((countAnggotaHadir / totalHadirSesi) * 100) : 0;
             let pTamu = totalHadirSesi > 0 ? Math.round((countTamuHadir / totalHadirSesi) * 100) : 0;
+            let pBelajar = totalHadirSesi > 0 ? Math.round((countBelajarSS / totalHadirSesi) * 100) : 0;
+            let pMenginjil = totalHadirSesi > 0 ? Math.round((countMenginjil / totalHadirSesi) * 100) : 0;
+            let pRenungan = totalHadirSesi > 0 ? Math.round((countRenungan / totalHadirSesi) * 100) : 0;
+            let pBaca = totalHadirSesi > 0 ? Math.round((countBacaAlkitab / totalHadirSesi) * 100) : 0;
 
             document.getElementById('kpiAnggotaHadirSub').textContent = `👥 ${pAnggota}% dari Total Hadir`;
             document.getElementById('kpiTamuHadirSub').textContent = `🤝 ${pTamu}% dari Total Hadir`;
+            document.getElementById('kpiBelajarSSSub').textContent = `📖 ${pBelajar}% dari Total Hadir`;
+            document.getElementById('kpiMenginjilSub').textContent = `📢 ${pMenginjil}% dari Total Hadir`;
+            document.getElementById('kpiRenunganSub').textContent = `☀️ ${pRenungan}% dari Total Hadir`;
+            document.getElementById('kpiBacaAlkitabSub').textContent = `📜 ${pBaca}% dari Total Hadir`;
 
             const tbody = document.getElementById('siswaTableBody'); tbody.innerHTML = '';
             let kelasStat = {};
             
             Object.keys(siswaMap).forEach(id => {
-                let s = siswaMap[id]; 
-                let persen = s.total > 0 ? Math.round((s.hadir / s.total) * 100) : 0;
+                let s = siswaMap[id]; let persen = s.total > 0 ? Math.round((s.hadir / s.total) * 100) : 0;
                 if(!kelasStat[s.kelas]) kelasStat[s.kelas] = { hadir: 0, total: 0 };
                 kelasStat[s.kelas].hadir += s.hadir; kelasStat[s.kelas].total += s.total;
 
-                tbody.innerHTML += `
-                <tr class="hover:bg-slate-50">
+                tbody.innerHTML += `<tr class="hover:bg-slate-50">
                     <td class="p-3 font-semibold text-slate-700">${s.name}</td>
                     <td class="p-3 text-2xs"><span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md font-medium">${s.kelas}</span></td>
-                    <td class="p-3 text-2xs"><span class="bg-blue-50 text-blue-600 border border-blue-100 px-2.5 py-1 rounded-md font-semibold">${s.kategori}</span></td>
                     <td class="p-3 text-center text-emerald-600 font-bold">${s.hadir}</td>
                     <td class="p-3 text-center text-rose-500">${s.total - s.hadir}</td>
+                    <td class="p-3 text-center font-mono font-bold ${persen >= 80 ? 'text-emerald-600' : 'text-amber-500'}">${persen}%</td>
                     <td class="p-3 text-right space-x-1 whitespace-nowrap">
-                        <button onclick="bukaModalEdit('${id}', '${s.name}', '${s.kelas}', '${s.kategori}')" class="bg-slate-100 hover:bg-slate-200 text-blue-600 text-2xs font-bold px-2.5 py-1.5 rounded-xl border border-slate-200 cursor-pointer transition-colors">✏️ Edit</button>
-                        <button onclick="hapusSiswaDariMasterCloud('${id}', '${s.name}')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 text-2xs font-bold px-2.5 py-1.5 rounded-xl border border-rose-200 cursor-pointer transition-colors">💥 Hapus</button>
+                        <button onclick="bukaModalEdit('${id}', '${s.name}', '${s.kelas}')" class="bg-slate-100 hover:bg-slate-200 text-blue-600 text-2xs font-bold px-2.5 py-1.5 rounded-xl border border-slate-200 cursor-pointer transition-colors">✏️ Edit</button>
+                        <button onclick="hapusSiswaDariMasterCloud('${id}', '${s.name}', this)" class="bg-rose-50 hover:bg-rose-100 text-rose-600 text-2xs font-bold px-2.5 py-1.5 rounded-xl border border-rose-200 cursor-pointer transition-colors">💥 Hapus</button>
                     </td>
                 </tr>`;
             });
@@ -669,12 +657,13 @@
                 containerK.innerHTML += `<div class="p-3 bg-slate-50 rounded-xl border border-slate-200"><div class="flex justify-between items-center mb-1 text-2xs"><span class="font-bold text-slate-700">${nk}</span><span class="font-bold text-slate-800">${pk}%</span></div><div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden"><div class="h-1.5 rounded-full ${pk >= 80 ? 'bg-emerald-500' : 'bg-amber-500'}" style="width: ${pk}%"></div></div></div>`;
             });
 
-            // Olah tren absensi per tanggal
             let trenMap = {};
             for(let j = 1; j < logAbsensi.length; j++) {
                 let tgl = logAbsensi[j][4];
                 if (tgl) {
-                    if (tgl.indexOf && tgl.indexOf('T') !== -1) { tgl = tgl.split('T')[0]; }
+                    if (tgl.indexOf && tgl.indexOf('T') !== -1) {
+                        tgl = tgl.split('T')[0];
+                    }
                     if(!trenMap[tgl]) trenMap[tgl] = { h: 0, t: 0 };
                     trenMap[tgl].t += 1; 
                     if(logAbsensi[j][5] === "Hadir") trenMap[tgl].h += 1;
@@ -692,10 +681,9 @@
             });
         }
 
-        function bukaModalEdit(id, nama, kelasAktif, kategori) {
+        function bukaModalEdit(id, nama, kelasAktif) {
             document.getElementById('editSiswaId').value = id;
             document.getElementById('editSiswaNama').value = nama;
-            document.getElementById('editSiswaKategori').value = kategori;
             
             const selectK = document.getElementById('editSiswaKelasSelect');
             selectK.innerHTML = '';
@@ -713,7 +701,6 @@
             const id = document.getElementById('editSiswaId').value;
             const namaBaru = document.getElementById('editSiswaNama').value.trim();
             const kelasBaru = document.getElementById('editSiswaKelasSelect').value;
-            const kategoriBaru = document.getElementById('editSiswaKategori').value;
             const btn = document.getElementById('btnSimpanEditSiswa');
             const txt = document.getElementById('textSimpanEditSiswa');
 
@@ -724,7 +711,7 @@
 
             fetch(APP_SCRIPT_URL, {
                 method: "POST", mode: "cors",
-                body: JSON.stringify({ aksi: "edit_master", id_user: id, nama: namaBaru, kelas: kelasBaru, kategori: kategoriBaru })
+                body: JSON.stringify({ aksi: "edit_master", id_user: id, nama: namaBaru, kelas: kelasBaru })
             })
             .then(res => res.json())
             .then(data => {
@@ -774,8 +761,7 @@
                     aksi: "tambah_master", 
                     id_user: document.getElementById('memberId').value.trim(), 
                     nama: document.getElementById('memberName').value.trim(), 
-                    kelas: memberClassSelect.options[memberClassSelect.selectedIndex].text,
-                    kategori: document.getElementById('memberCategory').value
+                    kelas: memberClassSelect.options[memberClassSelect.selectedIndex].text 
                 }) 
             })
             .then(() => { 
@@ -788,14 +774,15 @@
             });
         });
 
-        function hapusKelasDariMasterCloud() {
+        function hapusKelasDariMasterCloud(btn) {
             const activeClass = appData.classes.find(c => c.id == currentClassId);
             if(!activeClass || !confirm(`Hapus kelas master ${activeClass.name}? Semua siswa di kelas ini tidak akan memiliki wadah kelas.`)) return;
             fetch(APP_SCRIPT_URL, { method: "POST", mode: "cors", body: JSON.stringify({ aksi: "hapus_kelas_master", nama_kelas: activeClass.name }) }).then(() => { currentClassId = null; muatDataDariSheets(); });
         }
 
-        function hapusSiswaDariMasterCloud(id, nama) {
+        function hapusSiswaDariMasterCloud(id, nama, btn) {
             if(!confirm(`Apakah Anda yakin ingin menghapus ${nama} secara permanen?`)) return;
+            btn.disabled = true; btn.textContent = "⏳...";
             fetch(APP_SCRIPT_URL, { method: "POST", mode: "cors", body: JSON.stringify({ aksi: "hapus_master", id_user: id }) })
             .then(() => muatDataRekapTotal());
         }
