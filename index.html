@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Absensi SS GMAHK Kebayoran</title>
+    <title>Sistem Absensi Terpadu</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
@@ -33,34 +33,34 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased pb-12">
 
-    <!-- TOP BAR -->
+    <!-- TOP BAR (RESPONSIF UNTUK HP) -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-lg shadow-sm">A</div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 md:h-16 flex flex-col md:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-3 w-full md:w-auto">
+                <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-lg shadow-sm shrink-0">A</div>
                 <div>
                     <h1 class="font-bold text-slate-900 text-sm sm:text-base tracking-tight leading-tight">Sistem Absensi Terpadu</h1>
                     <p class="text-3xs sm:text-2xs text-slate-400 font-medium tracking-wide uppercase">Manajemen & Komitmen Jemaat</p>
                 </div>
             </div>
-            <div class="flex items-center gap-4">
-                <!-- Navigasi Halaman Halaman/Tab -->
-                <nav class="flex bg-slate-100 p-1 rounded-xl text-xs font-bold">
-                    <button onclick="switchPage('absensi')" id="btnTabAbsensi" class="px-3 py-1.5 rounded-lg transition-all cursor-pointer bg-white text-blue-600 shadow-xs">Absensi & Komitmen</button>
-                    <button onclick="switchPage('manajemen')" id="btnTabManajemen" class="px-3 py-1.5 rounded-lg transition-all cursor-pointer text-slate-600 hover:text-slate-900">Manajemen & KPI</button>
+            <div class="flex items-center justify-between md:justify-end gap-3 w-full md:w-auto border-t border-slate-100 pt-3 md:pt-0 md:border-none">
+                <!-- Navigasi Halaman -->
+                <nav class="flex bg-slate-100 p-1 rounded-xl text-3xs sm:text-xs font-bold">
+                    <button onclick="switchPage('absensi')" id="btnTabAbsensi" class="px-2.5 py-1.5 rounded-lg transition-all cursor-pointer bg-white text-blue-600 shadow-xs whitespace-nowrap">Absensi & Komitmen</button>
+                    <button onclick="switchPage('manajemen')" id="btnTabManajemen" class="px-2.5 py-1.5 rounded-lg transition-all cursor-pointer text-slate-600 hover:text-slate-900 whitespace-nowrap">Manajemen & KPI</button>
                 </nav>
-                <input type="date" id="attendanceDateInput" class="border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-600 bg-slate-50 focus:outline-blue-600 focus:bg-white transition-all">
+                <input type="date" id="attendanceDateInput" class="border border-slate-300 rounded-xl px-2.5 py-1.5 text-3xs sm:text-xs font-semibold text-slate-600 bg-slate-50 focus:outline-blue-600 focus:bg-white transition-all">
             </div>
         </div>
     </header>
 
     <!-- HALAMAN 1: ABSENSI & KOMITMEN -->
-    <div id="pageAbsensi" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div id="pageAbsensi" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 md:mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         <!-- KOLOM KIRI & TENGAH: AREA UTAMA ABSENSI -->
-        <div class="lg:col-span-2 flex flex-col gap-6">
+        <div class="lg:col-span-2 flex flex-col gap-4 md:gap-6">
             <!-- TABS PILIHAN KELAS -->
             <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Pilih Kelas / Kelompok</h3>
+                <h3 class="text-3xs sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Pilih Kelas / Kelompok</h3>
                 <div id="classTabs" class="flex flex-wrap gap-2">
                     <p class="text-xs text-slate-400 italic">Memuat daftar kelas...</p>
                 </div>
@@ -70,28 +70,28 @@
             <div id="attendanceArea" class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden hidden">
                 <div class="p-4 sm:p-6 border-b border-slate-100 flex justify-between items-center bg-linear-to-r from-white to-slate-50/50">
                     <div>
-                        <h2 id="selectedClassName" class="text-lg font-bold text-slate-900">Nama Kelas</h2>
-                        <p id="memberCount" class="text-xs text-slate-400 font-medium">0 Anggota Terdaftar</p>
+                        <h2 id="selectedClassName" class="text-base sm:text-lg font-bold text-slate-900">Nama Kelas</h2>
+                        <p id="memberCount" class="text-3xs sm:text-xs text-slate-400 font-medium">0 Anggota Terdaftar</p>
                     </div>
                 </div>
 
                 <!-- ROW KPI MINI KELAS AKTIF -->
                 <div class="grid grid-cols-4 gap-2 px-4 pt-4 text-center">
-                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                        <p class="text-3xs font-bold text-slate-400 uppercase">Total</p>
-                        <p id="kpiTotal" class="text-base font-black text-slate-700 mt-0.5">0</p>
+                    <div class="bg-slate-50 p-2 rounded-xl border border-slate-100">
+                        <p class="text-4xs sm:text-3xs font-bold text-slate-400 uppercase tracking-tight">Total</p>
+                        <p id="kpiTotal" class="text-sm sm:text-base font-black text-slate-700 mt-0.5">0</p>
                     </div>
-                    <div class="bg-emerald-50/50 p-2.5 rounded-xl border border-emerald-100">
-                        <p class="text-3xs font-bold text-emerald-600 uppercase">Hadir</p>
-                        <p id="kpiHadir" class="text-base font-black text-emerald-600 mt-0.5">0</p>
+                    <div class="bg-emerald-50/50 p-2 rounded-xl border border-emerald-100">
+                        <p class="text-4xs sm:text-3xs font-bold text-emerald-600 uppercase tracking-tight">Hadir</p>
+                        <p id="kpiHadir" class="text-sm sm:text-base font-black text-emerald-600 mt-0.5">0</p>
                     </div>
-                    <div class="bg-rose-50/50 p-2.5 rounded-xl border border-rose-100">
-                        <p class="text-3xs font-bold text-rose-600 uppercase">Absen</p>
-                        <p id="kpiAbsen" class="text-base font-black text-rose-600 mt-0.5">0</p>
+                    <div class="bg-rose-50/50 p-2 rounded-xl border border-rose-100">
+                        <p class="text-4xs sm:text-3xs font-bold text-rose-600 uppercase tracking-tight">Absen</p>
+                        <p id="kpiAbsen" class="text-sm sm:text-base font-black text-rose-600 mt-0.5">0</p>
                     </div>
-                    <div class="bg-blue-50/50 p-2.5 rounded-xl border border-blue-100">
-                        <p class="text-3xs font-bold text-blue-600 uppercase">% Rasio</p>
-                        <p id="kpiPersen" class="text-base font-black text-blue-600 mt-0.5">0%</p>
+                    <div class="bg-blue-50/50 p-2 rounded-xl border border-blue-100">
+                        <p class="text-4xs sm:text-3xs font-bold text-blue-600 uppercase tracking-tight">% Rasio</p>
+                        <p id="kpiPersen" class="text-sm sm:text-base font-black text-blue-600 mt-0.5">0%</p>
                     </div>
                 </div>
 
@@ -111,23 +111,23 @@
                     </table>
                 </div>
 
-                <!-- Card Mobile -->
-                <div id="memberMobileCards" class="sm:hidden p-4 flex flex-col gap-3 bg-slate-50/50"></div>
+                <!-- Card Mobile (DIOPTIMALKAN UNTUK HP AGAR TIDAK BERANTAKAN) -->
+                <div id="memberMobileCards" class="sm:hidden p-3 flex flex-col gap-3 bg-slate-50/50"></div>
             </div>
         </div>
 
         <!-- KOLOM KANAN: REGISTRASI CEPAT -->
-        <div class="flex flex-col gap-6">
+        <div class="flex flex-col gap-4 md:gap-6">
             <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
-                <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-1.5">👤 Registrasi Anggota Baru</h3>
+                <h3 class="text-3xs sm:text-xs font-bold text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-1.5">👤 Registrasi Anggota Baru</h3>
                 <form id="memberForm" class="flex flex-col gap-3 text-xs">
                     <div>
                         <label class="block text-slate-500 mb-1">ID Anggota / Nomor Induk</label>
-                        <input type="text" id="memberId" required placeholder="Contoh: 2026001" class="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-blue-600">
+                        <input type="text" id="memberId" required placeholder="Contoh: 2026001" class="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-blue-600 bg-white">
                     </div>
                     <div>
                         <label class="block text-slate-500 mb-1">Nama Lengkap</label>
-                        <input type="text" id="memberName" required placeholder="Contoh: John Doe" class="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-blue-600">
+                        <input type="text" id="memberName" required placeholder="Contoh: John Doe" class="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-blue-600 bg-white">
                     </div>
                     <div>
                         <label class="block text-slate-500 mb-1">Penempatan Kelas</label>
@@ -141,54 +141,51 @@
         </div>
     </div>
 
-    <!-- HALAMAN 2: DASHBOARD KPI & MANAJEMEN DATA MASTER (TERPISAH) -->
-    <div id="pageManajemen" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6 hidden">
+    <!-- HALAMAN 2: DASHBOARD KPI & MANAJEMEN DATA MASTER (TERPISAH & RESPONSIF) -->
+    <div id="pageManajemen" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 md:mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 hidden">
         
         <!-- KOLOM UTAMA KIRI: MANAJEMEN DATA EDIT & HAPUS ANGGOTA -->
-        <div class="lg:col-span-2 flex flex-col gap-6">
+        <div class="lg:col-span-2 flex flex-col gap-4 md:gap-6">
             <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
-                <div class="p-4 sm:p-5 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div>
-                        <h3 class="font-bold text-slate-900 text-base">📋 Basis Data & Manajemen Anggota</h3>
-                        <p class="text-xs text-slate-400 font-medium">Ubah penempatan kelas atau hapus data anggota aktif</p>
+                        <h3 class="font-bold text-slate-900 text-sm sm:text-base">📋 Basis Data & Manajemen Anggota</h3>
+                        <p class="text-3xs sm:text-xs text-slate-400 font-medium">Ubah penempatan kelas atau hapus data anggota aktif</p>
                     </div>
                     <input type="text" id="searchAnggota" oninput="filterManajemenAnggota()" placeholder="Cari nama anggota..." class="text-xs px-3 py-2 border border-slate-300 rounded-xl w-full sm:w-64 bg-white focus:outline-blue-600">
                 </div>
                 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-xs">
+                <!-- SCROLL HORIZONTAL PADA TABLE MOBILE AGAR TIDAK MELEBAR -->
+                <div class="overflow-x-auto w-full">
+                    <table class="w-full text-left border-collapse text-xs min-w-[500px]">
                         <thead>
                             <tr class="bg-slate-100 text-slate-500 font-bold uppercase border-b border-slate-200">
                                 <th class="p-3 w-20">ID</th>
                                 <th class="p-3">Nama Lengkap</th>
                                 <th class="p-3">Kelas Saat Ini</th>
-                                <th class="p-3 text-center w-40">Opsi Tindakan</th>
+                                <th class="p-3 text-center w-36">Opsi Tindakan</th>
                             </tr>
                         </thead>
-                        <tbody id="managementTableBody" class="divide-y divide-slate-100 text-slate-700">
-                            <!-- Diisi via JS -->
-                        </tbody>
+                        <tbody id="managementTableBody" class="divide-y divide-slate-100 text-slate-700"></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
         <!-- KOLOM KANAN: DASHBOARD KPI KELAS GLOBAL & KELAS MASTER -->
-        <div class="flex flex-col gap-6">
+        <div class="flex flex-col gap-4 md:gap-6">
             <!-- PANEL DAHBOARD KPI GLOBAL KELAS -->
             <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
-                <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3 flex items-center gap-1.5">📈 Performa & Ringkasan KPI Kelas</h3>
-                <div id="kpiGlobalContainer" class="flex flex-col gap-3">
-                    <!-- List KPI Global diisi via JS -->
-                </div>
+                <h3 class="text-3xs sm:text-xs font-bold text-slate-900 uppercase tracking-wider mb-3 flex items-center gap-1.5">📈 Performa & Ringkasan KPI Kelas</h3>
+                <div id="kpiGlobalContainer" class="flex flex-col gap-3"></div>
             </div>
 
             <!-- MANAJEMEN MASTER KELAS -->
             <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
-                <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-1.5">🏫 Manajemen Master Kelas</h3>
+                <h3 class="text-3xs sm:text-xs font-bold text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-1.5">🏫 Manajemen Master Kelas</h3>
                 <form id="classForm" class="flex flex-col gap-3 text-xs">
                     <div class="flex gap-2">
-                        <input type="text" id="newClassName" required placeholder="Nama Kelas Baru" class="flex-1 p-2.5 border border-slate-300 rounded-xl focus:outline-blue-600">
+                        <input type="text" id="newClassName" required placeholder="Nama Kelas Baru" class="flex-1 p-2.5 border border-slate-300 rounded-xl focus:outline-blue-600 bg-white">
                         <button type="submit" id="btnSubmitKelas" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 rounded-xl transition-colors cursor-pointer">Tambah</button>
                     </div>
                 </form>
@@ -231,21 +228,19 @@
 
             if(pageName === 'absensi') {
                 pAbsen.classList.remove('hidden'); pManajemen.classList.add('hidden');
-                tabAbsen.className = "px-3 py-1.5 rounded-lg transition-all cursor-pointer bg-white text-blue-600 shadow-xs";
-                tabManajemen.className = "px-3 py-1.5 rounded-lg transition-all cursor-pointer text-slate-600 hover:text-slate-900";
+                tabAbsen.className = "px-2.5 py-1.5 rounded-lg transition-all cursor-pointer bg-white text-blue-600 shadow-xs whitespace-nowrap";
+                tabManajemen.className = "px-2.5 py-1.5 rounded-lg transition-all cursor-pointer text-slate-600 hover:text-slate-900 whitespace-nowrap";
             } else {
                 pAbsen.classList.add('hidden'); pManajemen.classList.remove('hidden');
-                tabManajemen.className = "px-3 py-1.5 rounded-lg transition-all cursor-pointer bg-white text-blue-600 shadow-xs";
-                tabAbsen.className = "px-3 py-1.5 rounded-lg transition-all cursor-pointer text-slate-600 hover:text-slate-900";
+                tabManajemen.className = "px-2.5 py-1.5 rounded-lg transition-all cursor-pointer bg-white text-blue-600 shadow-xs whitespace-nowrap";
+                tabAbsen.className = "px-2.5 py-1.5 rounded-lg transition-all cursor-pointer text-slate-600 hover:text-slate-900 whitespace-nowrap";
                 renderHalamanManajemenDanKpi();
             }
         }
 
         function muatDataDariSheets() {
-            const tglTerpilih = attendanceDateInput.value;
             classTabs.innerHTML = '<p class="text-xs text-blue-600 italic animate-pulse">⏳ Membaca Sesi Absensi...</p>';
-            
-            fetch(`${APP_SCRIPT_URL}?tanggal=${tglTerpilih}`, { method: "GET" })
+            fetch(`${APP_SCRIPT_URL}?tanggal=${attendanceDateInput.value}`, { method: "GET" })
             .then(res => res.json())
             .then(data => {
                 if(data.status === "success") {
@@ -268,7 +263,7 @@
             appData.classes.forEach(c => {
                 const btn = document.createElement('button');
                 btn.textContent = c.name;
-                btn.className = `px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${c.id == currentClassId ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
+                btn.className = `px-3.5 py-2 text-3xs sm:text-xs font-bold rounded-xl transition-all cursor-pointer ${c.id == currentClassId ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
                 btn.onclick = () => { currentClassId = c.id; renderClassTabs(); renderTableSiswaAbsen(); };
                 classTabs.appendChild(btn);
             });
@@ -288,7 +283,6 @@
             });
         }
 
-        // TABEL UTAMA ABSENSI DENGAN LOADING PROSES INSTAN
         function renderTableSiswaAbsen() {
             const activeClass = appData.classes.find(c => c.id == currentClassId);
             if (!activeClass) { attendanceArea.classList.add('hidden'); return; }
@@ -307,29 +301,30 @@
 
             let kmt = activeClass.komitmen || { belajar_ss: 0, menginjil: 0, renungan_pagi: 0, bacaan_alkitab: 0 };
             document.getElementById('panelAgregatKelas').innerHTML = `
-                <div class="m-4 bg-blue-50/50 p-4 rounded-2xl border border-blue-100">
-                    <h4 class="text-xs font-bold text-blue-800 uppercase tracking-wider mb-2.5">📊 Indikator Komitmen Kolektif Kelas</h4>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                        <div><label class="block text-slate-600 mb-1">📖 Belajar SS</label><input type="number" id="kls_belajar" value="${kmt.belajar_ss}" class="w-full p-2 border rounded-xl text-center font-bold"></div>
-                        <div><label class="block text-slate-600 mb-1">📢 Menginjil</label><input type="number" id="kls_menginjil" value="${kmt.menginjil}" class="w-full p-2 border rounded-xl text-center font-bold"></div>
-                        <div><label class="block text-slate-600 mb-1">☀️ Renungan Pagi</label><input type="number" id="kls_renungan" value="${kmt.renungan_pagi}" class="w-full p-2 border rounded-xl text-center font-bold"></div>
-                        <div><label class="block text-slate-600 mb-1">📜 Baca Alkitab</label><input type="number" id="kls_bacaan" value="${kmt.bacaan_alkitab}" class="w-full p-2 border rounded-xl text-center font-bold"></div>
+                <div class="m-3 bg-blue-50/50 p-3.5 rounded-2xl border border-blue-100">
+                    <h4 class="text-4xs sm:text-xs font-bold text-blue-800 uppercase tracking-wider mb-2.5">📊 Indikator Komitmen Kolektif Kelas</h4>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-3xs sm:text-xs">
+                        <div><label class="block text-slate-600 mb-1">📖 Belajar SS</label><input type="number" id="kls_belajar" value="${kmt.belajar_ss}" class="w-full p-2 border rounded-xl text-center font-bold bg-white"></div>
+                        <div><label class="block text-slate-600 mb-1">📢 Menginjil</label><input type="number" id="kls_menginjil" value="${kmt.menginjil}" class="w-full p-2 border rounded-xl text-center font-bold bg-white"></div>
+                        <div><label class="block text-slate-600 mb-1">☀️ Renungan Pagi</label><input type="number" id="kls_renungan" value="${kmt.renungan_pagi}" class="w-full p-2 border rounded-xl text-center font-bold bg-white"></div>
+                        <div><label class="block text-slate-600 mb-1">📜 Baca Alkitab</label><input type="number" id="kls_bacaan" value="${kmt.bacaan_alkitab}" class="w-full p-2 border rounded-xl text-center font-bold bg-white"></div>
                     </div>
                     <div class="mt-3 flex justify-end">
-                        <button onclick="simpanKomitmenKolektifKelas()" id="btnSimpanKomitmenKls" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-1.5 rounded-xl text-2xs cursor-pointer">💾 Simpan Indikator Kelas</button>
+                        <button onclick="simpanKomitmenKolektifKelas()" id="btnSimpanKomitmenKls" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-xl text-3xs cursor-pointer w-full sm:w-auto text-center">💾 Simpan Indikator Kelas</button>
                     </div>
                 </div>`;
 
             memberTableBody.innerHTML = ''; memberMobileCards.innerHTML = '';
             if(activeClass.members.length === 0) {
                 memberTableBody.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-slate-400 italic text-xs">Belum ada anggota.</td></tr>`;
+                memberMobileCards.innerHTML = `<p class="p-6 bg-white border border-slate-200 rounded-xl text-center text-slate-400 italic text-xs">Belum ada anggota di kelas ini.</p>`;
                 return;
             }
 
             activeClass.members.forEach(m => {
                 let status = m.absenHariIni ? m.absenHariIni.status : 'Belum Absen';
-                let bh = status === 'Hadir' ? 'bg-emerald-600 text-white font-bold' : 'bg-slate-100 text-slate-600';
-                let ba = status === 'Tidak Hadir' ? 'bg-rose-600 text-white font-bold' : 'bg-slate-100 text-slate-600';
+                let bh = status === 'Hadir' ? 'bg-emerald-600 text-white font-bold shadow-xs' : 'bg-slate-100 text-slate-600';
+                let ba = status === 'Tidak Hadir' ? 'bg-rose-600 text-white font-bold shadow-xs' : 'bg-slate-100 text-slate-600';
 
                 // Desktop Row
                 const tr = document.createElement('tr');
@@ -345,40 +340,49 @@
                     </td>`;
                 memberTableBody.appendChild(tr);
 
-                // Mobile Card
+                // Mobile Card (STRUKTUR RAPI KHUSUS DI HP)
                 const card = document.createElement('div');
-                card.className = "p-4 bg-white rounded-2xl border border-slate-200 flex flex-col gap-3";
+                card.className = `p-3.5 bg-white rounded-xl border flex flex-col gap-3 transition-all ${status === 'Hadir' ? 'border-emerald-200 bg-emerald-50/10' : status === 'Tidak Hadir' ? 'border-rose-200 bg-rose-50/10' : 'border-slate-200'}`;
                 card.innerHTML = `
-                    <div><h4 class="font-bold text-slate-800">${m.name}</h4><p class="text-3xs text-slate-400">ID: ${m.id} | ${status}</p></div>
-                    <div class="grid grid-cols-3 gap-1.5 text-2xs" id="actions-mb-${m.id}">
-                        <button onclick="kirimAbsenInstan('${m.id}', '${m.name}', 'Hadir', 'mb')" class="py-2 rounded-xl font-bold ${bh}">Hadir</button>
-                        <button onclick="kirimAbsenInstan('${m.id}', '${m.name}', 'Tidak Hadir', 'mb')" class="py-2 rounded-xl font-bold ${ba}">Absen</button>
-                        <button onclick="hapusLogAbsenInstan('${m.id}', '${m.name}', 'mb')" class="py-2 rounded-xl bg-slate-100 text-slate-400">Hapus</button>
+                    <div class="flex justify-between items-center">
+                        <div class="min-w-0 flex-1">
+                            <h4 class="font-bold text-slate-800 text-sm truncate">${m.name}</h4>
+                            <p class="text-4xs font-mono text-slate-400 mt-0.5">ID: ${m.id} | Status: <span class="font-bold ${status === 'Hadir' ? 'text-emerald-600': status === 'Tidak Hadir' ? 'text-rose-600':'text-slate-400'}">${status}</span></p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-3xs w-full" id="actions-mb-${m.id}">
+                        <button onclick="kirimAbsenInstan('${m.id}', '${m.name}', 'Hadir', 'mb')" class="py-2 rounded-xl text-center font-bold cursor-pointer ${bh}">Hadir</button>
+                        <button onclick="kirimAbsenInstan('${m.id}', '${m.name}', 'Tidak Hadir', 'mb')" class="py-2 rounded-xl text-center font-bold cursor-pointer ${ba}">Absen</button>
+                        <button onclick="hapusLogAbsenInstan('${m.id}', '${m.name}', 'mb')" class="py-2 rounded-xl text-center font-medium bg-slate-100 text-slate-400 cursor-pointer">Hapus</button>
                     </div>`;
                 memberMobileCards.appendChild(card);
             });
         }
 
-        // PROSES ABSEN INSTAN + LOADING
+        // POST ACTIONS + LOADING PROSES
         function kirimAbsenInstan(idUser, namaUser, statusPilihan, mode) {
             const container = document.getElementById(`actions-${mode}-${idUser}`);
             const htmlLama = container.innerHTML;
-            container.innerHTML = `<span class="spinner-dark animate-spin my-1 mx-4"></span> <span class="text-3xs text-slate-400 self-center">Menyimpan...</span>`;
+            container.innerHTML = mode === 'pc' 
+                ? `<span class="spinner-dark animate-spin my-1 mx-4"></span> <span class="text-3xs text-slate-400 self-center">Menyimpan...</span>`
+                : `<div class="col-span-3 text-center py-1 text-3xs text-slate-400 font-medium"><span class="spinner-dark animate-spin mr-1 align-middle"></span> Memperbarui status jemaat...</div>`;
 
             fetch(APP_SCRIPT_URL, {
                 method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
                 body: JSON.stringify({ aksi: "absen", id_user: idUser, nama: namaUser, kelas: appData.classes.find(c=>c.id==currentClassId).name, status: statusPilihan, tanggal: attendanceDateInput.value })
             })
             .then(res => res.json())
-            .then(data => { if(data.status === "success") muatDataDariSheets(); else { alert("Gagal"); container.innerHTML = htmlLama; }})
+            .then(data => { if(data.status === "success") muatDataDariSheets(); else { alert("Gagal memperbarui data cloud."); container.innerHTML = htmlLama; }})
             .catch(() => { container.innerHTML = htmlLama; });
         }
 
         function hapusLogAbsenInstan(idUser, namaUser, mode) {
-            if(!confirm(`Hapus log kehadiran ${namaUser}?`)) return;
+            if(!confirm(`Hapus log kehadiran harian untuk ${namaUser}?`)) return;
             const container = document.getElementById(`actions-${mode}-${idUser}`);
             const htmlLama = container.innerHTML;
-            container.innerHTML = `<span class="spinner-dark animate-spin my-1 mx-4"></span>`;
+            container.innerHTML = mode === 'pc' 
+                ? `<span class="spinner-dark animate-spin my-1 mx-4"></span>`
+                : `<div class="col-span-3 text-center py-1 text-3xs text-slate-400 font-medium"><span class="spinner-dark animate-spin mr-1 align-middle"></span> Menghapus log harian...</div>`;
 
             fetch(APP_SCRIPT_URL, {
                 method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
@@ -389,14 +393,12 @@
             .catch(() => { container.innerHTML = htmlLama; });
         }
 
-        // HALAMAN TERPISAH: RENDER KPI & EDIT/HAPUS ANGGOTA MASTER
         function renderHalamanManajemenDanKpi() {
             managementTableBody.innerHTML = '';
             kpiGlobalContainer.innerHTML = '';
 
             let allMembers = [];
             appData.classes.forEach(c => {
-                // Hitung KPI Per Kelas
                 let tot = c.members.length;
                 let hdr = c.members.filter(m => m.absenHariIni && m.absenHariIni.status === 'Hadir').length;
                 let rasio = tot > 0 ? Math.round((hdr / tot) * 100) : 0;
@@ -406,7 +408,6 @@
                 divKpi.innerHTML = `<div><p class="font-bold text-slate-800">${c.name}</p><p class="text-3xs text-slate-400">${tot} Anggota - ${hdr} Hadir</p></div><div class="text-right"><span class="px-2.5 py-1 rounded-full font-black text-3xs ${rasio >= 75 ? 'bg-emerald-100 text-emerald-700':'bg-amber-100 text-amber-700'}">${rasio}% Rasio</span></div>`;
                 kpiGlobalContainer.appendChild(divKpi);
 
-                // Gabung Data untuk Grid Manajemen Anggota
                 c.members.forEach(m => { allMembers.push({ id: m.id, name: m.name, className: c.name }); });
             });
 
@@ -420,58 +421,51 @@
 
             const terfilter = window.cachedMembersList.filter(m => m.name.toLowerCase().includes(query) || m.id.toLowerCase().includes(query));
             if(terfilter.length === 0) {
-                managementTableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic">Data anggota tidak ditemukan.</td></tr>`;
+                managementTableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic">Data tidak ditemukan.</td></tr>`;
                 return;
             }
 
             terfilter.forEach(m => {
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition-colors border-b border-slate-100";
+                tr.className = "hover:bg-slate-50 border-b border-slate-100";
                 tr.innerHTML = `
                     <td class="p-3 font-mono text-slate-400">${m.id}</td>
                     <td class="p-3 font-bold text-slate-800">${m.name}</td>
                     <td class="p-3 text-slate-500">${m.className}</td>
-                    <td class="p-3 text-center flex justify-center gap-1">
-                        <button onclick="aksiEditAnggota('${m.id}', '${m.name}', '${m.className}')" class="bg-blue-50 text-blue-600 font-bold px-2 py-1 rounded hover:bg-blue-100 transition-colors cursor-pointer">Ubah</button>
-                        <button onclick="aksiHapusAnggota('${m.id}', '${m.name}')" class="bg-rose-50 text-rose-600 font-bold px-2 py-1 rounded hover:bg-rose-100 transition-colors cursor-pointer">Hapus</button>
+                    <td class="p-3 text-center flex justify-center gap-1.5">
+                        <button onclick="aksiEditAnggota('${m.id}', '${m.name}', '${m.className}')" class="bg-blue-50 text-blue-600 font-bold px-2 py-1 rounded hover:bg-blue-100 cursor-pointer">Ubah</button>
+                        <button onclick="aksiHapusAnggota('${m.id}', '${m.name}')" class="bg-rose-50 text-rose-600 font-bold px-2 py-1 rounded hover:bg-rose-100 cursor-pointer">Hapus</button>
                     </td>`;
                 managementTableBody.appendChild(tr);
             });
         }
 
-        // AKSI CRUD: UBAH DATA ANGGOTA (PROMPT EDIT)
         function aksiEditAnggota(id, namaLama, kelasLama) {
             const namaBaru = prompt(`Ubah Nama Lengkap untuk ID ${id}:`, namaLama);
             if(namaBaru === null || namaBaru.trim() === "") return;
 
             let opsiKelas = appData.classes.map(c => c.name).join(", ");
-            const kelasBaru = prompt(`Pindahkan ke kelas mana? \nPilihan yang ada: [ ${opsiKelas} ]`, kelasLama);
+            const kelasBaru = prompt(`Pindahkan ke kelas mana? \nPilihan: [ ${opsiKelas} ]`, kelasLama);
             if(kelasBaru === null || kelasBaru.trim() === "") return;
 
             if(!appData.classes.some(c => c.name.toLowerCase() === kelasBaru.trim().toLowerCase())) {
-                alert("Nama kelas salah/tidak terdaftar di sistem master!"); return;
+                alert("Nama kelas salah/tidak terdaftar!"); return;
             }
 
             fetch(APP_SCRIPT_URL, {
                 method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
                 body: JSON.stringify({ aksi: "tambah_master", id_user: id, nama: namaBaru.trim(), kelas: kelasBaru.trim() })
-            })
-            .then(res => res.json())
-            .then(data => { alert("Data Anggota berhasil diperbarui!"); muatDataDariSheets(); });
+            }).then(() => { alert("Data Anggota berhasil diperbarui!"); muatDataDariSheets(); });
         }
 
-        // AKSI CRUD: HAPUS ANGGOTA MASTER
         function aksiHapusAnggota(id, nama) {
             if(!confirm(`Hapus permanen master anggota bernama "${nama}" (ID: ${id})?`)) return;
             fetch(APP_SCRIPT_URL, {
                 method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
-                body: JSON.stringify({ aksi: "hapus_anggota_master", id_user: id }) // Pastikan Apps Script Anda mendukung aksi penanganan hapus ini
-            })
-            .then(() => { alert("Anggota terhapus!"); muatDataDariSheets(); })
-            .catch(() => muatDataDariSheets());
+                body: JSON.stringify({ aksi: "hapus_anggota_master", id_user: id })
+            }).then(() => { alert("Anggota terhapus!"); muatDataDariSheets(); }).catch(() => muatDataDariSheets());
         }
 
-        // PENANGANAN INDIKATOR KOMITMEN KOLEKTIF KELAS
         function simpanKomitmenKolektifKelas() {
             const btn = document.getElementById('btnSimpanKomitmenKls');
             btn.disabled = true; btn.textContent = "⏳ Menyimpan...";
@@ -482,11 +476,9 @@
                     belajar_ss: document.getElementById('kls_belajar').value, menginjil: document.getElementById('kls_menginjil').value,
                     renungan_pagi: document.getElementById('kls_renungan').value, bacaan_alkitab: document.getElementById('kls_bacaan').value
                 })
-            })
-            .then(() => { btn.disabled = false; btn.textContent = "💾 Simpan Indikator Kelas"; muatDataDariSheets(); });
+            }).then(() => { btn.disabled = false; btn.textContent = "💾 Simpan Indikator Kelas"; muatDataDariSheets(); });
         }
 
-        // REGISTRASI ANGGOTA BARU
         document.getElementById('memberForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSubmitSiswa');
@@ -494,15 +486,13 @@
             fetch(APP_SCRIPT_URL, { 
                 method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
                 body: JSON.stringify({ aksi: "tambah_master", id_user: document.getElementById('memberId').value.trim(), nama: document.getElementById('memberName').value.trim(), kelas: memberClassSelect.value }) 
-            })
-            .then(() => { 
+            }).then(() => { 
                 btn.disabled = false; btn.innerHTML = "Simpan Anggota Baru";
                 document.getElementById('memberId').value = ''; document.getElementById('memberName').value = ''; 
                 muatDataDariSheets(); 
             });
         });
 
-        // KELAS MASTER BARU & HAPUS KELAS
         document.getElementById('classForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const inp = document.getElementById('newClassName');
