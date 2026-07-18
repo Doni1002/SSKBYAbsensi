@@ -1,178 +1,493 @@
-function renderTableSiswaAbsen() {
-    const activeClass = appData.classes.find(c => c.id == currentClassId);
-    if (!activeClass) { attendanceArea.classList.add('hidden'); return; }
-    attendanceArea.classList.remove('hidden');
-    selectedClassName.textContent = activeClass.name;
-    memberCount.textContent = `${activeClass.members.length} Anggota`;
-    
-    // =========================================================================
-    // BARU: INJEKSI PANEL INPUT INDIKATOR DATA AGREGAT KELAS DI ATAS TABEL
-    // =========================================================================
-    let kmt = activeClass.komitmen || { belajar_ss: 0, menginjil: 0, renungan_pagi: 0, bacaan_alkitab: 0 };
-    let htmlKomitmenPanel = `
-        <div class="mb-4 bg-blue-50/50 p-4 rounded-2xl border border-blue-100">
-            <h4 class="text-xs font-bold text-blue-800 uppercase tracking-wider mb-2.5">📊 Indikator Komitmen Kolektif Kelas (Input Jumlah Anggota)</h4>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Absensi Terpadu</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        .spinner {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 2px solid #fff;
+            width: 14px;
+            height: 14px;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased pb-12">
+
+    <!-- TOP BAR -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-lg shadow-sm">A</div>
                 <div>
-                    <label class="block text-slate-600 mb-1">📖 Belajar SS</label>
-                    <input type="number" id="kls_belajar" value="${kmt.belajar_ss}" min="0" class="w-full p-2 border border-slate-300 rounded-xl bg-white text-center font-bold text-slate-700 focus:outline-blue-600">
-                </div>
-                <div>
-                    <label class="block text-slate-600 mb-1">📢 Menginjil</label>
-                    <input type="number" id="kls_menginjil" value="${kmt.menginjil}" min="0" class="w-full p-2 border border-slate-300 rounded-xl bg-white text-center font-bold text-slate-700 focus:outline-blue-600">
-                </div>
-                <div>
-                    <label class="block text-slate-600 mb-1">☀️ Renungan Pagi</label>
-                    <input type="number" id="kls_renungan" value="${kmt.renungan_pagi}" min="0" class="w-full p-2 border border-slate-300 rounded-xl bg-white text-center font-bold text-slate-700 focus:outline-blue-600">
-                </div>
-                <div>
-                    <label class="block text-slate-600 mb-1">📜 Baca Alkitab</label>
-                    <input type="number" id="kls_bacaan" value="${kmt.bacaan_alkitab}" min="0" class="w-full p-2 border border-slate-300 rounded-xl bg-white text-center font-bold text-slate-700 focus:outline-blue-600">
+                    <h1 class="font-bold text-slate-900 text-sm sm:text-base tracking-tight leading-tight">Sistem Absensi Terpadu</h1>
+                    <p class="text-3xs sm:text-2xs text-slate-400 font-medium tracking-wide uppercase">Manajemen & Komitmen Jemaat</p>
                 </div>
             </div>
-            <div class="mt-3 flex justify-end">
-                <button onclick="simpanKomitmenKolektifKelas()" id="btnSimpanKomitmenKls" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-1.5 rounded-xl text-2xs cursor-pointer shadow-xs transition-colors flex items-center gap-1">
-                    💾 Simpan Indikator Kelas
-                </button>
+            <div class="flex items-center gap-2">
+                <input type="date" id="attendanceDateInput" class="border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-600 bg-slate-50 focus:outline-blue-600 focus:bg-white transition-all">
             </div>
         </div>
-    `;
-    
-    // Sisipkan panel di atas area tabel (buat container pembungkus jika belum ada di HTML)
-    let infoArea = document.getElementById('attendanceArea');
-    let existingPanel = document.getElementById('panelAgregatKelas');
-    if(existingPanel) existingPanel.remove();
-    
-    let containerPanel = document.createElement('div');
-    containerPanel.id = "panelAgregatKelas";
-    containerPanel.innerHTML = htmlKomitmenPanel;
-    infoArea.insertBefore(containerPanel, infoArea.children[1]);
+    </header>
 
-    memberTableBody.innerHTML = ''; memberMobileCards.innerHTML = '';
-
-    if(activeClass.members.length === 0) {
-        memberTableBody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-400 italic text-xs">Kelas Kosong.</td></tr>`;
-        memberMobileCards.innerHTML = `<p class="p-4 bg-slate-50 border rounded-xl text-center text-slate-400 italic text-xs">Kelas Kosong.</p>`;
-        return;
-    }
-
-    activeClass.members.forEach(m => {
-        let statusAbsen = m.absenHariIni ? m.absenHariIni.status : 'Belum';
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        // Pembuatan 3 Tombol Tindakan Langsung untuk Layar PC
-        let btnHadirStyle = statusAbsen === 'Hadir' ? 'bg-emerald-600 text-white font-bold shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600';
-        let btnAbsenStyle = statusAbsen === 'Tidak Hadir' ? 'bg-rose-600 text-white font-bold shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-rose-50 hover:text-rose-600';
-        
-        let htmlAksiPc = `
-            <div class="inline-flex gap-1.5 text-2xs">
-                <button onclick="kirimAbsenInstan('${m.id}', '${m.name}', 'Hadir')" class="px-3 py-1.5 rounded-lg border border-transparent transition-all cursor-pointer ${btnHadirStyle}">Hadir</button>
-                <button onclick="kirimAbsenInstan('${m.id}', '${m.name}', 'Tidak Hadir')" class="px-3 py-1.5 rounded-lg border border-transparent transition-all cursor-pointer ${btnAbsenStyle}">Absen</button>
-                <button onclick="hapusLogAbsenInstan('${m.id}', '${m.name}')" class="px-2 py-1.5 bg-slate-100 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer" title="Hapus Status">Hapus</button>
-            </div>
-        `;
-        
-        const tr = document.createElement('tr');
-        tr.className = statusAbsen === 'Hadir' ? 'bg-emerald-50/20' : statusAbsen === 'Tidak Hadir' ? 'bg-rose-50/20' : '';
-        tr.innerHTML = `
-            <td class="p-4 font-mono text-xs text-slate-400">${m.id}</td>
-            <td class="p-4 font-semibold text-slate-700">${m.name}</td>
-            <td class="p-4 text-right">${htmlAksiPc}</td>
-        `;
-        memberTableBody.appendChild(tr);
-
-        // Untuk Tampilan Card Mobile
-        const card = document.createElement('div');
-        card.className = `p-4 bg-white rounded-2xl border shadow-2xs flex flex-col gap-3 ${statusAbsen === 'Hadir' ? 'border-emerald-200 bg-emerald-50/10' : statusAbsen === 'Tidak Hadir' ? 'border-rose-200 bg-rose-50/10' : 'border-slate-200'}`;
-        card.innerHTML = `
-            <div class="flex justify-between items-start">
-                <div>
-                    <h4 class="font-bold text-slate-800 text-sm">${m.name}</h4>
-                    <p class="text-2xs font-mono text-slate-400 mt-0.5">ID: ${m.id} | Status: <span class="font-bold">${statusAbsen}</span></p>
+        <!-- KOLOM KIRI & TENGAH: AREA UTAMA ABSENSI -->
+        <div class="lg:col-span-2 flex flex-col gap-6">
+            
+            <!-- TABS PILIHAN KELAS -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Pilih Kelas / Kelompok</h3>
+                <div id="classTabs" class="flex flex-wrap gap-2">
+                    <p class="text-xs text-slate-400 italic">Memuat daftar kelas...</p>
                 </div>
             </div>
-            <div class="grid grid-cols-3 gap-1.5 text-2xs w-full">
-                <button onclick="kirimAbsenInstan('${m.id}', '${m.name}', 'Hadir')" class="py-2 rounded-xl text-center font-bold ${statusAbsen === 'Hadir' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'}">Hadir</button>
-                <button onclick="kirimAbsenInstan('${m.id}', '${m.name}', 'Tidak Hadir')" class="py-2 rounded-xl text-center font-bold ${statusAbsen === 'Tidak Hadir' ? 'bg-rose-600 text-white' : 'bg-slate-100 text-slate-600'}">Absen</button>
-                <button onclick="hapusLogAbsenInstan('${m.id}', '${m.name}')" class="py-2 rounded-xl text-center font-medium bg-slate-100 text-slate-400">Hapus</button>
+
+            <!-- AREA ABSENSI SISWA -->
+            <div id="attendanceArea" class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden hidden">
+                <!-- Header Area -->
+                <div class="p-4 sm:p-6 border-b border-slate-100 flex justify-between items-center bg-linear-to-r from-white to-slate-50/50">
+                    <div>
+                        <h2 id="selectedClassName" class="text-lg font-bold text-slate-900">Nama Kelas</h2>
+                        <p id="memberCount" class="text-xs text-slate-400 font-medium">0 Anggota Terdaftar</p>
+                    </div>
+                </div>
+
+                <!-- Wadah Dinamis Panel Indikator Kolektif Kelas dimasukkan di sini oleh JS -->
+                <div id="panelAgregatKelas"></div>
+
+                <!-- Tampilan Tabel Dekstop -->
+                <div class="hidden sm:block overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-400 font-bold text-3xs uppercase tracking-wider border-b border-slate-100">
+                                <th class="p-4 w-24">ID</th>
+                                <th class="p-4">Nama Lengkap</th>
+                                <th class="p-4 text-right w-56">Aksi Kehadiran</th>
+                            </tr>
+                        </thead>
+                        <tbody id="memberTableBody" class="divide-y divide-slate-100 text-sm">
+                            <!-- Data Baris Ditulis via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Tampilan Card Mobile -->
+                <div id="memberMobileCards" class="sm:hidden p-4 flex flex-col gap-3 bg-slate-50/50">
+                    <!-- Data Card Ditulis via JS -->
+                </div>
             </div>
-        `;
-        memberMobileCards.appendChild(card);
-    });
-}
+        </div>
 
-// =========================================================================
-// BARU: FUNGSI FUNGSI CONTROLLER UNTUK PENGIRIMAN DATA INSTAN KE CLOUD
-// =========================================================================
+        <!-- KOLOM KANAN: DASHBOARD MANAJEMEN MASTER -->
+        <div class="flex flex-col gap-6">
+            
+            <!-- FORM TAMBAH MASTER SISWA -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
+                <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-1.5">
+                    👤 Registrasi Anggota Baru
+                </h3>
+                <form id="memberForm" class="flex flex-col gap-3 text-xs">
+                    <div>
+                        <label class="block text-slate-500 mb-1">ID Anggota / Nomor Induk</label>
+                        <input type="text" id="memberId" required placeholder="Contoh: 2026001" class="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-blue-600">
+                    </div>
+                    <div>
+                        <label class="block text-slate-500 mb-1">Nama Lengkap</label>
+                        <input type="text" id="memberName" required placeholder="Contoh: John Doe" class="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-blue-600">
+                    </div>
+                    <div>
+                        <label class="block text-slate-500 mb-1">Penempatan Kelas</label>
+                        <select id="memberClassSelect" required class="w-full p-2.5 border border-slate-300 rounded-xl bg-white focus:outline-blue-600">
+                            <!-- Opsi diisi otomatis berdasarkan Master Kelas -->
+                        </select>
+                    </div>
+                    <button type="submit" id="btnSubmitSiswa" class="mt-2 bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-1">
+                        <span id="textSubmitSiswa">Simpan Anggota Baru</span>
+                    </button>
+                </form>
+            </div>
 
-function kirimAbsenInstan(idUser, namaUser, statusPilihan) {
-    const tglSesi = attendanceDateInput.value;
-    const activeClass = appData.classes.find(c => c.id == currentClassId);
-    
-    fetch(APP_SCRIPT_URL, {
-        method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify({
-            aksi: "absen",
-            id_user: idUser,
-            nama: namaUser,
-            kelas: activeClass.name,
-            status: statusPilihan,
-            tanggal: tglSesi
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if(data.status === "success") muatDataDariSheets();
-        else alert("Gagal memperbarui absensi");
-    });
-}
+            <!-- FORM TAMBAH MASTER KELAS -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
+                <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-1.5">
+                    🏫 Manajemen Master Kelas
+                </h3>
+                <form id="classForm" class="flex flex-col gap-3 text-xs">
+                    <div class="flex gap-2">
+                        <input type="text" id="newClassName" required placeholder="Nama Kelas Baru" class="flex-1 p-2.5 border border-slate-300 rounded-xl focus:outline-blue-600">
+                        <button type="submit" id="btnSubmitKelas" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 rounded-xl transition-colors cursor-pointer">
+                            Tambah
+                        </button>
+                    </div>
+                </form>
+                <div id="masterClassList" class="mt-4 divide-y divide-slate-100 max-h-40 overflow-y-auto text-xs">
+                    <!-- List Kelas & Opsi Hapus -->
+                </div>
+            </div>
+        </div>
+    </main>
 
-function hapusLogAbsenInstan(idUser, namaUser) {
-    const tglSesi = attendanceDateInput.value;
-    if(!confirm(`Hapus status absensi ${namaUser}?`)) return;
-    
-    fetch(APP_SCRIPT_URL, {
-        method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify({
-            aksi: "hapus_log_absen",
-            id_user: idUser,
-            tanggal: tglSesi
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if(data.status === "success") muatDataDariSheets();
-    });
-}
+    <!-- SYSTEM GLOBAL CORE SCRIPT -->
+    <script>
+        // =========================================================================
+        // PENTING: GANTI DENGAN URL WEB APP DEPLOYMENT GOOGLE APPS SCRIPT ANDA
+        // =========================================================================
+        const APP_SCRIPT_URL = "CONTOH_URL_DEPLOYMENT_ANDA";
 
-function simpanKomitmenKolektifKelas() {
-    const tglSesi = attendanceDateInput.value;
-    const activeClass = appData.classes.find(c => c.id == currentClassId);
-    const btn = document.getElementById('btnSimpanKomitmenKls');
-    
-    btn.disabled = true; btn.textContent = "⏳ Menyimpan...";
+        let appData = { classes: [] };
+        let currentClassId = null;
 
-    let payload = {
-        aksi: "simpan_komitmen_kelas",
-        nama_kelas: activeClass.name,
-        tanggal: tglSesi,
-        belajar_ss: document.getElementById('kls_belajar').value,
-        menginjil: document.getElementById('kls_menginjil').value,
-        renungan_pagi: document.getElementById('kls_renungan').value,
-        bacaan_alkitab: document.getElementById('kls_bacaan').value
-    };
+        // Element Selectors
+        const attendanceDateInput = document.getElementById('attendanceDateInput');
+        const classTabs = document.getElementById('classTabs');
+        const attendanceArea = document.getElementById('attendanceArea');
+        const selectedClassName = document.getElementById('selectedClassName');
+        const memberCount = document.getElementById('memberCount');
+        const memberTableBody = document.getElementById('memberTableBody');
+        const memberMobileCards = document.getElementById('memberMobileCards');
+        const memberClassSelect = document.getElementById('memberClassSelect');
+        const masterClassList = document.getElementById('masterClassList');
 
-    fetch(APP_SCRIPT_URL, {
-        method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify(payload)
-    })
-    .then(res => res.json())
-    .then(data => {
-        btn.disabled = false; btn.textContent = "💾 Simpan Indikator Kelas";
-        if(data.status === "success") {
-            alert("Indikator komitmen kelas berhasil diperbarui!");
+        // Set default Tanggal Hari Ini (Format ISO YYYY-MM-DD)
+        const hariIni = new Date().toISOString().split('T')[0];
+        attendanceDateInput.value = hariIni;
+
+        // Event Listener Perubahan Tanggal
+        attendanceDateInput.addEventListener('change', muatDataDariSheets);
+
+        // INIT LOAD
+        document.addEventListener("DOMContentLoaded", () => {
             muatDataDariSheets();
+        });
+
+        // ACTION: AMBIL DATA DARI CLOUD (GET)
+        function muatDataDariSheets() {
+            const tglTerpilih = attendanceDateInput.value;
+            classTabs.innerHTML = '<p class="text-xs text-blue-600 italic animate-pulse">⏳ Membaca Sesi Absensi...</p>';
+            
+            fetch(`${APP_SCRIPT_URL}?tanggal=${tglTerpilih}`, { method: "GET" })
+            .then(res => {
+                if(!res.ok) throw new Error();
+                return res.json();
+            })
+            .then(data => {
+                if(data.status === "success") {
+                    appData.classes = data.classes;
+                    
+                    // Render UI Komponen
+                    renderClassTabs();
+                    renderDropdownKelasSiswa();
+                    renderTableSiswaAbsen();
+                }
+            })
+            .catch(() => { 
+                classTabs.innerHTML = '<p class="text-rose-600 text-xs font-semibold">❌ Gagal memuat data cloud.</p>'; 
+            });
         }
-    }).catch(() => {
-        btn.disabled = false; btn.textContent = "💾 Simpan Indikator Kelas";
-    });
-}
+
+        // RENDER TABS UTAMA
+        function renderClassTabs() {
+            classTabs.innerHTML = '';
+            if(appData.classes.length === 0) {
+                classTabs.innerHTML = '<p class="text-xs text-slate-400 italic">Belum ada data kelas master.</p>';
+                return;
+            }
+
+            if(!currentClassId && appData.classes.length > 0) {
+                currentClassId = appData.classes[0].id;
+            }
+
+            appData.classes.forEach(c => {
+                const btn = document.createElement('button');
+                btn.textContent = c.name;
+                btn.className = `px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+                    c.id == currentClassId 
+                    ? 'bg-blue-600 text-white shadow-sm shadow-blue-200' 
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`;
+                btn.onclick = () => {
+                    currentClassId = c.id;
+                    renderClassTabs();
+                    renderTableSiswaAbsen();
+                };
+                classTabs.appendChild(btn);
+            });
+        }
+
+        // RENDER DROPDOWN & SIDEBAR LIST KELAS MASTER
+        function renderDropdownKelasSiswa() {
+            memberClassSelect.innerHTML = '<option value="" disabled selected>Pilih Kelas</option>';
+            masterClassList.innerHTML = '';
+
+            appData.classes.forEach(c => {
+                // Dropdown Registrasi
+                const opt = document.createElement('option');
+                opt.value = c.name;
+                opt.textContent = c.name;
+                memberClassSelect.appendChild(opt);
+
+                // List Hapus Kelas Master
+                const div = document.createElement('div');
+                div.className = "flex justify-between items-center py-2 text-slate-700 font-medium";
+                div.innerHTML = `
+                    <span>${c.name}</span>
+                    <button onclick="hapusKelasMasterCloud('${c.name}')" class="text-3xs font-bold text-rose-500 hover:text-rose-700 bg-rose-50 px-2 py-1 rounded-md cursor-pointer">Hapus</button>
+                `;
+                masterClassList.appendChild(div);
+            });
+        }
+
+        // RENDER TABEL UTAMA ABSENSI DENGAN 3 TOMBOL INSTAN & PANEL AGREGAT KELAS
+        function renderTableSiswaAbsen() {
+            const activeClass = appData.classes.find(c => c.id == currentClassId);
+            if (!activeClass) { attendanceArea.classList.add('hidden'); return; }
+            attendanceArea.classList.remove('hidden');
+            
+            selectedClassName.textContent = activeClass.name;
+            memberCount.textContent = `${activeClass.members.length} Anggota Terdaftar`;
+            
+            // INJEKSI PANEL INPUT INDIKATOR DATA AGREGAT KELAS DI ATAS TABEL
+            let kmt = activeClass.komitmen || { belajar_ss: 0, menginjil: 0, renungan_pagi: 0, bacaan_alkitab: 0 };
+            let htmlKomitmenPanel = `
+                <div class="m-4 bg-blue-50/50 p-4 rounded-2xl border border-blue-100">
+                    <h4 class="text-xs font-bold text-blue-800 uppercase tracking-wider mb-2.5">📊 Indikator Komitmen Kolektif Kelas (Total Hari Ini)</h4>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                        <div>
+                            <label class="block text-slate-600 mb-1 font-medium">📖 Belajar SS</label>
+                            <input type="number" id="kls_belajar" value="${kmt.belajar_ss}" min="0" class="w-full p-2 border border-slate-300 rounded-xl bg-white text-center font-bold text-slate-700 focus:outline-blue-600">
+                        </div>
+                        <div>
+                            <label class="block text-slate-600 mb-1 font-medium">📢 Menginjil</label>
+                            <input type="number" id="kls_menginjil" value="${kmt.menginjil}" min="0" class="w-full p-2 border border-slate-300 rounded-xl bg-white text-center font-bold text-slate-700 focus:outline-blue-600">
+                        </div>
+                        <div>
+                            <label class="block text-slate-600 mb-1 font-medium">☀️ Renungan Pagi</label>
+                            <input type="number" id="kls_renungan" value="${kmt.renungan_pagi}" min="0" class="w-full p-2 border border-slate-300 rounded-xl bg-white text-center font-bold text-slate-700 focus:outline-blue-600">
+                        </div>
+                        <div>
+                            <label class="block text-slate-600 mb-1 font-medium">📜 Baca Alkitab</label>
+                            <input type="number" id="kls_bacaan" value="${kmt.bacaan_alkitab}" min="0" class="w-full p-2 border border-slate-300 rounded-xl bg-white text-center font-bold text-slate-700 focus:outline-blue-600">
+                        </div>
+                    </div>
+                    <div class="mt-3 flex justify-end">
+                        <button onclick="simpanKomitmenKolektifKelas()" id="btnSimpanKomitmenKls" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-1.5 rounded-xl text-2xs cursor-pointer shadow-xs transition-colors flex items-center gap-1">
+                            💾 Simpan Indikator Kelas
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('panelAgregatKelas').innerHTML = htmlKomitmenPanel;
+            memberTableBody.innerHTML = ''; 
+            memberMobileCards.innerHTML = '';
+
+            if(activeClass.members.length === 0) {
+                memberTableBody.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-slate-400 italic text-xs">Belum ada anggota di kelas ini. Silakan daftarkan anggota baru di sidebar kanan.</td></tr>`;
+                memberMobileCards.innerHTML = `<p class="p-6 bg-white border border-slate-200 rounded-xl text-center text-slate-400 italic text-xs">Belum ada anggota di kelas ini.</p>`;
+                return;
+            }
+
+            activeClass.members.forEach(m => {
+                let statusAbsen = m.absenHariIni ? m.absenHariIni.status : 'Belum Absen';
+                
+                // Styles berdasarkan status keaktifan tombol
+                let btnHadirStyle = statusAbsen === 'Hadir' ? 'bg-emerald-600 text-white font-bold shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600';
+                let btnAbsenStyle = statusAbsen === 'Tidak Hadir' ? 'bg-rose-600 text-white font-bold shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-rose-50 hover:text-rose-600';
+                
+                let htmlAksiPc = `
+                    <div class="inline-flex gap-1.5 text-2xs">
+                        <button onclick="kirimAbsenInstan('${m.id}', '${m.name}', 'Hadir')" class="px-3 py-1.5 rounded-lg border border-transparent transition-all cursor-pointer font-medium ${btnHadirStyle}">Hadir</button>
+                        <button onclick="kirimAbsenInstan('${m.id}', '${m.name}', 'Tidak Hadir')" class="px-3 py-1.5 rounded-lg border border-transparent transition-all cursor-pointer font-medium ${btnAbsenStyle}">Absen</button>
+                        <button onclick="hapusLogAbsenInstan('${m.id}', '${m.name}')" class="px-2 py-1.5 bg-slate-100 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer" title="Hapus Status Log">Hapus</button>
+                    </div>
+                `;
+                
+                // Append PC Row
+                const tr = document.createElement('tr');
+                tr.className = statusAbsen === 'Hadir' ? 'bg-emerald-50/20' : statusAbsen === 'Tidak Hadir' ? 'bg-rose-50/20' : '';
+                tr.innerHTML = `
+                    <td class="p-4 font-mono text-xs text-slate-400">${m.id}</td>
+                    <td class="p-4 font-semibold text-slate-700">${m.name}</td>
+                    <td class="p-4 text-right">${htmlAksiPc}</td>
+                `;
+                memberTableBody.appendChild(tr);
+
+                // Append Mobile Card
+                const card = document.createElement('div');
+                card.className = `p-4 bg-white rounded-2xl border shadow-2xs flex flex-col gap-3 ${statusAbsen === 'Hadir' ? 'border-emerald-200 bg-emerald-50/10' : statusAbsen === 'Tidak Hadir' ? 'border-rose-200 bg-rose-50/10' : 'border-slate-200'}`;
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="font-bold text-slate-800 text-sm">${m.name}</h4>
+                            <p class="text-2xs font-mono text-slate-400 mt-0.5">ID: ${m.id} | Status: <span class="font-bold ${statusAbsen === 'Hadir' ? 'text-emerald-600' : statusAbsen === 'Tidak Hadir' ? 'text-rose-600' : 'text-slate-400'}">${statusAbsen}</span></p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-1.5 text-2xs w-full">
+                        <button onclick="kirimAbsenInstan('${m.id}', '${m.name}', 'Hadir')" class="py-2 rounded-xl text-center font-bold ${statusAbsen === 'Hadir' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'}">Hadir</button>
+                        <button onclick="kirimAbsenInstan('${m.id}', '${m.name}', 'Tidak Hadir')" class="py-2 rounded-xl text-center font-bold ${statusAbsen === 'Tidak Hadir' ? 'bg-rose-600 text-white' : 'bg-slate-100 text-slate-600'}">Absen</button>
+                        <button onclick="hapusLogAbsenInstan('${m.id}', '${m.name}')" class="py-2 rounded-xl text-center font-medium bg-slate-100 text-slate-400">Hapus</button>
+                    </div>
+                `;
+                memberMobileCards.appendChild(card);
+            });
+        }
+
+        // CONTROL: KIRIM DATA STATUS ABSENSI INSTAN (POST)
+        function kirimAbsenInstan(idUser, namaUser, statusPilihan) {
+            const tglSesi = attendanceDateInput.value;
+            const activeClass = appData.classes.find(c => c.id == currentClassId);
+            
+            fetch(APP_SCRIPT_URL, {
+                method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify({
+                    aksi: "absen",
+                    id_user: idUser,
+                    nama: namaUser,
+                    kelas: activeClass.name,
+                    status: statusPilihan,
+                    tanggal: tglSesi
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === "success") muatDataDariSheets();
+                else alert("Gagal memperbarui absensi: " + data.message);
+            }).catch(() => alert("Koneksi cloud gagal!"));
+        }
+
+        // CONTROL: HAPUS LOG DATA ABSENSI INSTAN (POST)
+        function hapusLogAbsenInstan(idUser, namaUser) {
+            const tglSesi = attendanceDateInput.value;
+            if(!confirm(`Hapus log kehadiran harian untuk ${namaUser}?`)) return;
+            
+            fetch(APP_SCRIPT_URL, {
+                method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify({
+                    aksi: "hapus_log_absen",
+                    id_user: idUser,
+                    tanggal: tglSesi
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === "success") muatDataDariSheets();
+            });
+        }
+
+        // CONTROL: SIMPAN DATA AGREGAT KOMITMEN KELAS (POST)
+        function simpanKomitmenKolektifKelas() {
+            const tglSesi = attendanceDateInput.value;
+            const activeClass = appData.classes.find(c => c.id == currentClassId);
+            const btn = document.getElementById('btnSimpanKomitmenKls');
+            
+            btn.disabled = true; btn.textContent = "⏳ Menyimpan...";
+
+            let payload = {
+                aksi: "simpan_komitmen_kelas",
+                nama_kelas: activeClass.name,
+                tanggal: tglSesi,
+                belajar_ss: document.getElementById('kls_belajar').value,
+                menginjil: document.getElementById('kls_menginjil').value,
+                renungan_pagi: document.getElementById('kls_renungan').value,
+                bacaan_alkitab: document.getElementById('kls_bacaan').value
+            };
+
+            fetch(APP_SCRIPT_URL, {
+                method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                btn.disabled = false; btn.textContent = "💾 Simpan Indikator Kelas";
+                if(data.status === "success") {
+                    alert("Indikator komitmen kelas berhasil disimpan ke Google Sheets!");
+                    muatDataDariSheets();
+                }
+            }).catch(() => {
+                btn.disabled = false; btn.textContent = "💾 Simpan Indikator Kelas";
+                alert("Gagal terhubung untuk menyimpan indikator jemaat!");
+            });
+        }
+
+        // CONTROL: SUBMIT PENDAFTARAN SISWA BARU (POST)
+        document.getElementById('memberForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitSiswa');
+            const txt = document.getElementById('textSubmitSiswa');
+            
+            btn.disabled = true; btn.classList.add('opacity-50');
+            txt.innerHTML = `<span class="spinner"></span> Menyimpan...`;
+
+            fetch(APP_SCRIPT_URL, { 
+                method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify({ 
+                    aksi: "tambah_master", 
+                    id_user: document.getElementById('memberId').value.trim(), 
+                    nama: document.getElementById('memberName').value.trim(), 
+                    kelas: memberClassSelect.value 
+                }) 
+            })
+            .then(res => res.json())
+            .then(() => { 
+                btn.disabled = false; btn.classList.remove('opacity-50'); txt.innerHTML = "Simpan Anggota Baru";
+                document.getElementById('memberId').value = ''; 
+                document.getElementById('memberName').value = ''; 
+                muatDataDariSheets(); 
+            }).catch(() => {
+                btn.disabled = false; btn.classList.remove('opacity-50'); txt.innerHTML = "Simpan Anggota Baru";
+            });
+        });
+
+        // CONTROL: SUBMIT PENAMBAHAN KELAS MASTER BARU (POST)
+        document.getElementById('classForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const inp = document.getElementById('newClassName');
+            const btn = document.getElementById('btnSubmitKelas');
+
+            btn.disabled = true; btn.textContent = "⏳";
+            
+            fetch(APP_SCRIPT_URL, {
+                method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify({
+                    aksi: "tambah_kelas_master",
+                    nama_kelas: inp.value.trim()
+                })
+            })
+            .then(res => res.json())
+            .then(() => {
+                btn.disabled = false; btn.textContent = "Tambah";
+                inp.value = '';
+                muatDataDariSheets();
+            }).catch(() => { btn.disabled = false; btn.textContent = "Tambah"; });
+        });
+
+        // CONTROL: HAPUS KELAS MASTER (POST)
+        function hapusKelasMasterCloud(namaKelas) {
+            if(!confirm(`Apakah Anda yakin ingin menghapus kelas "${namaKelas}"? Seluruh anggota di kelas ini tidak akan tampil sebelum dipindahkan.`)) return;
+            
+            fetch(APP_SCRIPT_URL, {
+                method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify({
+                    aksi: "hapus_kelas_master",
+                    nama_kelas: namaKelas
+                })
+            })
+            .then(res => res.json())
+            .then(() => {
+                muatDataDariSheets();
+            });
+        }
+    </script>
+</body>
+</html>
