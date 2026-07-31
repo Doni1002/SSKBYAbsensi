@@ -122,16 +122,16 @@
                 <h3 class="text-3xs sm:text-xs font-bold text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-1.5">👤 Registrasi Anggota Baru</h3>
                 <form id="memberForm" class="flex flex-col gap-3 text-xs">
                     <div>
-                        <label class="block text-slate-500 mb-1">ID Anggota / Nomor Induk</label>
-                        <input type="text" id="memberId" required placeholder="Contoh: 2026001" class="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-blue-600 bg-white">
+                        <label class="block text-slate-500 mb-1">Penempatan Kelas</label>
+                        <select id="memberClassSelect" required onchange="generateOtomatisId()" class="w-full p-2.5 border border-slate-300 rounded-xl bg-white focus:outline-blue-600"></select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-500 mb-1">ID Anggota (Otomatis)</label>
+                        <input type="text" id="memberId" readonly placeholder="Pilih kelas terlebih dahulu..." class="w-full p-2.5 border border-slate-200 rounded-xl bg-slate-100 text-slate-500 font-mono font-bold cursor-not-allowed">
                     </div>
                     <div>
                         <label class="block text-slate-500 mb-1">Nama Lengkap</label>
                         <input type="text" id="memberName" required placeholder="Contoh: John Doe" class="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-blue-600 bg-white">
-                    </div>
-                    <div>
-                        <label class="block text-slate-500 mb-1">Penempatan Kelas</label>
-                        <select id="memberClassSelect" required class="w-full p-2.5 border border-slate-300 rounded-xl bg-white focus:outline-blue-600"></select>
                     </div>
                     <button type="submit" id="btnSubmitSiswa" class="mt-2 bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-1">
                         <span id="textSubmitSiswa">Simpan Anggota Baru</span>
@@ -274,6 +274,39 @@
                 div.innerHTML = `<span class="font-bold text-slate-700">${c.name}</span><button onclick="hapusKelasMasterCloud('${c.name}')" class="text-3xs font-bold text-rose-500 hover:text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg cursor-pointer">Hapus</button>`;
                 masterClassList.appendChild(div);
             });
+            generateOtomatisId();
+        }
+
+        // FUNGSI PREVIEW ID OTOMATIS BERDASARKAN KELAS
+        function generateOtomatisId() {
+            const selectedClass = memberClassSelect.value;
+            const inputId = document.getElementById('memberId');
+            
+            if(!selectedClass) {
+                inputId.value = '';
+                return;
+            }
+
+            const activeClass = appData.classes.find(c => c.name === selectedClass);
+            let prefix = selectedClass.split(' ').map(w => w.charAt(0)).join('').toUpperCase();
+            if(prefix.length === 1 && selectedClass.length >= 3) {
+                prefix = selectedClass.substring(0, 3).toUpperCase();
+            }
+
+            let maxNum = 0;
+            if(activeClass && activeClass.members) {
+                activeClass.members.forEach(m => {
+                    const matches = String(m.id).match(/\d+$/);
+                    if(matches) {
+                        const num = parseInt(matches[0], 10);
+                        if(num > maxNum) maxNum = num;
+                    }
+                });
+            }
+
+            const nextNum = maxNum + 1;
+            const formattedNum = String(nextNum).padStart(3, '0');
+            inputId.value = `${prefix}-${formattedNum}`;
         }
 
         function renderTableSiswaAbsen() {
@@ -474,16 +507,23 @@
             }).then(() => { btn.disabled = false; btn.textContent = "💾 Simpan Indikator Kelas"; muatDataDariSheets(); });
         }
 
+        // EVENT SUBMIT ANGGOTA BARU
         document.getElementById('memberForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSubmitSiswa');
             btn.disabled = true; btn.innerHTML = `<span class="spinner"></span> Menyimpan...`;
+            
             fetch(APP_SCRIPT_URL, { 
                 method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
-                body: JSON.stringify({ aksi: "tambah_master", id_user: document.getElementById('memberId').value.trim(), nama: document.getElementById('memberName').value.trim(), kelas: memberClassSelect.value }) 
+                body: JSON.stringify({ 
+                    aksi: "tambah_master", 
+                    id_user: document.getElementById('memberId').value.trim(), 
+                    nama: document.getElementById('memberName').value.trim(), 
+                    kelas: memberClassSelect.value 
+                }) 
             }).then(() => { 
                 btn.disabled = false; btn.innerHTML = "Simpan Anggota Baru";
-                document.getElementById('memberId').value = ''; document.getElementById('memberName').value = ''; 
+                document.getElementById('memberName').value = ''; 
                 muatDataDariSheets(); 
             });
         });
