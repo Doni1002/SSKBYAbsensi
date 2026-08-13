@@ -377,6 +377,15 @@
             inputId.value = `${prefix}-${String(maxNum + 1).padStart(3, '0')}`;
         }
 
+        function handleSelectAbsenChange(idUser, value) {
+            if(!value) return;
+            if(value === "Sakit") {
+                kirimAbsenInstan(idUser, "Sakit", "");
+            } else {
+                kirimAbsenInstan(idUser, "Tidak Hadir", value);
+            }
+        }
+
         function renderTableSiswaAbsen() {
             const activeClass = appData.classes.find(c => c.id == currentClassId);
             if (!activeClass) { attendanceArea.classList.add('hidden'); return; }
@@ -387,7 +396,7 @@
             
             let jmlTotal = activeClass.members.length;
             let jmlHadir = activeClass.members.filter(m => m.absenHariIni && m.absenHariIni.status === 'Hadir').length;
-            let jmlAbsen = activeClass.members.filter(m => m.absenHariIni && m.absenHariIni.status === 'Tidak Hadir').length;
+            let jmlAbsen = activeClass.members.filter(m => m.absenHariIni && (m.absenHariIni.status === 'Tidak Hadir' || m.absenHariIni.status === 'Sakit')).length;
             
             document.getElementById('kpiTotal').textContent = jmlTotal;
             document.getElementById('kpiHadir').textContent = jmlHadir;
@@ -421,7 +430,12 @@
                 let keterangan = m.absenHariIni && m.absenHariIni.keterangan ? String(m.absenHariIni.keterangan).trim() : '';
 
                 let bh = status === 'Hadir' ? 'bg-emerald-600 text-white font-bold shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200';
-                let isAbsen = status === 'Tidak Hadir';
+                let isAbsen = status === 'Tidak Hadir' || status === 'Sakit';
+
+                let selectedVal = "";
+                if(status === 'Sakit' || keterangan.toLowerCase() === 'sakit') selectedVal = "Sakit";
+                else if(keterangan.toLowerCase() === 'perlu dilawat') selectedVal = "Perlu Dilawat";
+                else if(keterangan.toLowerCase().includes('alasan') || keterangan.toLowerCase().includes('kabar')) selectedVal = "Tidak ada Alasan";
 
                 // Desktop Row
                 const tr = document.createElement('tr');
@@ -435,11 +449,11 @@
                         <div class="flex items-center justify-end gap-1.5 text-2xs">
                             <button onclick="kirimAbsenInstan('${m.id}', 'Hadir', '')" class="px-3.5 py-2 rounded-xl font-bold cursor-pointer transition-all ${bh}">Hadir</button>
                             
-                            <select onchange="kirimAbsenInstan('${m.id}', 'Tidak Hadir', this.value)" class="px-3 py-2 border ${isAbsen ? 'border-rose-500 bg-rose-50 text-rose-700 font-bold' : 'border-slate-300 bg-slate-50 text-slate-700'} rounded-xl text-2xs cursor-pointer focus:outline-blue-600 font-semibold">
+                            <select onchange="handleSelectAbsenChange('${m.id}', this.value)" class="px-3 py-2 border ${isAbsen ? 'border-rose-500 bg-rose-50 text-rose-700 font-bold' : 'border-slate-300 bg-slate-50 text-slate-700'} rounded-xl text-2xs cursor-pointer focus:outline-blue-600 font-semibold">
                                 <option value="" disabled ${!isAbsen ? 'selected' : ''}>-- Absen --</option>
-                                <option value="Sakit" ${keterangan.toLowerCase() === 'sakit' ? 'selected' : ''}>Sakit</option>
-                                <option value="Perlu Dilawat" ${keterangan.toLowerCase() === 'perlu dilawat' ? 'selected' : ''}>Perlu Dilawat</option>
-                                <option value="Tidak ada Alasan" ${keterangan.toLowerCase().includes('alasan') || keterangan.toLowerCase().includes('kabar') ? 'selected' : ''}>Tidak ada Alasan</option>
+                                <option value="Sakit" ${selectedVal === 'Sakit' ? 'selected' : ''}>Sakit</option>
+                                <option value="Perlu Dilawat" ${selectedVal === 'Perlu Dilawat' ? 'selected' : ''}>Perlu Dilawat</option>
+                                <option value="Tidak ada Alasan" ${selectedVal === 'Tidak ada Alasan' ? 'selected' : ''}>Tidak ada Alasan</option>
                             </select>
 
                             <button onclick="hapusLogAbsenInstan('${m.id}')" class="px-2.5 py-2 bg-slate-100 text-slate-400 hover:text-rose-600 rounded-xl cursor-pointer font-bold">Hapus</button>
@@ -449,12 +463,12 @@
 
                 // Mobile Card
                 const card = document.createElement('div');
-                card.className = `p-3.5 bg-white rounded-xl border flex flex-col gap-3 transition-all ${status === 'Hadir' ? 'border-emerald-200 bg-emerald-50/10' : status === 'Tidak Hadir' ? 'border-rose-200 bg-rose-50/10' : 'border-slate-200'}`;
+                card.className = `p-3.5 bg-white rounded-xl border flex flex-col gap-3 transition-all ${status === 'Hadir' ? 'border-emerald-200 bg-emerald-50/10' : isAbsen ? 'border-rose-200 bg-rose-50/10' : 'border-slate-200'}`;
                 card.innerHTML = `
                     <div class="flex justify-between items-center">
                         <div class="min-w-0 flex-1">
                             <h4 class="font-bold text-slate-800 text-sm truncate">${m.name}</h4>
-                            <p class="text-4xs font-mono text-slate-400 mt-0.5">ID: ${m.id} | Status: <span class="font-bold ${status === 'Hadir' ? 'text-emerald-600': status === 'Tidak Hadir' ? 'text-rose-600':'text-slate-400'}">${status}</span> ${keterangan ? `(${keterangan})` : ''}</p>
+                            <p class="text-4xs font-mono text-slate-400 mt-0.5">ID: ${m.id} | Status: <span class="font-bold ${status === 'Hadir' ? 'text-emerald-600': isAbsen ? 'text-rose-600':'text-slate-400'}">${status}</span> ${keterangan ? `(${keterangan})` : ''}</p>
                         </div>
                     </div>
                     <div class="flex flex-col gap-2 text-3xs w-full">
@@ -463,11 +477,11 @@
                             <button onclick="hapusLogAbsenInstan('${m.id}')" class="py-2.5 rounded-xl text-center font-bold bg-slate-100 text-slate-400 cursor-pointer">Hapus Log</button>
                         </div>
                         <div>
-                            <select onchange="kirimAbsenInstan('${m.id}', 'Tidak Hadir', this.value)" class="w-full p-2.5 border ${isAbsen ? 'border-rose-500 bg-rose-50 text-rose-700' : 'border-slate-300 bg-slate-50 text-slate-700'} rounded-xl text-3xs cursor-pointer focus:outline-blue-600 font-bold">
+                            <select onchange="handleSelectAbsenChange('${m.id}', this.value)" class="w-full p-2.5 border ${isAbsen ? 'border-rose-500 bg-rose-50 text-rose-700' : 'border-slate-300 bg-slate-50 text-slate-700'} rounded-xl text-3xs cursor-pointer focus:outline-blue-600 font-bold">
                                 <option value="" disabled ${!isAbsen ? 'selected' : ''}>-- Absen --</option>
-                                <option value="Sakit" ${keterangan.toLowerCase() === 'sakit' ? 'selected' : ''}>Sakit</option>
-                                <option value="Perlu Dilawat" ${keterangan.toLowerCase() === 'perlu dilawat' ? 'selected' : ''}>Perlu Dilawat</option>
-                                <option value="Tidak ada Alasan" ${keterangan.toLowerCase().includes('alasan') || keterangan.toLowerCase().includes('kabar') ? 'selected' : ''}>Tidak ada Alasan</option>
+                                <option value="Sakit" ${selectedVal === 'Sakit' ? 'selected' : ''}>Sakit</option>
+                                <option value="Perlu Dilawat" ${selectedVal === 'Perlu Dilawat' ? 'selected' : ''}>Perlu Dilawat</option>
+                                <option value="Tidak ada Alasan" ${selectedVal === 'Tidak ada Alasan' ? 'selected' : ''}>Tidak ada Alasan</option>
                             </select>
                         </div>
                     </div>`;
@@ -593,7 +607,7 @@
 
                 let totLog = logs.length;
                 let totHadir = logs.filter(l => (l.status || '').toLowerCase() === 'hadir').length;
-                let totAbsen = logs.filter(l => (l.status || '').toLowerCase() === 'tidak hadir').length;
+                let totAbsen = logs.filter(l => (l.status || '').toLowerCase() === 'tidak hadir' || (l.status || '').toLowerCase() === 'sakit').length;
 
                 document.getElementById('totalLogBulan').textContent = totLog;
                 document.getElementById('totalHadirBulan').textContent = totHadir;
@@ -615,6 +629,8 @@
                     const statusFix = l.status || '-';
                     const ketFix = l.keterangan || '-';
 
+                    const isHadir = statusFix.toLowerCase() === 'hadir';
+
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-slate-50 border-b border-slate-100 text-xs";
                     tr.innerHTML = `
@@ -622,7 +638,7 @@
                         <td class="p-3 font-mono text-slate-500 font-bold">${idFix}</td>
                         <td class="p-3 font-bold text-slate-800">${namaFix}</td>
                         <td class="p-3 text-slate-600">${kelasFix}</td>
-                        <td class="p-3 font-bold ${statusFix.toLowerCase() === 'hadir' ? 'text-emerald-600' : 'text-rose-600'}">${statusFix}</td>
+                        <td class="p-3 font-bold ${isHadir ? 'text-emerald-600' : 'text-rose-600'}">${statusFix}</td>
                         <td class="p-3 text-slate-500">${ketFix}</td>`;
                     tableBody.appendChild(tr);
 
@@ -631,7 +647,7 @@
                     card.innerHTML = `
                         <div class="flex justify-between items-center border-b border-slate-100 pb-1.5">
                             <span class="font-bold text-slate-800">${namaFix}</span>
-                            <span class="px-2 py-0.5 rounded-md font-black text-4xs ${statusFix.toLowerCase() === 'hadir' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">${statusFix}</span>
+                            <span class="px-2 py-0.5 rounded-md font-black text-4xs ${isHadir ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">${statusFix}</span>
                         </div>
                         <div class="grid grid-cols-2 text-3xs text-slate-500 font-medium pt-0.5">
                             <div>📅 Tanggal: <span class="font-semibold text-slate-700">${tanggalFix}</span></div>
