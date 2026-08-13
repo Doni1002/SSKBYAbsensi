@@ -1,10 +1,3 @@
-Aplikasi terasa lemot dan prosesnya lama karena setiap kali Anda mengubah status absensi (misalnya memilih dropdown/menekan tombol), aplikasi melakukan fetch() langsung ke Google Apps Script (GAS) dan memanggil muatDataDariSheets() (refresh total).
-Google Apps Script memiliki waktu respon (latency) bawaan sekitar 1-3 detik per request. Jika setiap aksi dipicu langsung ke server satu per satu, antrean (queue) akan menumpuk dan UI terasa patah/lemot.
-Berikut adalah kodingan index.html yang sudah dioptimasi dengan teknik Optimistic UI Update + Debounce:
- * Instan di Layar (Tanpa Loading): Begitu Anda pilih dropdown atau klik "Hadir", status di layar langsung berubah seketika (0 milidetik) tanpa menunggu respon server Google Apps Script.
- * Pengiriman Latar Belakang (Background Sync): Proses simpan ke Apps Script berjalan diam-diam di belakang layar tanpa mengunci antarmuka pengguna (user interface).
- * Mencegah Multi-fetch Berlebihan: Fungsi pembacaan data (muatDataDariSheets()) tidak dipanggil berulang-ulang setiap kali tombol diklik.
-Kode Lengkap index.html (Teroptimasi & Cepat)
 <!DOCTYPE html>
 <html lang="id">
 <head>
