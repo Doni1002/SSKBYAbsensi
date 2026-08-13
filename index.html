@@ -116,7 +116,7 @@
                             <tr class="bg-slate-50 text-slate-400 font-bold text-3xs uppercase tracking-wider border-b border-slate-100">
                                 <th class="p-4 w-24">ID</th>
                                 <th class="p-4">Nama Lengkap</th>
-                                <th class="p-4 text-right w-80">Aksi & Keterangan Kehadiran</th>
+                                <th class="p-4 text-right w-96">Aksi & Keterangan Kehadiran</th>
                             </tr>
                         </thead>
                         <tbody id="memberTableBody" class="divide-y divide-slate-100 text-sm"></tbody>
@@ -199,9 +199,9 @@
 
     </div>
 
-    <!-- HALAMAN 3: LAPORAN BULANAN (FITUR BARU) -->
+    <!-- HALAMAN 3: LAPORAN BULANAN (UI RESPONSIF HP/DESKTOP) -->
     <div id="pageLaporan" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 md:mt-6 flex flex-col gap-4 md:gap-6 hidden">
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-2xs">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
                 <div>
                     <h3 class="font-bold text-slate-900 text-sm sm:text-base">📅 Laporan Kehadiran Bulanan</h3>
@@ -214,23 +214,23 @@
             </div>
 
             <!-- SUMMARY RINGKASAN LAPORAN BULANAN -->
-            <div id="summaryLaporanBulanan" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-                <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                    <p class="text-3xs font-bold text-slate-400 uppercase">Total Log Kehadiran</p>
-                    <p id="totalLogBulan" class="text-xl font-black text-slate-800 mt-1">0</p>
+            <div id="summaryLaporanBulanan" class="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
+                <div class="p-3 sm:p-4 bg-slate-50 rounded-xl border border-slate-100 text-center sm:text-left">
+                    <p class="text-4xs sm:text-3xs font-bold text-slate-400 uppercase tracking-tight">Total Log</p>
+                    <p id="totalLogBulan" class="text-base sm:text-xl font-black text-slate-800 mt-0.5 sm:mt-1">0</p>
                 </div>
-                <div class="p-4 bg-emerald-50/50 rounded-xl border border-emerald-100">
-                    <p class="text-3xs font-bold text-emerald-600 uppercase">Total Hadir</p>
-                    <p id="totalHadirBulan" class="text-xl font-black text-emerald-600 mt-1">0</p>
+                <div class="p-3 sm:p-4 bg-emerald-50/50 rounded-xl border border-emerald-100 text-center sm:text-left">
+                    <p class="text-4xs sm:text-3xs font-bold text-emerald-600 uppercase tracking-tight">Total Hadir</p>
+                    <p id="totalHadirBulan" class="text-base sm:text-xl font-black text-emerald-600 mt-0.5 sm:mt-1">0</p>
                 </div>
-                <div class="p-4 bg-rose-50/50 rounded-xl border border-rose-100">
-                    <p class="text-3xs font-bold text-rose-600 uppercase">Total Absen / Tidak Hadir</p>
-                    <p id="totalAbsenBulan" class="text-xl font-black text-rose-600 mt-1">0</p>
+                <div class="p-3 sm:p-4 bg-rose-50/50 rounded-xl border border-rose-100 text-center sm:text-left">
+                    <p class="text-4xs sm:text-3xs font-bold text-rose-600 uppercase tracking-tight">Total Absen</p>
+                    <p id="totalAbsenBulan" class="text-base sm:text-xl font-black text-rose-600 mt-0.5 sm:mt-1">0</p>
                 </div>
             </div>
 
-            <!-- TABEL DETAIL LAPORAN BULANAN -->
-            <div class="overflow-x-auto border border-slate-200 rounded-xl">
+            <!-- TAMPILAN LAPORAN DESKTOP (TABEL) -->
+            <div class="hidden sm:block overflow-x-auto border border-slate-200 rounded-xl">
                 <table class="w-full text-left border-collapse text-xs">
                     <thead>
                         <tr class="bg-slate-100 text-slate-600 font-bold border-b border-slate-200 uppercase">
@@ -246,6 +246,11 @@
                         <tr><td colspan="6" class="p-6 text-center text-slate-400 italic">Pilih bulan dan klik "Tampilkan" untuk memuat laporan.</td></tr>
                     </tbody>
                 </table>
+            </div>
+
+            <!-- TAMPILAN LAPORAN MOBILE (CARD RESPONSIVE) -->
+            <div id="cardsLaporanBulananMobile" class="sm:hidden flex flex-col gap-2.5">
+                <p class="p-6 text-center text-slate-400 italic text-xs bg-slate-50 rounded-xl border border-slate-200">Pilih bulan dan klik "Tampilkan" untuk memuat laporan.</p>
             </div>
         </div>
     </div>
@@ -436,8 +441,8 @@
                 let status = m.absenHariIni ? m.absenHariIni.status : 'Belum Absen';
                 let keterangan = m.absenHariIni && m.absenHariIni.keterangan ? m.absenHariIni.keterangan : '';
 
-                let bh = status === 'Hadir' ? 'bg-emerald-600 text-white font-bold shadow-xs' : 'bg-slate-100 text-slate-600';
-                let ba = status === 'Tidak Hadir' ? 'bg-rose-600 text-white font-bold shadow-xs' : 'bg-slate-100 text-slate-600';
+                let bh = status === 'Hadir' ? 'bg-emerald-600 text-white font-bold shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200';
+                let isAbsen = status === 'Tidak Hadir';
 
                 // Desktop Row
                 const tr = document.createElement('tr');
@@ -449,15 +454,16 @@
                     </td>
                     <td class="p-4 text-right">
                         <div class="flex items-center justify-end gap-1.5 text-2xs" id="actions-pc-${m.id}">
-                            <button onclick="kirimAbsenInstan('${m.id}', '${m.name}', 'Hadir', '', 'pc')" class="px-3 py-1.5 rounded-lg font-medium cursor-pointer ${bh}">Hadir</button>
-                            <button onclick="kirimAbsenInstan('${m.id}', '${m.name}', 'Tidak Hadir', 'Tidak Ada Kabar', 'pc')" class="px-3 py-1.5 rounded-lg font-medium cursor-pointer ${ba}">Absen</button>
-                            <select onchange="kirimAbsenInstan('${m.id}', '${m.name}', 'Tidak Hadir', this.value, 'pc')" class="px-2 py-1.5 border border-slate-300 rounded-lg text-2xs bg-white text-slate-700 cursor-pointer focus:outline-blue-600">
-                                <option value="" disabled ${!keterangan ? 'selected' : ''}>-- Alasan Absen --</option>
+                            <button onclick="kirimAbsenInstan('${m.id}', '${m.name}', 'Hadir', '', 'pc')" class="px-3.5 py-2 rounded-xl font-bold cursor-pointer transition-all ${bh}">Hadir</button>
+                            
+                            <select onchange="kirimAbsenInstan('${m.id}', '${m.name}', 'Tidak Hadir', this.value, 'pc')" class="px-3 py-2 border ${isAbsen ? 'border-rose-500 bg-rose-50 text-rose-700 font-bold' : 'border-slate-300 bg-slate-50 text-slate-700'} rounded-xl text-2xs cursor-pointer focus:outline-blue-600 font-semibold">
+                                <option value="" disabled ${!isAbsen ? 'selected' : ''}>-- Absen / Ketidakhadiran --</option>
                                 <option value="Sakit" ${keterangan === 'Sakit' ? 'selected' : ''}>Sakit</option>
                                 <option value="Perlu Dilawat" ${keterangan === 'Perlu Dilawat' ? 'selected' : ''}>Perlu Dilawat</option>
-                                <option value="Tidak Ada Alasan" ${keterangan === 'Tidak Ada Alasan' ? 'selected' : ''}>Tidak Ada Alasan</option>
+                                <option value="Tanpa Alasan" ${keterangan === 'Tanpa Alasan' || keterangan === 'Tidak Ada Alasan' || keterangan === 'Tidak Ada Kabar' ? 'selected' : ''}>Tanpa Alasan</option>
                             </select>
-                            <button onclick="hapusLogAbsenInstan('${m.id}', '${m.name}', 'pc')" class="px-2 py-1.5 bg-slate-100 text-slate-400 hover:text-rose-600 rounded-lg cursor-pointer">Hapus</button>
+
+                            <button onclick="hapusLogAbsenInstan('${m.id}', '${m.name}', 'pc')" class="px-2.5 py-2 bg-slate-100 text-slate-400 hover:text-rose-600 rounded-xl cursor-pointer font-bold">Hapus</button>
                         </div>
                     </td>`;
                 memberTableBody.appendChild(tr);
@@ -473,17 +479,16 @@
                         </div>
                     </div>
                     <div class="flex flex-col gap-2 text-3xs w-full" id="actions-mb-${m.id}">
-                        <div class="grid grid-cols-3 gap-2">
-                            <button onclick="kirimAbsenInstan('${m.id}', '${m.name}', 'Hadir', '', 'mb')" class="py-2 rounded-xl text-center font-bold cursor-pointer ${bh}">Hadir</button>
-                            <button onclick="kirimAbsenInstan('${m.id}', '${m.name}', 'Tidak Hadir', 'Tidak Ada Kabar', 'mb')" class="py-2 rounded-xl text-center font-bold cursor-pointer ${ba}">Absen</button>
-                            <button onclick="hapusLogAbsenInstan('${m.id}', '${m.name}', 'mb')" class="py-2 rounded-xl text-center font-medium bg-slate-100 text-slate-400 cursor-pointer">Hapus</button>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="kirimAbsenInstan('${m.id}', '${m.name}', 'Hadir', '', 'mb')" class="py-2.5 rounded-xl text-center font-bold cursor-pointer ${bh}">Hadir</button>
+                            <button onclick="hapusLogAbsenInstan('${m.id}', '${m.name}', 'mb')" class="py-2.5 rounded-xl text-center font-bold bg-slate-100 text-slate-400 cursor-pointer">Hapus Log</button>
                         </div>
                         <div>
-                            <select onchange="kirimAbsenInstan('${m.id}', '${m.name}', 'Tidak Hadir', this.value, 'mb')" class="w-full p-2 border border-slate-300 rounded-xl text-3xs bg-white text-slate-700 cursor-pointer focus:outline-blue-600 font-semibold">
-                                <option value="" disabled ${!keterangan ? 'selected' : ''}>-- Pilihan Alasan Tidak Hadir --</option>
+                            <select onchange="kirimAbsenInstan('${m.id}', '${m.name}', 'Tidak Hadir', this.value, 'mb')" class="w-full p-2.5 border ${isAbsen ? 'border-rose-500 bg-rose-50 text-rose-700' : 'border-slate-300 bg-slate-50 text-slate-700'} rounded-xl text-3xs cursor-pointer focus:outline-blue-600 font-bold">
+                                <option value="" disabled ${!isAbsen ? 'selected' : ''}>-- Absen / Ketidakhadiran --</option>
                                 <option value="Sakit" ${keterangan === 'Sakit' ? 'selected' : ''}>Sakit</option>
                                 <option value="Perlu Dilawat" ${keterangan === 'Perlu Dilawat' ? 'selected' : ''}>Perlu Dilawat</option>
-                                <option value="Tidak Ada Alasan" ${keterangan === 'Tidak Ada Alasan' ? 'selected' : ''}>Tidak Ada Alasan</option>
+                                <option value="Tanpa Alasan" ${keterangan === 'Tanpa Alasan' || keterangan === 'Tidak Ada Alasan' || keterangan === 'Tidak Ada Kabar' ? 'selected' : ''}>Tanpa Alasan</option>
                             </select>
                         </div>
                     </div>`;
@@ -491,13 +496,13 @@
             });
         }
 
-        // ABSENSI INSTAN + KETERANGAN ALASAN
+        // ABSENSI INSTAN DENGAN DROPDOWN ALASAN TERINTEGRASI
         function kirimAbsenInstan(idUser, namaUser, statusPilihan, alasanKeterangan, mode) {
             const container = document.getElementById(`actions-${mode}-${idUser}`);
             const htmlLama = container.innerHTML;
             container.innerHTML = mode === 'pc' 
                 ? `<span class="spinner-dark animate-spin my-1 mx-4"></span> <span class="text-3xs text-slate-400 self-center">Menyimpan...</span>`
-                : `<div class="col-span-3 text-center py-1 text-3xs text-slate-400 font-medium"><span class="spinner-dark animate-spin mr-1 align-middle"></span> Memperbarui status jemaat...</div>`;
+                : `<div class="col-span-2 text-center py-2 text-3xs text-slate-400 font-medium"><span class="spinner-dark animate-spin mr-1 align-middle"></span> Memperbarui status jemaat...</div>`;
 
             fetch(APP_SCRIPT_URL, {
                 method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
@@ -522,7 +527,7 @@
             const htmlLama = container.innerHTML;
             container.innerHTML = mode === 'pc' 
                 ? `<span class="spinner-dark animate-spin my-1 mx-4"></span>`
-                : `<div class="col-span-3 text-center py-1 text-3xs text-slate-400 font-medium"><span class="spinner-dark animate-spin mr-1 align-middle"></span> Menghapus log harian...</div>`;
+                : `<div class="col-span-2 text-center py-2 text-3xs text-slate-400 font-medium"><span class="spinner-dark animate-spin mr-1 align-middle"></span> Menghapus log...</div>`;
 
             fetch(APP_SCRIPT_URL, {
                 method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
@@ -580,11 +585,14 @@
             });
         }
 
-        // MUAT FITUR LAPORAN BULANAN
+        // MUAT FITUR LAPORAN BULANAN (DESKTOP & MOBILE RESPONSIVE)
         function muatLaporanBulanan() {
             const monthVal = reportMonthInput.value;
             const tableBody = document.getElementById('tableLaporanBulanan');
+            const mobileCards = document.getElementById('cardsLaporanBulananMobile');
+
             tableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-blue-600 font-semibold animate-pulse">⏳ Memuat Laporan Bulan ${monthVal}...</td></tr>`;
+            mobileCards.innerHTML = `<p class="p-6 text-center text-blue-600 font-semibold animate-pulse bg-slate-50 rounded-xl border border-slate-200">⏳ Memuat Laporan Bulan ${monthVal}...</p>`;
 
             fetch(`${APP_SCRIPT_URL}?bulan=${monthVal}`, { method: "GET" })
             .then(res => res.json())
@@ -600,12 +608,16 @@
                     document.getElementById('totalAbsenBulan').textContent = totAbsen;
 
                     tableBody.innerHTML = '';
+                    mobileCards.innerHTML = '';
+
                     if(logs.length === 0) {
                         tableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400 italic">Belum ada log kehadiran di bulan ini.</td></tr>`;
+                        mobileCards.innerHTML = `<p class="p-6 text-center text-slate-400 italic text-xs bg-slate-50 rounded-xl border border-slate-200">Belum ada log kehadiran di bulan ini.</p>`;
                         return;
                     }
 
                     logs.forEach(l => {
+                        // Rendering Desktop Table
                         const tr = document.createElement('tr');
                         tr.className = "hover:bg-slate-50 border-b border-slate-100 text-xs";
                         tr.innerHTML = `
@@ -616,13 +628,31 @@
                             <td class="p-3 font-bold ${l.status === 'Hadir' ? 'text-emerald-600' : 'text-rose-600'}">${l.status}</td>
                             <td class="p-3 text-slate-500">${l.keterangan || '-'}</td>`;
                         tableBody.appendChild(tr);
+
+                        // Rendering Mobile Card Layout
+                        const card = document.createElement('div');
+                        card.className = "p-3 bg-white rounded-xl border border-slate-200 shadow-2xs flex flex-col gap-1.5 text-xs";
+                        card.innerHTML = `
+                            <div class="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                                <span class="font-bold text-slate-800">${l.nama}</span>
+                                <span class="px-2 py-0.5 rounded-md font-black text-4xs ${l.status === 'Hadir' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">${l.status}</span>
+                            </div>
+                            <div class="grid grid-cols-2 text-3xs text-slate-500 font-medium pt-0.5">
+                                <div>📅 Tanggal: <span class="font-semibold text-slate-700">${l.tanggal}</span></div>
+                                <div>🏫 Kelas: <span class="font-semibold text-slate-700">${l.kelas}</span></div>
+                                <div>🪪 ID: <span class="font-mono font-bold text-slate-700">${l.id_user}</span></div>
+                                <div>📝 Ket: <span class="font-semibold text-slate-700">${l.keterangan || '-'}</span></div>
+                            </div>`;
+                        mobileCards.appendChild(card);
                     });
                 } else {
                     tableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400 italic">Data laporan bulan ini kosong.</td></tr>`;
+                    mobileCards.innerHTML = `<p class="p-6 text-center text-slate-400 italic text-xs bg-slate-50 rounded-xl border border-slate-200">Data laporan bulan ini kosong.</p>`;
                 }
             })
             .catch(() => {
                 tableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-rose-600 italic">❌ Gagal mengambil laporan dari server.</td></tr>`;
+                mobileCards.innerHTML = `<p class="p-6 text-center text-rose-600 italic text-xs bg-rose-50 rounded-xl border border-rose-200">❌ Gagal mengambil laporan dari server.</p>`;
             });
         }
 
