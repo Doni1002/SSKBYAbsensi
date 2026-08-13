@@ -439,7 +439,7 @@
 
             activeClass.members.forEach(m => {
                 let status = m.absenHariIni ? m.absenHariIni.status : 'Belum Absen';
-                let keterangan = m.absenHariIni && m.absenHariIni.keterangan ? m.absenHariIni.keterangan : '';
+                let keterangan = m.absenHariIni && m.absenHariIni.keterangan ? String(m.absenHariIni.keterangan).trim() : '';
 
                 let bh = status === 'Hadir' ? 'bg-emerald-600 text-white font-bold shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200';
                 let isAbsen = status === 'Tidak Hadir';
@@ -457,10 +457,10 @@
                             <button onclick="kirimAbsenInstan('${m.id}', '${m.name}', 'Hadir', '', 'pc')" class="px-3.5 py-2 rounded-xl font-bold cursor-pointer transition-all ${bh}">Hadir</button>
                             
                             <select onchange="kirimAbsenInstan('${m.id}', '${m.name}', 'Tidak Hadir', this.value, 'pc')" class="px-3 py-2 border ${isAbsen ? 'border-rose-500 bg-rose-50 text-rose-700 font-bold' : 'border-slate-300 bg-slate-50 text-slate-700'} rounded-xl text-2xs cursor-pointer focus:outline-blue-600 font-semibold">
-                                <option value="" disabled ${!isAbsen ? 'selected' : ''}>-- Absen / Ketidakhadiran --</option>
-                                <option value="Sakit" ${keterangan === 'Sakit' ? 'selected' : ''}>Sakit</option>
-                                <option value="Perlu Dilawat" ${keterangan === 'Perlu Dilawat' ? 'selected' : ''}>Perlu Dilawat</option>
-                                <option value="Tanpa Alasan" ${keterangan === 'Tanpa Alasan' || keterangan === 'Tidak Ada Alasan' || keterangan === 'Tidak Ada Kabar' ? 'selected' : ''}>Tanpa Alasan</option>
+                                <option value="" disabled ${!isAbsen ? 'selected' : ''}>-- Absen --</option>
+                                <option value="Sakit" ${keterangan.toLowerCase() === 'sakit' ? 'selected' : ''}>Sakit</option>
+                                <option value="Perlu Dilawat" ${keterangan.toLowerCase() === 'perlu dilawat' ? 'selected' : ''}>Perlu Dilawat</option>
+                                <option value="Tidak ada Alasan" ${keterangan.toLowerCase().includes('alasan') || keterangan.toLowerCase().includes('kabar') ? 'selected' : ''}>Tidak ada Alasan</option>
                             </select>
 
                             <button onclick="hapusLogAbsenInstan('${m.id}', '${m.name}', 'pc')" class="px-2.5 py-2 bg-slate-100 text-slate-400 hover:text-rose-600 rounded-xl cursor-pointer font-bold">Hapus</button>
@@ -485,10 +485,10 @@
                         </div>
                         <div>
                             <select onchange="kirimAbsenInstan('${m.id}', '${m.name}', 'Tidak Hadir', this.value, 'mb')" class="w-full p-2.5 border ${isAbsen ? 'border-rose-500 bg-rose-50 text-rose-700' : 'border-slate-300 bg-slate-50 text-slate-700'} rounded-xl text-3xs cursor-pointer focus:outline-blue-600 font-bold">
-                                <option value="" disabled ${!isAbsen ? 'selected' : ''}>-- Absen / Ketidakhadiran --</option>
-                                <option value="Sakit" ${keterangan === 'Sakit' ? 'selected' : ''}>Sakit</option>
-                                <option value="Perlu Dilawat" ${keterangan === 'Perlu Dilawat' ? 'selected' : ''}>Perlu Dilawat</option>
-                                <option value="Tanpa Alasan" ${keterangan === 'Tanpa Alasan' || keterangan === 'Tidak Ada Alasan' || keterangan === 'Tidak Ada Kabar' ? 'selected' : ''}>Tanpa Alasan</option>
+                                <option value="" disabled ${!isAbsen ? 'selected' : ''}>-- Absen --</option>
+                                <option value="Sakit" ${keterangan.toLowerCase() === 'sakit' ? 'selected' : ''}>Sakit</option>
+                                <option value="Perlu Dilawat" ${keterangan.toLowerCase() === 'perlu dilawat' ? 'selected' : ''}>Perlu Dilawat</option>
+                                <option value="Tidak ada Alasan" ${keterangan.toLowerCase().includes('alasan') || keterangan.toLowerCase().includes('kabar') ? 'selected' : ''}>Tidak ada Alasan</option>
                             </select>
                         </div>
                     </div>`;
@@ -585,9 +585,9 @@
             });
         }
 
-        // MUAT FITUR LAPORAN BULANAN (DESKTOP & MOBILE RESPONSIVE)
+        // MUAT FITUR LAPORAN BULANAN (DENGAN MULTI-FORMAT HANDLER & ADAPTIF KOSONG)
         function muatLaporanBulanan() {
-            const monthVal = reportMonthInput.value;
+            const monthVal = reportMonthInput.value; // YYYY-MM
             const tableBody = document.getElementById('tableLaporanBulanan');
             const mobileCards = document.getElementById('cardsLaporanBulananMobile');
 
@@ -597,58 +597,90 @@
             fetch(`${APP_SCRIPT_URL}?bulan=${monthVal}`, { method: "GET" })
             .then(res => res.json())
             .then(data => {
-                if(data.status === "success" && data.laporan) {
-                    let logs = data.laporan;
-                    let totLog = logs.length;
-                    let totHadir = logs.filter(l => l.status === 'Hadir').length;
-                    let totAbsen = logs.filter(l => l.status === 'Tidak Hadir').length;
-
-                    document.getElementById('totalLogBulan').textContent = totLog;
-                    document.getElementById('totalHadirBulan').textContent = totHadir;
-                    document.getElementById('totalAbsenBulan').textContent = totAbsen;
-
-                    tableBody.innerHTML = '';
-                    mobileCards.innerHTML = '';
-
-                    if(logs.length === 0) {
-                        tableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400 italic">Belum ada log kehadiran di bulan ini.</td></tr>`;
-                        mobileCards.innerHTML = `<p class="p-6 text-center text-slate-400 italic text-xs bg-slate-50 rounded-xl border border-slate-200">Belum ada log kehadiran di bulan ini.</p>`;
-                        return;
-                    }
-
-                    logs.forEach(l => {
-                        // Rendering Desktop Table
-                        const tr = document.createElement('tr');
-                        tr.className = "hover:bg-slate-50 border-b border-slate-100 text-xs";
-                        tr.innerHTML = `
-                            <td class="p-3 font-semibold text-slate-600">${l.tanggal}</td>
-                            <td class="p-3 font-mono text-slate-500 font-bold">${l.id_user}</td>
-                            <td class="p-3 font-bold text-slate-800">${l.nama}</td>
-                            <td class="p-3 text-slate-600">${l.kelas}</td>
-                            <td class="p-3 font-bold ${l.status === 'Hadir' ? 'text-emerald-600' : 'text-rose-600'}">${l.status}</td>
-                            <td class="p-3 text-slate-500">${l.keterangan || '-'}</td>`;
-                        tableBody.appendChild(tr);
-
-                        // Rendering Mobile Card Layout
-                        const card = document.createElement('div');
-                        card.className = "p-3 bg-white rounded-xl border border-slate-200 shadow-2xs flex flex-col gap-1.5 text-xs";
-                        card.innerHTML = `
-                            <div class="flex justify-between items-center border-b border-slate-100 pb-1.5">
-                                <span class="font-bold text-slate-800">${l.nama}</span>
-                                <span class="px-2 py-0.5 rounded-md font-black text-4xs ${l.status === 'Hadir' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">${l.status}</span>
-                            </div>
-                            <div class="grid grid-cols-2 text-3xs text-slate-500 font-medium pt-0.5">
-                                <div>📅 Tanggal: <span class="font-semibold text-slate-700">${l.tanggal}</span></div>
-                                <div>🏫 Kelas: <span class="font-semibold text-slate-700">${l.kelas}</span></div>
-                                <div>🪪 ID: <span class="font-mono font-bold text-slate-700">${l.id_user}</span></div>
-                                <div>📝 Ket: <span class="font-semibold text-slate-700">${l.keterangan || '-'}</span></div>
-                            </div>`;
-                        mobileCards.appendChild(card);
-                    });
-                } else {
-                    tableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400 italic">Data laporan bulan ini kosong.</td></tr>`;
-                    mobileCards.innerHTML = `<p class="p-6 text-center text-slate-400 italic text-xs bg-slate-50 rounded-xl border border-slate-200">Data laporan bulan ini kosong.</p>`;
+                let logs = [];
+                
+                if (data.status === "success" && Array.isArray(data.laporan)) {
+                    logs = data.laporan;
+                } else if (Array.isArray(data)) {
+                    logs = data;
+                } else if (data.data && Array.isArray(data.data)) {
+                    logs = data.data;
                 }
+
+                // Melakukan Filter Sisi Klien Sebagai Cadangan Kompatibilitas Format Tanggal
+                if (monthVal && logs.length > 0) {
+                    const parts = monthVal.split('-');
+                    const targetYear = parts[0];
+                    const targetMonth = parts[1]; // MM Format
+
+                    logs = logs.filter(l => {
+                        let tglStr = String(l.tanggal || l.date || '');
+                        if (!tglStr) return true;
+                        
+                        // YYYY-MM Matches
+                        if (tglStr.startsWith(monthVal)) return true;
+                        
+                        // MM/DD/YYYY / YYYY-MM-DD
+                        if (tglStr.includes(`${targetYear}-${targetMonth}`)) return true;
+                        if (tglStr.includes(`/${targetMonth}/${targetYear}`) || tglStr.includes(`-${targetMonth}-${targetYear}`)) return true;
+
+                        return true; 
+                    });
+                }
+
+                let totLog = logs.length;
+                let totHadir = logs.filter(l => (l.status || '').toLowerCase() === 'hadir').length;
+                let totAbsen = logs.filter(l => (l.status || '').toLowerCase() === 'tidak hadir').length;
+
+                document.getElementById('totalLogBulan').textContent = totLog;
+                document.getElementById('totalHadirBulan').textContent = totHadir;
+                document.getElementById('totalAbsenBulan').textContent = totAbsen;
+
+                tableBody.innerHTML = '';
+                mobileCards.innerHTML = '';
+
+                if(logs.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400 italic">Belum ada log kehadiran yang tercatat untuk bulan ini.</td></tr>`;
+                    mobileCards.innerHTML = `<p class="p-6 text-center text-slate-400 italic text-xs bg-slate-50 rounded-xl border border-slate-200">Belum ada log kehadiran yang tercatat untuk bulan ini.</p>`;
+                    return;
+                }
+
+                logs.forEach(l => {
+                    const tanggalFix = l.tanggal || l.date || '-';
+                    const idFix = l.id_user || l.id || '-';
+                    const namaFix = l.nama || l.nama_user || '-';
+                    const kelasFix = l.kelas || l.class_name || '-';
+                    const statusFix = l.status || '-';
+                    const ketFix = l.keterangan || '-';
+
+                    // Rendering Desktop Table
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 border-b border-slate-100 text-xs";
+                    tr.innerHTML = `
+                        <td class="p-3 font-semibold text-slate-600">${tanggalFix}</td>
+                        <td class="p-3 font-mono text-slate-500 font-bold">${idFix}</td>
+                        <td class="p-3 font-bold text-slate-800">${namaFix}</td>
+                        <td class="p-3 text-slate-600">${kelasFix}</td>
+                        <td class="p-3 font-bold ${statusFix.toLowerCase() === 'hadir' ? 'text-emerald-600' : 'text-rose-600'}">${statusFix}</td>
+                        <td class="p-3 text-slate-500">${ketFix}</td>`;
+                    tableBody.appendChild(tr);
+
+                    // Rendering Mobile Card Layout
+                    const card = document.createElement('div');
+                    card.className = "p-3 bg-white rounded-xl border border-slate-200 shadow-2xs flex flex-col gap-1.5 text-xs";
+                    card.innerHTML = `
+                        <div class="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                            <span class="font-bold text-slate-800">${namaFix}</span>
+                            <span class="px-2 py-0.5 rounded-md font-black text-4xs ${statusFix.toLowerCase() === 'hadir' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">${statusFix}</span>
+                        </div>
+                        <div class="grid grid-cols-2 text-3xs text-slate-500 font-medium pt-0.5">
+                            <div>📅 Tanggal: <span class="font-semibold text-slate-700">${tanggalFix}</span></div>
+                            <div>🏫 Kelas: <span class="font-semibold text-slate-700">${kelasFix}</span></div>
+                            <div>🪪 ID: <span class="font-mono font-bold text-slate-700">${idFix}</span></div>
+                            <div>📝 Ket: <span class="font-semibold text-slate-700">${ketFix}</span></div>
+                        </div>`;
+                    mobileCards.appendChild(card);
+                });
             })
             .catch(() => {
                 tableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-rose-600 italic">❌ Gagal mengambil laporan dari server.</td></tr>`;
