@@ -470,15 +470,16 @@
             document.getElementById('kpiAbsen').textContent = jmlAbsen;
             document.getElementById('kpiPersen').textContent = (jmlTotal > 0 ? Math.round((jmlHadir / jmlTotal) * 100) : 0) + "%";
 
-            let kmt = activeClass.komitmen || { belajar_ss: 0, menginjil: 0, renungan_pagi: 0, bacaan_alkitab: 0 };
+            let kmt = activeClass.komitmen || { belajar_ss: 0, menginjil: 0, renungan_pagi: 0, bacaan_alkitab: 0, tamu: 0 };
             document.getElementById('panelAgregatKelas').innerHTML = `
                 <div class="m-3 bg-blue-50/50 p-3.5 rounded-2xl border border-blue-100">
                     <h4 class="text-4xs sm:text-xs font-bold text-blue-800 uppercase tracking-wider mb-2.5">📊 Indikator Komitmen Kolektif Kelas</h4>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-3xs sm:text-xs">
-                        <div><label class="block text-slate-600 mb-1">📖 Belajar SS</label><input type="number" id="kls_belajar" value="${kmt.belajar_ss}" class="w-full p-2 border border-slate-200 rounded-xl text-center font-bold bg-white"></div>
-                        <div><label class="block text-slate-600 mb-1">📢 Menginjil</label><input type="number" id="kls_menginjil" value="${kmt.menginjil}" class="w-full p-2 border border-slate-200 rounded-xl text-center font-bold bg-white"></div>
-                        <div><label class="block text-slate-600 mb-1">☀️ Renungan Pagi</label><input type="number" id="kls_renungan" value="${kmt.renungan_pagi}" class="w-full p-2 border border-slate-200 rounded-xl text-center font-bold bg-white"></div>
-                        <div><label class="block text-slate-600 mb-1">📜 Baca Alkitab</label><input type="number" id="kls_bacaan" value="${kmt.bacaan_alkitab}" class="w-full p-2 border border-slate-200 rounded-xl text-center font-bold bg-white"></div>
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-3xs sm:text-xs">
+                        <div><label class="block text-slate-600 mb-1">📖 Belajar SS</label><input type="number" id="kls_belajar" value="${kmt.belajar_ss || 0}" class="w-full p-2 border border-slate-200 rounded-xl text-center font-bold bg-white"></div>
+                        <div><label class="block text-slate-600 mb-1">📢 Menginjil</label><input type="number" id="kls_menginjil" value="${kmt.menginjil || 0}" class="w-full p-2 border border-slate-200 rounded-xl text-center font-bold bg-white"></div>
+                        <div><label class="block text-slate-600 mb-1">☀️ Renungan Pagi</label><input type="number" id="kls_renungan" value="${kmt.renungan_pagi || 0}" class="w-full p-2 border border-slate-200 rounded-xl text-center font-bold bg-white"></div>
+                        <div><label class="block text-slate-600 mb-1">📜 Baca Alkitab</label><input type="number" id="kls_bacaan" value="${kmt.bacaan_alkitab || 0}" class="w-full p-2 border border-slate-200 rounded-xl text-center font-bold bg-white"></div>
+                        <div class="col-span-2 sm:col-span-1"><label class="block text-slate-600 mb-1">👥 Tamu</label><input type="number" id="kls_tamu" value="${kmt.tamu || 0}" class="w-full p-2 border border-slate-200 rounded-xl text-center font-bold bg-white"></div>
                     </div>
                     <div class="mt-3 flex justify-end">
                         <button onclick="simpanKomitmenKolektifKelas()" id="btnSimpanKomitmenKls" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-xl text-3xs cursor-pointer w-full sm:w-auto text-center">💾 Simpan Indikator Kelas</button>
@@ -764,9 +765,14 @@
             fetch(APP_SCRIPT_URL, {
                 method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
                 body: JSON.stringify({
-                    aksi: "simpan_komitmen_kelas", nama_kelas: appData.classes.find(c => c.id == currentClassId).name, tanggal: attendanceDateInput.value,
-                    belajar_ss: document.getElementById('kls_belajar').value, menginjil: document.getElementById('kls_menginjil').value,
-                    renungan_pagi: document.getElementById('kls_renungan').value, bacaan_alkitab: document.getElementById('kls_bacaan').value
+                    aksi: "simpan_komitmen_kelas", 
+                    nama_kelas: appData.classes.find(c => c.id == currentClassId).name, 
+                    tanggal: attendanceDateInput.value,
+                    belajar_ss: document.getElementById('kls_belajar').value, 
+                    menginjil: document.getElementById('kls_menginjil').value,
+                    renungan_pagi: document.getElementById('kls_renungan').value, 
+                    bacaan_alkitab: document.getElementById('kls_bacaan').value,
+                    tamu: document.getElementById('kls_tamu').value
                 })
             }).then(() => { btn.disabled = false; btn.textContent = "💾 Simpan Indikator Kelas"; setSyncIndicator(false); muatDataDariSheets(); });
         }
