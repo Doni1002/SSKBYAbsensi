@@ -22,216 +22,265 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased pb-12">
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
 
-    <!-- TOP BAR -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row items-center justify-between gap-3">
+    <!-- OVERLAY LAYAR DIBUKA (KHUSUS MOBILE) -->
+    <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/50 z-40 hidden md:hidden transition-opacity"></div>
+
+    <div class="flex min-h-screen">
+        
+        <!-- ================= SIDEBAR NAVIGATION ================= -->
+        <aside id="sidebar" class="fixed top-0 bottom-0 left-0 w-64 bg-slate-900 text-slate-300 z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-200 ease-in-out flex flex-col justify-between border-r border-slate-800">
             
-            <!-- Judul & Status Indikator Sync -->
-            <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-lg shadow-sm shrink-0">A</div>
-                    <div>
-                        <h1 class="font-bold text-slate-900 text-sm sm:text-base tracking-tight leading-tight">Sistem Absensi Terpadu</h1>
-                        <p id="syncStatus" class="text-3xs text-emerald-600 font-bold uppercase tracking-wide">● Tersambung & Siap</p>
+            <div>
+                <!-- Sidebar Header -->
+                <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-lg shadow-sm shrink-0">A</div>
+                        <div>
+                            <h1 class="font-bold text-white text-sm tracking-tight leading-tight">Sistem Absensi</h1>
+                            <p id="syncStatus" class="text-3xs text-emerald-400 font-bold uppercase tracking-wide">● Tersambung & Siap</p>
+                        </div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Area Navigasi & Input Tanggal -->
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full md:w-auto border-t md:border-t-0 border-slate-100 pt-2.5 md:pt-0">
-                <nav class="flex bg-slate-100 p-1 rounded-xl text-3xs sm:text-xs font-bold w-full sm:w-auto">
-                    <button onclick="switchPage('absensi')" id="btnTabAbsensi" class="flex-1 sm:flex-none text-center px-3 py-2 rounded-lg transition-all cursor-pointer bg-white text-blue-600 shadow-xs whitespace-nowrap">Absensi & Komitmen</button>
-                    <button onclick="switchPage('manajemen')" id="btnTabManajemen" class="flex-1 sm:flex-none text-center px-3 py-2 rounded-lg transition-all cursor-pointer text-slate-600 hover:text-slate-900 whitespace-nowrap">Manajemen & KPI</button>
-                    <button onclick="switchPage('laporan')" id="btnTabLaporan" class="flex-1 sm:flex-none text-center px-3 py-2 rounded-lg transition-all cursor-pointer text-slate-600 hover:text-slate-900 whitespace-nowrap">Laporan Bulanan</button>
-                </nav>
-                
-                <div class="w-full sm:w-auto">
-                    <input type="date" id="attendanceDateInput" class="w-full sm:w-auto border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 bg-slate-50 focus:outline-blue-600 focus:bg-white transition-all shadow-2xs">
-                </div>
-            </div>
-
-        </div>
-    </header>
-
-    <!-- HALAMAN 1: ABSENSI & KOMITMEN -->
-    <div id="pageAbsensi" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 md:mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-        <div class="lg:col-span-2 flex flex-col gap-4 md:gap-6">
-            <!-- TABS PILIHAN KELAS -->
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
-                <h3 class="text-3xs sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Pilih Kelas / Kelompok</h3>
-                <div id="classTabs" class="flex flex-wrap gap-2">
-                    <p class="text-xs text-slate-400 italic">Memuat daftar kelas...</p>
-                </div>
-            </div>
-
-            <!-- AREA ABSENSI SISWA -->
-            <div id="attendanceArea" class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden hidden">
-                <div class="p-4 sm:p-6 border-b border-slate-100 flex justify-between items-center bg-linear-to-r from-white to-slate-50/50">
-                    <div>
-                        <h2 id="selectedClassName" class="text-base sm:text-lg font-bold text-slate-900">Nama Kelas</h2>
-                        <p id="memberCount" class="text-3xs sm:text-xs text-slate-400 font-medium">0 Anggota Terdaftar</p>
-                    </div>
+                    <!-- Tombol Tutup Sidebar di Mobile -->
+                    <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white p-1 text-lg">✕</button>
                 </div>
 
-                <!-- ROW KPI MINI KELAS AKTIF -->
-                <div class="grid grid-cols-4 gap-2 px-4 pt-4 text-center">
-                    <div class="bg-slate-50 p-2 rounded-xl border border-slate-100">
-                        <p class="text-4xs sm:text-3xs font-bold text-slate-400 uppercase tracking-tight">Total</p>
-                        <p id="kpiTotal" class="text-sm sm:text-base font-black text-slate-700 mt-0.5">0</p>
-                    </div>
-                    <div class="bg-emerald-50/50 p-2 rounded-xl border border-emerald-100">
-                        <p class="text-4xs sm:text-3xs font-bold text-emerald-600 uppercase tracking-tight">Hadir</p>
-                        <p id="kpiHadir" class="text-sm sm:text-base font-black text-emerald-600 mt-0.5">0</p>
-                    </div>
-                    <div class="bg-rose-50/50 p-2 rounded-xl border border-rose-100">
-                        <p class="text-4xs sm:text-3xs font-bold text-rose-600 uppercase tracking-tight">Absen</p>
-                        <p id="kpiAbsen" class="text-sm sm:text-base font-black text-rose-600 mt-0.5">0</p>
-                    </div>
-                    <div class="bg-blue-50/50 p-2 rounded-xl border border-blue-100">
-                        <p class="text-4xs sm:text-3xs font-bold text-blue-600 uppercase tracking-tight">% Rasio</p>
-                        <p id="kpiPersen" class="text-sm sm:text-base font-black text-blue-600 mt-0.5">0%</p>
-                    </div>
-                </div>
-
-                <div id="panelAgregatKelas"></div>
-
-                <!-- Tabel Desktop -->
-                <div class="hidden sm:block overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50 text-slate-400 font-bold text-3xs uppercase tracking-wider border-b border-slate-100">
-                                <th class="p-4 w-24">ID</th>
-                                <th class="p-4">Nama Lengkap</th>
-                                <th class="p-4 text-right w-96">Aksi & Keterangan Kehadiran</th>
-                            </tr>
-                        </thead>
-                        <tbody id="memberTableBody" class="divide-y divide-slate-100 text-sm"></tbody>
-                    </table>
-                </div>
-
-                <!-- Card Mobile -->
-                <div id="memberMobileCards" class="sm:hidden p-3 flex flex-col gap-3 bg-slate-50/50"></div>
-            </div>
-        </div>
-
-        <!-- REGISTRASI ANGGOTA BARU -->
-        <div class="flex flex-col gap-4 md:gap-6">
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
-                <h3 class="text-3xs sm:text-xs font-bold text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-1.5">👤 Registrasi Anggota Baru</h3>
-                <form id="memberForm" class="flex flex-col gap-3 text-xs">
-                    <div>
-                        <label class="block text-slate-500 mb-1">Penempatan Kelas</label>
-                        <select id="memberClassSelect" required onchange="generateOtomatisId()" class="w-full p-2.5 border border-slate-300 rounded-xl bg-white focus:outline-blue-600"></select>
-                    </div>
-                    <div>
-                        <label class="block text-slate-500 mb-1">ID Anggota (Otomatis)</label>
-                        <input type="text" id="memberId" readonly placeholder="Pilih kelas terlebih dahulu..." class="w-full p-2.5 border border-slate-200 rounded-xl bg-slate-100 text-slate-500 font-mono font-bold cursor-not-allowed">
-                    </div>
-                    <div>
-                        <label class="block text-slate-500 mb-1">Nama Lengkap</label>
-                        <input type="text" id="memberName" required placeholder="Contoh: John Doe" class="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-blue-600 bg-white">
-                    </div>
-                    <button type="submit" id="btnSubmitSiswa" class="mt-2 bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-1">
-                        <span id="textSubmitSiswa">Simpan Anggota Baru</span>
+                <!-- Menu Navigasi Utama -->
+                <nav class="p-3 space-y-1.5 text-xs font-semibold">
+                    <div class="px-3 py-2 text-4xs font-bold text-slate-500 uppercase tracking-wider">Menu Utama</div>
+                    
+                    <button onclick="switchPage('absensi'); autoCloseSidebarOnMobile();" id="btnTabAbsensi" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all cursor-pointer bg-blue-600 text-white font-bold shadow-sm">
+                        <span>📋</span>
+                        <span>Absensi & Komitmen</span>
                     </button>
-                </form>
+
+                    <button onclick="switchPage('manajemen'); autoCloseSidebarOnMobile();" id="btnTabManajemen" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all cursor-pointer text-slate-400 hover:bg-slate-800 hover:text-white">
+                        <span>⚙️</span>
+                        <span>Manajemen & KPI</span>
+                    </button>
+
+                    <button onclick="switchPage('laporan'); autoCloseSidebarOnMobile();" id="btnTabLaporan" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all cursor-pointer text-slate-400 hover:bg-slate-800 hover:text-white">
+                        <span>📊</span>
+                        <span>Laporan Bulanan</span>
+                    </button>
+                </nav>
             </div>
-        </div>
-    </div>
 
-    <!-- HALAMAN 2: MANAJEMEN -->
-    <div id="pageManajemen" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 md:mt-6 flex flex-col gap-4 md:gap-6 hidden">
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
-            <h3 class="text-3xs sm:text-xs font-bold text-slate-900 uppercase tracking-wider mb-3 flex items-center gap-1.5">📈 Performa & Ringkasan KPI Kelas</h3>
-            <div id="kpiGlobalContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
-        </div>
-
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
-            <h3 class="text-3xs sm:text-xs font-bold text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-1.5">🏫 Manajemen Master Kelas</h3>
-            <form id="classForm" class="flex flex-col sm:flex-row gap-3 text-xs mb-4">
-                <input type="text" id="newClassName" required placeholder="Nama Kelas Baru" class="flex-1 p-2.5 border border-slate-300 rounded-xl focus:outline-blue-600 bg-white">
-                <button type="submit" id="btnSubmitKelas" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl transition-colors cursor-pointer">Tambah Kelas</button>
-            </form>
-            <div id="masterClassList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs"></div>
-        </div>
-
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
-            <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <div>
-                    <h3 class="font-bold text-slate-900 text-sm sm:text-base">📋 Basis Data & Manajemen Anggota</h3>
-                    <p class="text-3xs sm:text-xs text-slate-400 font-medium">Kelola data anggota berdasarkan ID unik</p>
-                </div>
-                <input type="text" id="searchAnggota" oninput="filterManajemenAnggota()" placeholder="Cari ID atau nama..." class="text-xs px-3 py-2 border border-slate-300 rounded-xl w-full sm:w-64 bg-white focus:outline-blue-600">
+            <!-- Footer Sidebar -->
+            <div class="p-4 border-t border-slate-800 text-3xs text-slate-500 text-center">
+                <p>Sistem Absensi Terpadu v2.0</p>
             </div>
+        </aside>
+
+        <!-- ================= KONTEN UTAMA Halaman ================= -->
+        <div class="flex-1 md:ml-64 flex flex-col min-w-0">
             
-            <div class="overflow-x-auto w-full">
-                <table class="w-full text-left border-collapse text-xs min-w-[500px]">
-                    <thead>
-                        <tr class="bg-slate-100 text-slate-500 font-bold uppercase border-b border-slate-200">
-                            <th class="p-3 w-28">ID Unik</th>
-                            <th class="p-3">Nama Lengkap</th>
-                            <th class="p-3">Kelas Saat Ini</th>
-                            <th class="p-3 text-center w-36">Opsi Tindakan</th>
-                        </tr>
-                    </thead>
-                    <tbody id="managementTableBody" class="divide-y divide-slate-100 text-slate-700"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+            <!-- TOP BAR (Tampilan Header Utama) -->
+            <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-3">
+                    
+                    <!-- Tombol Hamburger Mobile -->
+                    <div class="flex items-center gap-3">
+                        <button onclick="toggleSidebar()" class="md:hidden bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-xl text-lg flex items-center justify-center">
+                            ☰
+                        </button>
+                        <h2 id="pageTitle" class="font-bold text-slate-900 text-sm sm:text-base">Absensi & Komitmen</h2>
+                    </div>
 
-    <!-- HALAMAN 3: LAPORAN BULANAN -->
-    <div id="pageLaporan" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 md:mt-6 flex flex-col gap-4 md:gap-6 hidden">
-        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-2xs">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-                <div>
-                    <h3 class="font-bold text-slate-900 text-sm sm:text-base">📅 Laporan Kehadiran Bulanan</h3>
-                    <p class="text-3xs sm:text-xs text-slate-400 font-medium">Rekapitulasi kehadiran jemaat dan statistik kelas per bulan</p>
-                </div>
-                <div class="flex items-center gap-2 w-full sm:w-auto">
-                    <input type="month" id="reportMonthInput" class="border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 bg-slate-50 focus:outline-blue-600 focus:bg-white transition-all w-full sm:w-auto">
-                    <button onclick="muatLaporanBulanan()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors cursor-pointer shrink-0">Tampilkan</button>
-                </div>
-            </div>
+                    <!-- Input Tanggal Absensi -->
+                    <div class="flex items-center gap-2">
+                        <label class="hidden sm:block text-xs font-semibold text-slate-500">Tanggal:</label>
+                        <input type="date" id="attendanceDateInput" class="border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-50 focus:outline-blue-600 focus:bg-white transition-all shadow-2xs">
+                    </div>
 
-            <div id="summaryLaporanBulanan" class="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
-                <div class="p-3 sm:p-4 bg-slate-50 rounded-xl border border-slate-100 text-center sm:text-left">
-                    <p class="text-4xs sm:text-3xs font-bold text-slate-400 uppercase tracking-tight">Total Log</p>
-                    <p id="totalLogBulan" class="text-base sm:text-xl font-black text-slate-800 mt-0.5 sm:mt-1">0</p>
                 </div>
-                <div class="p-3 sm:p-4 bg-emerald-50/50 rounded-xl border border-emerald-100 text-center sm:text-left">
-                    <p class="text-4xs sm:text-3xs font-bold text-emerald-600 uppercase tracking-tight">Total Hadir</p>
-                    <p id="totalHadirBulan" class="text-base sm:text-xl font-black text-emerald-600 mt-0.5 sm:mt-1">0</p>
-                </div>
-                <div class="p-3 sm:p-4 bg-rose-50/50 rounded-xl border border-rose-100 text-center sm:text-left">
-                    <p class="text-4xs sm:text-3xs font-bold text-rose-600 uppercase tracking-tight">Total Absen</p>
-                    <p id="totalAbsenBulan" class="text-base sm:text-xl font-black text-rose-600 mt-0.5 sm:mt-1">0</p>
-                </div>
-            </div>
+            </header>
 
-            <div class="hidden sm:block overflow-x-auto border border-slate-200 rounded-xl">
-                <table class="w-full text-left border-collapse text-xs">
-                    <thead>
-                        <tr class="bg-slate-100 text-slate-600 font-bold border-b border-slate-200 uppercase">
-                            <th class="p-3">Tanggal</th>
-                            <th class="p-3">ID Jemaat</th>
-                            <th class="p-3">Nama Lengkap</th>
-                            <th class="p-3">Kelas</th>
-                            <th class="p-3">Status</th>
-                            <th class="p-3">Keterangan</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableLaporanBulanan" class="divide-y divide-slate-100">
-                        <tr><td colspan="6" class="p-6 text-center text-slate-400 italic">Pilih bulan dan klik "Tampilkan" untuk memuat laporan.</td></tr>
-                    </tbody>
-                </table>
-            </div>
+            <!-- CONTAINER ISI KONTEN -->
+            <main class="flex-1 pb-12">
+                
+                <!-- HALAMAN 1: ABSENSI & KOMITMEN -->
+                <div id="pageAbsensi" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 md:mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+                    <div class="lg:col-span-2 flex flex-col gap-4 md:gap-6">
+                        <!-- TABS PILIHAN KELAS -->
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
+                            <h3 class="text-3xs sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Pilih Kelas / Kelompok</h3>
+                            <div id="classTabs" class="flex flex-wrap gap-2">
+                                <p class="text-xs text-slate-400 italic">Memuat daftar kelas...</p>
+                            </div>
+                        </div>
 
-            <div id="cardsLaporanBulananMobile" class="sm:hidden flex flex-col gap-2.5">
-                <p class="p-6 text-center text-slate-400 italic text-xs bg-slate-50 rounded-xl border border-slate-200">Pilih bulan dan klik "Tampilkan" untuk memuat laporan.</p>
-            </div>
+                        <!-- AREA ABSENSI SISWA -->
+                        <div id="attendanceArea" class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden hidden">
+                            <div class="p-4 sm:p-6 border-b border-slate-100 flex justify-between items-center bg-linear-to-r from-white to-slate-50/50">
+                                <div>
+                                    <h2 id="selectedClassName" class="text-base sm:text-lg font-bold text-slate-900">Nama Kelas</h2>
+                                    <p id="memberCount" class="text-3xs sm:text-xs text-slate-400 font-medium">0 Anggota Terdaftar</p>
+                                </div>
+                            </div>
+
+                            <!-- ROW KPI MINI KELAS AKTIF -->
+                            <div class="grid grid-cols-4 gap-2 px-4 pt-4 text-center">
+                                <div class="bg-slate-50 p-2 rounded-xl border border-slate-100">
+                                    <p class="text-4xs sm:text-3xs font-bold text-slate-400 uppercase tracking-tight">Total</p>
+                                    <p id="kpiTotal" class="text-sm sm:text-base font-black text-slate-700 mt-0.5">0</p>
+                                </div>
+                                <div class="bg-emerald-50/50 p-2 rounded-xl border border-emerald-100">
+                                    <p class="text-4xs sm:text-3xs font-bold text-emerald-600 uppercase tracking-tight">Hadir</p>
+                                    <p id="kpiHadir" class="text-sm sm:text-base font-black text-emerald-600 mt-0.5">0</p>
+                                </div>
+                                <div class="bg-rose-50/50 p-2 rounded-xl border border-rose-100">
+                                    <p class="text-4xs sm:text-3xs font-bold text-rose-600 uppercase tracking-tight">Absen</p>
+                                    <p id="kpiAbsen" class="text-sm sm:text-base font-black text-rose-600 mt-0.5">0</p>
+                                </div>
+                                <div class="bg-blue-50/50 p-2 rounded-xl border border-blue-100">
+                                    <p class="text-4xs sm:text-3xs font-bold text-blue-600 uppercase tracking-tight">% Rasio</p>
+                                    <p id="kpiPersen" class="text-sm sm:text-base font-black text-blue-600 mt-0.5">0%</p>
+                                </div>
+                            </div>
+
+                            <div id="panelAgregatKelas"></div>
+
+                            <!-- Tabel Desktop -->
+                            <div class="hidden sm:block overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-50 text-slate-400 font-bold text-3xs uppercase tracking-wider border-b border-slate-100">
+                                            <th class="p-4 w-24">ID</th>
+                                            <th class="p-4">Nama Lengkap</th>
+                                            <th class="p-4 text-right w-96">Aksi & Keterangan Kehadiran</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="memberTableBody" class="divide-y divide-slate-100 text-sm"></tbody>
+                                </table>
+                            </div>
+
+                            <!-- Card Mobile -->
+                            <div id="memberMobileCards" class="sm:hidden p-3 flex flex-col gap-3 bg-slate-50/50"></div>
+                        </div>
+                    </div>
+
+                    <!-- REGISTRASI ANGGOTA BARU -->
+                    <div class="flex flex-col gap-4 md:gap-6">
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
+                            <h3 class="text-3xs sm:text-xs font-bold text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-1.5">👤 Registrasi Anggota Baru</h3>
+                            <form id="memberForm" class="flex flex-col gap-3 text-xs">
+                                <div>
+                                    <label class="block text-slate-500 mb-1">Penempatan Kelas</label>
+                                    <select id="memberClassSelect" required onchange="generateOtomatisId()" class="w-full p-2.5 border border-slate-300 rounded-xl bg-white focus:outline-blue-600"></select>
+                                </div>
+                                <div>
+                                    <label class="block text-slate-500 mb-1">ID Anggota (Otomatis)</label>
+                                    <input type="text" id="memberId" readonly placeholder="Pilih kelas terlebih dahulu..." class="w-full p-2.5 border border-slate-200 rounded-xl bg-slate-100 text-slate-500 font-mono font-bold cursor-not-allowed">
+                                </div>
+                                <div>
+                                    <label class="block text-slate-500 mb-1">Nama Lengkap</label>
+                                    <input type="text" id="memberName" required placeholder="Contoh: John Doe" class="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-blue-600 bg-white">
+                                </div>
+                                <button type="submit" id="btnSubmitSiswa" class="mt-2 bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-1">
+                                    <span id="textSubmitSiswa">Simpan Anggota Baru</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HALAMAN 2: MANAJEMEN -->
+                <div id="pageManajemen" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 md:mt-6 flex flex-col gap-4 md:gap-6 hidden">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
+                        <h3 class="text-3xs sm:text-xs font-bold text-slate-900 uppercase tracking-wider mb-3 flex items-center gap-1.5">📈 Performa & Ringkasan KPI Kelas</h3>
+                        <div id="kpiGlobalContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
+                        <h3 class="text-3xs sm:text-xs font-bold text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-1.5">🏫 Manajemen Master Kelas</h3>
+                        <form id="classForm" class="flex flex-col sm:flex-row gap-3 text-xs mb-4">
+                            <input type="text" id="newClassName" required placeholder="Nama Kelas Baru" class="flex-1 p-2.5 border border-slate-300 rounded-xl focus:outline-blue-600 bg-white">
+                            <button type="submit" id="btnSubmitKelas" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl transition-colors cursor-pointer">Tambah Kelas</button>
+                        </form>
+                        <div id="masterClassList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs"></div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
+                        <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-sm sm:text-base">📋 Basis Data & Manajemen Anggota</h3>
+                                <p class="text-3xs sm:text-xs text-slate-400 font-medium">Kelola data anggota berdasarkan ID unik</p>
+                            </div>
+                            <input type="text" id="searchAnggota" oninput="filterManajemenAnggota()" placeholder="Cari ID atau nama..." class="text-xs px-3 py-2 border border-slate-300 rounded-xl w-full sm:w-64 bg-white focus:outline-blue-600">
+                        </div>
+                        
+                        <div class="overflow-x-auto w-full">
+                            <table class="w-full text-left border-collapse text-xs min-w-[500px]">
+                                <thead>
+                                    <tr class="bg-slate-100 text-slate-500 font-bold uppercase border-b border-slate-200">
+                                        <th class="p-3 w-28">ID Unik</th>
+                                        <th class="p-3">Nama Lengkap</th>
+                                        <th class="p-3">Kelas Saat Ini</th>
+                                        <th class="p-3 text-center w-36">Opsi Tindakan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="managementTableBody" class="divide-y divide-slate-100 text-slate-700"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HALAMAN 3: LAPORAN BULANAN -->
+                <div id="pageLaporan" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 md:mt-6 flex flex-col gap-4 md:gap-6 hidden">
+                    <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-2xs">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-sm sm:text-base">📅 Laporan Kehadiran Bulanan</h3>
+                                <p class="text-3xs sm:text-xs text-slate-400 font-medium">Rekapitulasi kehadiran jemaat dan statistik kelas per bulan</p>
+                            </div>
+                            <div class="flex items-center gap-2 w-full sm:w-auto">
+                                <input type="month" id="reportMonthInput" class="border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 bg-slate-50 focus:outline-blue-600 focus:bg-white transition-all w-full sm:w-auto">
+                                <button onclick="muatLaporanBulanan()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors cursor-pointer shrink-0">Tampilkan</button>
+                            </div>
+                        </div>
+
+                        <div id="summaryLaporanBulanan" class="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
+                            <div class="p-3 sm:p-4 bg-slate-50 rounded-xl border border-slate-100 text-center sm:text-left">
+                                <p class="text-4xs sm:text-3xs font-bold text-slate-400 uppercase tracking-tight">Total Log</p>
+                                <p id="totalLogBulan" class="text-base sm:text-xl font-black text-slate-800 mt-0.5 sm:mt-1">0</p>
+                            </div>
+                            <div class="p-3 sm:p-4 bg-emerald-50/50 rounded-xl border border-emerald-100 text-center sm:text-left">
+                                <p class="text-4xs sm:text-3xs font-bold text-emerald-600 uppercase tracking-tight">Total Hadir</p>
+                                <p id="totalHadirBulan" class="text-base sm:text-xl font-black text-emerald-600 mt-0.5 sm:mt-1">0</p>
+                            </div>
+                            <div class="p-3 sm:p-4 bg-rose-50/50 rounded-xl border border-rose-100 text-center sm:text-left">
+                                <p class="text-4xs sm:text-3xs font-bold text-rose-600 uppercase tracking-tight">Total Absen</p>
+                                <p id="totalAbsenBulan" class="text-base sm:text-xl font-black text-rose-600 mt-0.5 sm:mt-1">0</p>
+                            </div>
+                        </div>
+
+                        <div class="hidden sm:block overflow-x-auto border border-slate-200 rounded-xl">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-slate-100 text-slate-600 font-bold border-b border-slate-200 uppercase">
+                                        <th class="p-3">Tanggal</th>
+                                        <th class="p-3">ID Jemaat</th>
+                                        <th class="p-3">Nama Lengkap</th>
+                                        <th class="p-3">Kelas</th>
+                                        <th class="p-3">Status</th>
+                                        <th class="p-3">Keterangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableLaporanBulanan" class="divide-y divide-slate-100">
+                                    <tr><td colspan="6" class="p-6 text-center text-slate-400 italic">Pilih bulan dan klik "Tampilkan" untuk memuat laporan.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div id="cardsLaporanBulananMobile" class="sm:hidden flex flex-col gap-2.5">
+                            <p class="p-6 text-center text-slate-400 italic text-xs bg-slate-50 rounded-xl border border-slate-200">Pilih bulan dan klik "Tampilkan" untuk memuat laporan.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
         </div>
     </div>
 
@@ -265,13 +314,27 @@
         attendanceDateInput.addEventListener('change', muatDataDariSheets);
         document.addEventListener("DOMContentLoaded", () => { muatDataDariSheets(); });
 
+        // Fungsi Buka/Tutup Sidebar Mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        function autoCloseSidebarOnMobile() {
+            if (window.innerWidth < 768) {
+                toggleSidebar();
+            }
+        }
+
         function setSyncIndicator(isSyncing) {
             if(isSyncing) {
-                syncStatus.textContent = "⏳ Menyimpan ke cloud...";
-                syncStatus.className = "text-3xs text-amber-600 font-bold uppercase tracking-wide animate-pulse";
+                syncStatus.textContent = "⏳ Menyimpan...";
+                syncStatus.className = "text-3xs text-amber-400 font-bold uppercase tracking-wide animate-pulse";
             } else {
                 syncStatus.textContent = "● Tersambung & Siap";
-                syncStatus.className = "text-3xs text-emerald-600 font-bold uppercase tracking-wide";
+                syncStatus.className = "text-3xs text-emerald-400 font-bold uppercase tracking-wide";
             }
         }
 
@@ -279,6 +342,7 @@
             const tabAbsen = document.getElementById('btnTabAbsensi');
             const tabManajemen = document.getElementById('btnTabManajemen');
             const tabLaporan = document.getElementById('btnTabLaporan');
+            const pageTitle = document.getElementById('pageTitle');
             
             const pAbsen = document.getElementById('pageAbsensi');
             const pManajemen = document.getElementById('pageManajemen');
@@ -288,8 +352,8 @@
             pManajemen.classList.add('hidden');
             pLaporan.classList.add('hidden');
 
-            const activeClass = "flex-1 sm:flex-none text-center px-3 py-2 rounded-lg transition-all cursor-pointer bg-white text-blue-600 shadow-xs whitespace-nowrap";
-            const inactiveClass = "flex-1 sm:flex-none text-center px-3 py-2 rounded-lg transition-all cursor-pointer text-slate-600 hover:text-slate-900 whitespace-nowrap";
+            const activeClass = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all cursor-pointer bg-blue-600 text-white font-bold shadow-sm";
+            const inactiveClass = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all cursor-pointer text-slate-400 hover:bg-slate-800 hover:text-white font-semibold";
 
             tabAbsen.className = inactiveClass;
             tabManajemen.className = inactiveClass;
@@ -298,13 +362,16 @@
             if(pageName === 'absensi') {
                 pAbsen.classList.remove('hidden');
                 tabAbsen.className = activeClass;
+                pageTitle.textContent = "Absensi & Komitmen";
             } else if(pageName === 'manajemen') {
                 pManajemen.classList.remove('hidden');
                 tabManajemen.className = activeClass;
+                pageTitle.textContent = "Manajemen & KPI";
                 renderHalamanManajemenDanKpi();
             } else if(pageName === 'laporan') {
                 pLaporan.classList.remove('hidden');
                 tabLaporan.className = activeClass;
+                pageTitle.textContent = "Laporan Bulanan";
                 muatLaporanBulanan();
             }
         }
@@ -496,14 +563,12 @@
 
             const member = activeClass.members.find(m => m.id == idUser);
             if (member) {
-                // Update Memori Lokal Langsung (0ms Latency)
                 member.absenHariIni = { status: statusPilihan, keterangan: alasanKeterangan || '' };
-                renderTableSiswaAbsen(); // Refresh UI instan
+                renderTableSiswaAbsen();
             }
 
             setSyncIndicator(true);
 
-            // Kirim ke Google Apps Script tanpa mengunci UI
             fetch(APP_SCRIPT_URL, {
                 method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
                 body: JSON.stringify({ 
@@ -528,7 +593,7 @@
             const member = activeClass.members.find(m => m.id == idUser);
             if (member) {
                 delete member.absenHariIni;
-                renderTableSiswaAbsen(); // Refresh UI Instan
+                renderTableSiswaAbsen();
             }
 
             setSyncIndicator(true);
