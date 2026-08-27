@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Absensi Terpadu</title>
+    <title>Sistem Absensi Terpadu & Analytics</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
@@ -50,7 +50,12 @@
                 <nav class="p-3 space-y-1.5 text-xs font-semibold">
                     <div class="px-3 py-2 text-4xs font-bold text-slate-500 uppercase tracking-wider">Menu Utama</div>
                     
-                    <button onclick="switchPage('absensi'); autoCloseSidebarOnMobile();" id="btnTabAbsensi" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all cursor-pointer bg-blue-600 text-white font-bold shadow-sm">
+                    <button onclick="switchPage('dashboard'); autoCloseSidebarOnMobile();" id="btnTabDashboard" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all cursor-pointer bg-blue-600 text-white font-bold shadow-sm">
+                        <span>📈</span>
+                        <span>Dashboard Analytics</span>
+                    </button>
+
+                    <button onclick="switchPage('absensi'); autoCloseSidebarOnMobile();" id="btnTabAbsensi" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all cursor-pointer text-slate-400 hover:bg-slate-800 hover:text-white">
                         <span>📋</span>
                         <span>Absensi & Komitmen</span>
                     </button>
@@ -69,7 +74,7 @@
 
             <!-- Footer Sidebar -->
             <div class="p-4 border-t border-slate-800 text-3xs text-slate-500 text-center">
-                <p>Sistem Absensi Terpadu v2.0</p>
+                <p>Sistem Absensi Terpadu v3.0</p>
             </div>
         </aside>
 
@@ -85,7 +90,7 @@
                         <button onclick="toggleSidebar()" class="md:hidden bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-xl text-lg flex items-center justify-center">
                             ☰
                         </button>
-                        <h2 id="pageTitle" class="font-bold text-slate-900 text-sm sm:text-base">Absensi & Komitmen</h2>
+                        <h2 id="pageTitle" class="font-bold text-slate-900 text-sm sm:text-base">Dashboard Analytics</h2>
                     </div>
 
                     <!-- Input Tanggal Absensi -->
@@ -100,8 +105,103 @@
             <!-- CONTAINER ISI KONTEN -->
             <main class="flex-1 pb-12">
                 
+                <!-- HALAMAN DSIHBARD ANALYTICS -->
+                <div id="pageDashboard" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 md:mt-6 flex flex-col gap-4 md:gap-6">
+                    
+                    <!-- METRIC CARDS RINGKASAN UTAMA -->
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
+                            <p class="text-4xs sm:text-3xs font-bold text-slate-400 uppercase tracking-wider">Total Jemaat / Siswa</p>
+                            <h3 id="dashTotalAnggota" class="text-xl sm:text-2xl font-black text-slate-800 mt-1">0</h3>
+                            <p class="text-4xs text-emerald-600 font-bold mt-1">● Master Terdaftar</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
+                            <p class="text-4xs sm:text-3xs font-bold text-slate-400 uppercase tracking-wider">Rata-rata Kehadiran</p>
+                            <h3 id="dashAvgRasio" class="text-xl sm:text-2xl font-black text-blue-600 mt-1">0%</h3>
+                            <p class="text-4xs text-slate-400 font-semibold mt-1">Hari Ini</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
+                            <p class="text-4xs sm:text-3xs font-bold text-slate-400 uppercase tracking-wider">Total Tamu Hadir</p>
+                            <h3 id="dashTotalTamu" class="text-xl sm:text-2xl font-black text-amber-600 mt-1">0</h3>
+                            <p class="text-4xs text-amber-600 font-bold mt-1">👥 Kumulatif Hari Ini</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
+                            <p class="text-4xs sm:text-3xs font-bold text-slate-400 uppercase tracking-wider">Kelas Terbaik</p>
+                            <h3 id="dashBestClass" class="text-lg sm:text-xl font-black text-emerald-600 mt-1 truncate">-</h3>
+                            <p id="dashBestClassSub" class="text-4xs text-slate-400 font-semibold mt-1">Rasio Kehadiran 0%</p>
+                        </div>
+                    </div>
+
+                    <!-- REKAP KPI DETAIL PER KELAS -->
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs p-4 sm:p-5">
+                        <h3 class="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+                            <span>🏆</span> Performance & KPI Detail Per Kelas (Hari Ini)
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-500 font-bold uppercase border-b border-slate-200">
+                                        <th class="p-3">Nama Kelas</th>
+                                        <th class="p-3 text-center">Total Siswa</th>
+                                        <th class="p-3 text-center">Hadir</th>
+                                        <th class="p-3 text-center">Absen / Sakit</th>
+                                        <th class="p-3 text-center">Jumlah Tamu</th>
+                                        <th class="p-3 text-center">Rasio Kehadiran</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dashTableKpiKelas" class="divide-y divide-slate-100">
+                                    <tr><td colspan="6" class="p-4 text-center text-slate-400 italic">Memuat data...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- ANALISIS TREN KEHADIRAN (PER BULAN & PER 3 BULAN) -->
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs p-4 sm:p-5 flex flex-col gap-4">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-3">
+                            <div>
+                                <h3 class="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                                    <span>📊</span> Analisis Tren Kehadiran Jemaat
+                                </h3>
+                                <p class="text-3xs sm:text-xs text-slate-400">Pantau pertumbuhan dan konsistensi kehadiran berkala</p>
+                            </div>
+
+                            <!-- FILTER PERIODE TREN -->
+                            <div class="flex items-center gap-2 bg-slate-100 p-1 rounded-xl">
+                                <button onclick="switchTrendPeriod('bulan')" id="btnTrendBulan" class="px-3 py-1.5 text-3xs font-bold rounded-lg bg-blue-600 text-white shadow-2xs transition-all">Per Bulan</button>
+                                <button onclick="switchTrendPeriod('triwulan')" id="btnTrendTriwulan" class="px-3 py-1.5 text-3xs font-bold rounded-lg text-slate-600 hover:text-slate-900 transition-all">Per 3 Bulan (Triwulan)</button>
+                            </div>
+                        </div>
+
+                        <!-- STATISTIK RINGKASAN TREN -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div class="p-3 bg-blue-50/50 rounded-xl border border-blue-100">
+                                <p class="text-4xs font-bold text-blue-600 uppercase">Total Log Tercatat</p>
+                                <p id="trendTotalLog" class="text-lg font-black text-blue-900 mt-0.5">0 Data</p>
+                            </div>
+                            <div class="p-3 bg-emerald-50/50 rounded-xl border border-emerald-100">
+                                <p class="text-4xs font-bold text-emerald-600 uppercase">Tren Rata-Rata Kehadiran</p>
+                                <p id="trendAvgPercent" class="text-lg font-black text-emerald-900 mt-0.5">0%</p>
+                            </div>
+                            <div class="p-3 bg-amber-50/50 rounded-xl border border-amber-100">
+                                <p class="text-4xs font-bold text-amber-600 uppercase">Periode Aktif</p>
+                                <p id="trendPeriodLabel" class="text-lg font-black text-amber-900 mt-0.5">-</p>
+                            </div>
+                        </div>
+
+                        <!-- BARIS KEMAJUAN TREN KELAS -->
+                        <div class="mt-2">
+                            <h4 class="text-3xs font-bold text-slate-400 uppercase tracking-wider mb-3">Breakdown Tren Rata-rata Kehadiran per Kelas</h4>
+                            <div id="trendClassBreakdown" class="flex flex-col gap-3">
+                                <p class="text-xs text-slate-400 italic">Memuat tren kehadiran...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
                 <!-- HALAMAN 1: ABSENSI & KOMITMEN -->
-                <div id="pageAbsensi" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 md:mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+                <div id="pageAbsensi" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 md:mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 hidden">
                     <div class="lg:col-span-2 flex flex-col gap-4 md:gap-6">
                         <!-- TABS PILIHAN KELAS -->
                         <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
@@ -290,6 +390,7 @@
 
         let appData = { classes: [] };
         let currentClassId = null;
+        let trendPeriodMode = 'bulan';
 
         // Dom Elements
         const attendanceDateInput = document.getElementById('attendanceDateInput');
@@ -339,15 +440,18 @@
         }
 
         function switchPage(pageName) {
+            const tabDashboard = document.getElementById('btnTabDashboard');
             const tabAbsen = document.getElementById('btnTabAbsensi');
             const tabManajemen = document.getElementById('btnTabManajemen');
             const tabLaporan = document.getElementById('btnTabLaporan');
             const pageTitle = document.getElementById('pageTitle');
             
+            const pDashboard = document.getElementById('pageDashboard');
             const pAbsen = document.getElementById('pageAbsensi');
             const pManajemen = document.getElementById('pageManajemen');
             const pLaporan = document.getElementById('pageLaporan');
 
+            pDashboard.classList.add('hidden');
             pAbsen.classList.add('hidden');
             pManajemen.classList.add('hidden');
             pLaporan.classList.add('hidden');
@@ -355,11 +459,17 @@
             const activeClass = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all cursor-pointer bg-blue-600 text-white font-bold shadow-sm";
             const inactiveClass = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all cursor-pointer text-slate-400 hover:bg-slate-800 hover:text-white font-semibold";
 
+            tabDashboard.className = inactiveClass;
             tabAbsen.className = inactiveClass;
             tabManajemen.className = inactiveClass;
             tabLaporan.className = inactiveClass;
 
-            if(pageName === 'absensi') {
+            if(pageName === 'dashboard') {
+                pDashboard.classList.remove('hidden');
+                tabDashboard.className = activeClass;
+                pageTitle.textContent = "Dashboard Analytics";
+                renderDashboardAnalytics();
+            } else if(pageName === 'absensi') {
                 pAbsen.classList.remove('hidden');
                 tabAbsen.className = activeClass;
                 pageTitle.textContent = "Absensi & Komitmen";
@@ -387,11 +497,143 @@
                     renderDropdownKelasSiswa();
                     renderTableSiswaAbsen();
                     renderHalamanManajemenDanKpi();
+                    renderDashboardAnalytics();
                 }
             }).catch(() => { 
                 classTabs.innerHTML = '<p class="text-rose-600 text-xs font-semibold">❌ Gagal memuat data cloud.</p>'; 
             });
         }
+
+        // ================= LOGIKA DASHBOARD ANALYTICS =================
+        function renderDashboardAnalytics() {
+            if(!appData.classes) return;
+
+            let totalAnggota = 0;
+            let totalHadirHariIni = 0;
+            let totalTamuHariIni = 0;
+            let bestClass = { name: '-', rasio: -1 };
+
+            const tableKpi = document.getElementById('dashTableKpiKelas');
+            tableKpi.innerHTML = '';
+
+            appData.classes.forEach(c => {
+                let totSiswa = c.members.length;
+                let hdr = c.members.filter(m => m.absenHariIni && m.absenHariIni.status === 'Hadir').length;
+                let abs = c.members.filter(m => m.absenHariIni && (m.absenHariIni.status === 'Tidak Hadir' || m.absenHariIni.status === 'Sakit')).length;
+                let tamu = Number(c.komitmen ? (c.komitmen.tamu || c.komitmen.jumlah_tamu || 0) : 0);
+                let rasio = totSiswa > 0 ? Math.round((hdr / totSiswa) * 100) : 0;
+
+                totalAnggota += totSiswa;
+                totalHadirHariIni += hdr;
+                totalTamuHariIni += tamu;
+
+                if (rasio > bestClass.rasio && totSiswa > 0) {
+                    bestClass = { name: c.name, rasio: rasio };
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 border-b border-slate-100";
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-slate-800">${c.name}</td>
+                    <td class="p-3 text-center font-bold text-slate-600">${totSiswa}</td>
+                    <td class="p-3 text-center font-bold text-emerald-600 bg-emerald-50/30">${hdr}</td>
+                    <td class="p-3 text-center font-bold text-rose-600 bg-rose-50/30">${abs}</td>
+                    <td class="p-3 text-center font-bold text-amber-600 bg-amber-50/30">${tamu}</td>
+                    <td class="p-3 text-center">
+                        <span class="px-2.5 py-1 rounded-full font-black text-3xs ${rasio >= 75 ? 'bg-emerald-100 text-emerald-700' : rasio >= 50 ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'}">${rasio}%</span>
+                    </td>`;
+                tableKpi.appendChild(tr);
+            });
+
+            document.getElementById('dashTotalAnggota').textContent = totalAnggota;
+            document.getElementById('dashAvgRasio').textContent = (totalAnggota > 0 ? Math.round((totalHadirHariIni / totalAnggota) * 100) : 0) + "%";
+            document.getElementById('dashTotalTamu').textContent = totalTamuHariIni;
+            document.getElementById('dashBestClass').textContent = bestClass.name;
+            document.getElementById('dashBestClassSub').textContent = `Rasio Kehadiran: ${bestClass.rasio >= 0 ? bestClass.rasio : 0}%`;
+
+            muatTrenKehadiran();
+        }
+
+        function switchTrendPeriod(mode) {
+            trendPeriodMode = mode;
+            const btnBulan = document.getElementById('btnTrendBulan');
+            const btnTriwulan = document.getElementById('btnTrendTriwulan');
+            
+            if(mode === 'bulan') {
+                btnBulan.className = "px-3 py-1.5 text-3xs font-bold rounded-lg bg-blue-600 text-white shadow-2xs transition-all";
+                btnTriwulan.className = "px-3 py-1.5 text-3xs font-bold rounded-lg text-slate-600 hover:text-slate-900 transition-all";
+            } else {
+                btnTriwulan.className = "px-3 py-1.5 text-3xs font-bold rounded-lg bg-blue-600 text-white shadow-2xs transition-all";
+                btnBulan.className = "px-3 py-1.5 text-3xs font-bold rounded-lg text-slate-600 hover:text-slate-900 transition-all";
+            }
+            muatTrenKehadiran();
+        }
+
+        function muatTrenKehadiran() {
+            const container = document.getElementById('trendClassBreakdown');
+            container.innerHTML = '<p class="text-xs text-blue-600 italic animate-pulse">⏳ Menghitung Tren Kehadiran Cloud...</p>';
+
+            fetch(`${APP_SCRIPT_URL}?mode=rekap_total`, { method: "GET" })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status !== "success" || !Array.isArray(data.log_absensi)) {
+                    container.innerHTML = '<p class="text-xs text-rose-500 italic">❌ Gagal memuat data rekap tren.</p>';
+                    return;
+                }
+
+                const rawLog = data.log_absensi;
+                const now = new Date();
+                let filteredLogs = [];
+
+                if(trendPeriodMode === 'bulan') {
+                    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                    document.getElementById('trendPeriodLabel').textContent = `Bulan Ini (${currentMonth})`;
+                    filteredLogs = rawLog.filter((row, idx) => idx > 0 && String(row[4]).startsWith(currentMonth));
+                } else {
+                    document.getElementById('trendPeriodLabel').textContent = `3 Bulan (Triwulan)`;
+                    const cutoffDate = new Date();
+                    cutoffDate.setMonth(cutoffDate.getMonth() - 3);
+                    filteredLogs = rawLog.filter((row, idx) => {
+                        if (idx === 0) return false;
+                        const logDate = new Date(row[4]);
+                        return logDate >= cutoffDate;
+                    });
+                }
+
+                let totalLog = filteredLogs.length;
+                let totalHadir = filteredLogs.filter(row => String(row[5]).toLowerCase() === 'hadir').length;
+                let avgPercent = totalLog > 0 ? Math.round((totalHadir / totalLog) * 100) : 0;
+
+                document.getElementById('trendTotalLog').textContent = `${totalLog} Entries`;
+                document.getElementById('trendAvgPercent').textContent = `${avgPercent}%`;
+
+                // Calculate Per-Class Trend
+                container.innerHTML = '';
+                appData.classes.forEach(c => {
+                    let logsKelas = filteredLogs.filter(row => String(row[2]).toLowerCase() === c.name.toLowerCase());
+                    let totKelasLog = logsKelas.length;
+                    let hdrKelas = logsKelas.filter(row => String(row[5]).toLowerCase() === 'hadir').length;
+                    let percentKelas = totKelasLog > 0 ? Math.round((hdrKelas / totKelasLog) * 100) : 0;
+
+                    const item = document.createElement('div');
+                    item.className = "bg-slate-50 p-3 rounded-xl border border-slate-100 flex flex-col gap-1.5";
+                    item.innerHTML = `
+                        <div class="flex justify-between items-center text-xs font-bold">
+                            <span class="text-slate-800">${c.name}</span>
+                            <span class="text-blue-600">${percentKelas}% <span class="text-4xs text-slate-400 font-normal">(${hdrKelas}/${totKelasLog} Log)</span></span>
+                        </div>
+                        <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                            <div class="bg-blue-600 h-full rounded-full transition-all duration-500" style="width: ${percentKelas}%"></div>
+                        </div>`;
+                    container.appendChild(item);
+                });
+            })
+            .catch(() => {
+                container.innerHTML = '<p class="text-xs text-rose-500 italic">❌ Gagal memuat data tren dari cloud.</p>';
+            });
+        }
+
+        // ================= END LOGIKA DASHBOARD =================
 
         function renderClassTabs() {
             classTabs.innerHTML = '';
@@ -470,7 +712,9 @@
             document.getElementById('kpiAbsen').textContent = jmlAbsen;
             document.getElementById('kpiPersen').textContent = (jmlTotal > 0 ? Math.round((jmlHadir / jmlTotal) * 100) : 0) + "%";
 
-            let kmt = activeClass.komitmen || { belajar_ss: 0, menginjil: 0, renungan_pagi: 0, bacaan_alkitab: 0, tamu: 0 };
+            let kmt = activeClass.komitmen || { belajar_ss: 0, menginjil: 0, renungan_pagi: 0, bacaan_alkitab: 0, tamu: 0, jumlah_tamu: 0 };
+            let valTamuFix = kmt.tamu || kmt.jumlah_tamu || 0;
+
             document.getElementById('panelAgregatKelas').innerHTML = `
                 <div class="m-3 bg-blue-50/50 p-3.5 rounded-2xl border border-blue-100">
                     <h4 class="text-4xs sm:text-xs font-bold text-blue-800 uppercase tracking-wider mb-2.5">📊 Indikator Komitmen Kolektif Kelas</h4>
@@ -479,7 +723,7 @@
                         <div><label class="block text-slate-600 mb-1">📢 Menginjil</label><input type="number" id="kls_menginjil" value="${kmt.menginjil || 0}" class="w-full p-2 border border-slate-200 rounded-xl text-center font-bold bg-white"></div>
                         <div><label class="block text-slate-600 mb-1">☀️ Renungan Pagi</label><input type="number" id="kls_renungan" value="${kmt.renungan_pagi || 0}" class="w-full p-2 border border-slate-200 rounded-xl text-center font-bold bg-white"></div>
                         <div><label class="block text-slate-600 mb-1">📜 Baca Alkitab</label><input type="number" id="kls_bacaan" value="${kmt.bacaan_alkitab || 0}" class="w-full p-2 border border-slate-200 rounded-xl text-center font-bold bg-white"></div>
-                        <div class="col-span-2 sm:col-span-1"><label class="block text-slate-600 mb-1">👥 Tamu</label><input type="number" id="kls_tamu" value="${kmt.tamu || 0}" class="w-full p-2 border border-slate-200 rounded-xl text-center font-bold bg-white"></div>
+                        <div class="col-span-2 sm:col-span-1"><label class="block text-slate-600 mb-1">👥 Tamu</label><input type="number" id="kls_tamu" value="${valTamuFix}" class="w-full p-2 border border-slate-200 rounded-xl text-center font-bold bg-white"></div>
                     </div>
                     <div class="mt-3 flex justify-end">
                         <button onclick="simpanKomitmenKolektifKelas()" id="btnSimpanKomitmenKls" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-xl text-3xs cursor-pointer w-full sm:w-auto text-center">💾 Simpan Indikator Kelas</button>
@@ -762,6 +1006,9 @@
             const btn = document.getElementById('btnSimpanKomitmenKls');
             btn.disabled = true; btn.textContent = "⏳ Menyimpan...";
             setSyncIndicator(true);
+
+            const valTamu = document.getElementById('kls_tamu').value;
+
             fetch(APP_SCRIPT_URL, {
                 method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
                 body: JSON.stringify({
@@ -772,7 +1019,8 @@
                     menginjil: document.getElementById('kls_menginjil').value,
                     renungan_pagi: document.getElementById('kls_renungan').value, 
                     bacaan_alkitab: document.getElementById('kls_bacaan').value,
-                    tamu: document.getElementById('kls_tamu').value
+                    tamu: valTamu,
+                    jumlah_tamu: valTamu
                 })
             }).then(() => { btn.disabled = false; btn.textContent = "💾 Simpan Indikator Kelas"; setSyncIndicator(false); muatDataDariSheets(); });
         }
