@@ -60,24 +60,29 @@
                         <span>Absensi & Komitmen</span>
                     </button>
 
-                    <!-- SEKSI PILIHAN KELAS SS LEBAK WANGI (DI SIDEBAR) -->
-                    <div class="pt-2">
-                        <div class="px-3 py-1.5 text-4xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                            <span>🏫</span> SS Lebak Wangi
-                        </div>
-                        <div class="pl-2 mt-1 space-y-1">
-                            <!-- Kelas Cornerstone -->
-                            <button onclick="pilihKelasDariSidebar('Cornerstone'); autoCloseSidebarOnMobile();" id="btnClassCornerstone" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all cursor-pointer text-slate-400 hover:bg-slate-800 hover:text-white text-2xs">
+                    <!-- ================= TOMBOL YANG DIPINDAHKAN KE SIDEBAR ================= -->
+                    <div class="pt-2 border-t border-slate-800/80 my-2">
+                        <div class="px-3 py-1.5 text-4xs font-bold text-slate-500 uppercase tracking-wider">Cabang & Kelas</div>
+                        
+                        <!-- Tombol Utama: Cabang SS Lebak Wangi -->
+                        <button onclick="pilihKelasDariSidebar('Cabang SS Lebak Wangi'); autoCloseSidebarOnMobile();" id="btnCabangSSLebakWangi" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all cursor-pointer text-slate-300 hover:bg-slate-800 hover:text-white bg-slate-800/50 font-bold mt-1">
+                            <div class="flex items-center gap-2.5">
+                                <span>🏫</span>
+                                <span>Cabang SS Lebak Wangi</span>
+                            </div>
+                        </button>
+
+                        <!-- Sub-Tombol: Cornerstone (Berada di Bawahnya) -->
+                        <div class="pl-4 mt-1 space-y-1">
+                            <button onclick="pilihKelasDariSidebar('Cornerstone'); autoCloseSidebarOnMobile();" id="btnClassCornerstone" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all cursor-pointer text-slate-400 hover:bg-slate-800 hover:text-white text-2xs font-medium">
                                 <span>📖</span>
                                 <span>Cornerstone</span>
                             </button>
-                            
-                            <!-- Container tempat memuat kelas SS Lebak Wangi lainnya secara dinamis -->
-                            <div id="sidebarClassList" class="space-y-1"></div>
                         </div>
                     </div>
+                    <!-- ====================================================================== -->
 
-                    <div class="pt-2">
+                    <div class="pt-2 border-t border-slate-800/80">
                         <div class="px-3 py-1.5 text-4xs font-bold text-slate-500 uppercase tracking-wider">Pengaturan & Data</div>
                         <button onclick="switchPage('manajemen'); autoCloseSidebarOnMobile();" id="btnTabManajemen" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all cursor-pointer text-slate-400 hover:bg-slate-800 hover:text-white">
                             <span>⚙️</span>
@@ -506,16 +511,16 @@
             }
         }
 
-        // FUNGSI MEMILIH KELAS LANGSUNG DARI SIDEBAR
-        function pilihKelasDariSidebar(namaKelasTarget) {
+        // FUNGSI MEMILIH KELAS / CABANG LANGSUNG DARI SIDEBAR
+        function pilihKelasDariSidebar(namaTarget) {
             switchPage('absensi');
-            const target = appData.classes.find(c => c.name.toLowerCase().includes(namaKelasTarget.toLowerCase()));
+            const target = appData.classes.find(c => c.name.toLowerCase().includes(namaTarget.toLowerCase()));
             if(target) {
                 currentClassId = target.id;
                 renderClassTabs();
                 renderTableSiswaAbsen();
             } else {
-                alert(`Kelas "${namaKelasTarget}" belum ada di Master Kelas. Tambahkan terlebih dahulu di menu Manajemen.`);
+                alert(`Data "${namaTarget}" belum terdaftar di Master Kelas. Silakan tambahkan pada menu Manajemen jika diperlukan.`);
             }
         }
 
@@ -527,7 +532,6 @@
                 if(data.status === "success") {
                     appData.classes = data.classes;
                     renderClassTabs();
-                    renderSidebarClassList();
                     renderDropdownKelasSiswa();
                     renderTableSiswaAbsen();
                     renderHalamanManajemenDanKpi();
@@ -535,27 +539,6 @@
                 }
             }).catch(() => { 
                 classTabs.innerHTML = '<p class="text-rose-600 text-xs font-semibold">❌ Gagal memuat data cloud.</p>'; 
-            });
-        }
-
-        // MENAMPILKAN KELAS DINAMIS DI SIDEBAR SS LEBAK WANGI
-        function renderSidebarClassList() {
-            const container = document.getElementById('sidebarClassList');
-            if(!container) return;
-            container.innerHTML = '';
-
-            appData.classes.forEach(c => {
-                // Lewati jika nama kelas adalah Cornerstone (karena sudah dibuat statis di atas)
-                if(c.name.toLowerCase().includes('cornerstone')) return;
-
-                const btn = document.createElement('button');
-                btn.className = `w-full flex items-center gap-2.5 px-3 py-1.5 rounded-xl transition-all cursor-pointer text-2xs ${c.id == currentClassId ? 'bg-slate-800 text-blue-400 font-bold' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`;
-                btn.innerHTML = `<span>🔹</span><span class="truncate">${c.name}</span>`;
-                btn.onclick = () => {
-                    pilihKelasDariSidebar(c.name);
-                    autoCloseSidebarOnMobile();
-                };
-                container.appendChild(btn);
             });
         }
 
@@ -688,8 +671,6 @@
             });
         }
 
-        // ================= END LOGIKA DASHBOARD =================
-
         function renderClassTabs() {
             classTabs.innerHTML = '';
             if(appData.classes.length === 0) return;
@@ -699,7 +680,7 @@
                 const btn = document.createElement('button');
                 btn.textContent = c.name;
                 btn.className = `px-3.5 py-2 text-3xs sm:text-xs font-bold rounded-xl transition-all cursor-pointer ${c.id == currentClassId ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
-                btn.onclick = () => { currentClassId = c.id; renderClassTabs(); renderTableSiswaAbsen(); renderSidebarClassList(); };
+                btn.onclick = () => { currentClassId = c.id; renderClassTabs(); renderTableSiswaAbsen(); };
                 classTabs.appendChild(btn);
             });
         }
